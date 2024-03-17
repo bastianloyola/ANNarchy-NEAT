@@ -69,16 +69,40 @@ class Node {
         }
 };
 
-class Genome {     // Falta poner el constructor  
+class Genome {     // Falta poner el constructor
+    int in_nodes;
+    int out_nodes; 
     vector<Connection> connections;
     vector<Node> nodes;
 
 
-  public:  
+    public:  
 
-    Genome(){
-        connections = vector<Connection>();
-        nodes = vector<Node>();
+    Genome(int in, int out){
+        in_nodes = in;
+        out_nodes = out;
+        for (int i = 0; i < in_nodes; i++){
+            Node n(i, 0);
+            nodes.push_back(n);
+        }
+        for (int i = 0; i < out_nodes; i++){
+            Node n(i + in_nodes, 2);
+            nodes.push_back(n);
+        }
+        //Crear conexiones entre todos los nodos de entrada y todos los nodos de salida
+        int new_innovation = 0;
+        for (int i = 0; i < nodes.size(); i++){
+            if (nodes[i].get_type() == 0){
+                for (int j = 0; j < nodes.size(); j++){
+                    if (nodes[j].get_type() == 2){
+                        Connection c(nodes[i].get_id(), nodes[j].get_id(), 1, true, new_innovation);
+                        connections.push_back(c);
+                        new_innovation++;
+                    }
+                }
+            }
+        }
+
     }
     void add_connection(Connection c){
         connections.push_back(c);
@@ -93,6 +117,14 @@ class Genome {     // Falta poner el constructor
 
     vector<Node> get_nodes(){
         return nodes;
+    }
+
+    int get_in_nodes(){
+        return in_nodes;
+    }
+
+    int get_out_nodes(){
+        return out_nodes;
     }
 
     Connection get_connection(int in_node, int out_node){
@@ -121,6 +153,14 @@ class Genome {     // Falta poner el constructor
         nodes = new_nodes;
     }
 
+    void set_in_nodes(int new_in){
+        in_nodes = new_in;
+    }
+
+    void set_out_nodes(int new_out){
+        out_nodes = new_out;
+    }
+
     //Mutators
     
     //Change weight, this depends
@@ -130,7 +170,7 @@ class Genome {     // Falta poner el constructor
 
     //Create new connection
     void create_connection(int in_node, int out_node, float new_weight){
-        int new_innovation = connections.size() + 1;
+        int new_innovation = connections.size();
         Connection c(in_node, out_node, new_weight, true, new_innovation);
         connections.push_back(c);
     }
@@ -150,9 +190,11 @@ class Genome {     // Falta poner el constructor
         //Add node
         Node n(new_id, 2);
         nodes.push_back(n);
+        //last innovation
+        int new_innovation = connections.size();
         //Add two new connections
-        Connection c1(in_node, new_id, 1, true, 1);
-        Connection c2(new_id, out_node, new_weight, true, 1);
+        Connection c1(in_node, new_id, 1, true, new_innovation);
+        Connection c2(new_id, out_node, new_weight, true, new_innovation+1);
         connections.push_back(c1);
         connections.push_back(c2);
 
@@ -162,7 +204,7 @@ class Genome {     // Falta poner el constructor
     //Print genome
     void print_genome(){
         for(int i = 0; i < connections.size(); i++){
-            cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << connections[i].get_Innovation() << endl;
+            cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << endl;
         }
 
     }
@@ -172,7 +214,10 @@ class Genome {     // Falta poner el constructor
 };
 
 void testing_all_classes_and_methods() {
-    // testing all classes and methods
+
+
+    Genome g(3,1);
+     // testing all classes and methods
     Connection c(1, 2, 0.5, true, 1);
     cout << c.get_InNode() << endl;
     cout << c.get_OutNode() << endl;
@@ -180,12 +225,10 @@ void testing_all_classes_and_methods() {
     cout << c.get_enable() << endl;
     cout << c.get_Innovation() << endl;
 
-    Node n(1, 1);
-    Node n2(2, 1);
+    Node n(3, 1);
+    Node n2(4, 1);
     cout << n.get_id() << endl;
     cout << n.get_type() << endl;
-
-    Genome g;
     g.add_connection(c);
     g.add_node(n);
     g.add_node(n2);
@@ -206,7 +249,14 @@ void menu() {
      // Menu to test mutators
   int in_node, out_node, new_weight, new_id, new_type, innovation;
   char option;
-  Genome g;
+
+  //Ingresar cantidad de nodos de entrada y de salida
+  int in, out;
+  cout << "Enter in_nodes, out_nodes: ";
+  cin >> in >> out;
+
+
+  Genome g(in, out);
   do {
     cout << "Choose an option:  a. create_connection  b. create_node  c. change_weight  d. print_genome" << endl;
     cin >> option;
@@ -223,7 +273,7 @@ void menu() {
       g.create_node(in_node, out_node);
       break;
     case 'c':
-      cout << "Enter in_node, out_node, new_weight: ";
+      cout << "Enter innovation, new_weight: ";
       cin >> innovation >> new_weight;
       g.change_weight(innovation, new_weight);
       break;
@@ -236,7 +286,7 @@ void menu() {
 }
 
 int main() {
-    testing_all_classes_and_methods();
+    //testing_all_classes_and_methods();
     menu();
   return 0;
 }
