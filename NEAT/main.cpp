@@ -233,14 +233,13 @@ Genome crossover(Genome a, Genome b, bool equal_fit=false){
     }else{
         max = connections_b[connection_size_b -1].get_Innovation();
     }
-    
     int count_a=0, count_b = 0, random;
 
     Genome offspring(in_nodes, out_nodes);
 
     // excess and disjoint fron fiiter parent (a)
     offspring.set_nodes(a.get_nodes());
-    for (int i = 0; i < max; i++){
+    for (int i = 0; i <= max; i++){
         if (connections_a[count_a].get_Innovation() == i){
             if (connections_b[count_b].get_Innovation() == i){
                 random = rand() % 2;
@@ -303,29 +302,54 @@ void menu() {
   cin >> in >> out;
 
 
-  Genome g(in, out);
+  Genome g1(in, out);
+  Genome g2(in, out);
+  Genome g3(in, out);
   do {
-    cout << "Choose an option:  a. create_connection  b. create_node  c. change_weight  d. print_genome" << endl;
+    cout << "Choose an option:  a. create_connection  b. create_node  c. change_weight  d. print_genome  f. create_connection  g. create_node  h. change_weight  i. print_genome z. cross" << endl;
     cin >> option;
     switch (option) {
     case 'a':
       cout << "Enter in_node, out_node, new_weight: ";
       cin >> in_node >> out_node >> new_weight;
-      g.create_connection(in_node, out_node, new_weight);
+      g1.create_connection(in_node, out_node, new_weight);
       break;
     case 'b':
       //select connection
       cout << "Enter in_node, out_node: ";
       cin >> in_node >> out_node;
-      g.create_node(in_node, out_node);
+      g1.create_node(in_node, out_node);
       break;
     case 'c':
       cout << "Enter innovation, new_weight: ";
       cin >> innovation >> new_weight;
-      g.change_weight(innovation, new_weight);
+      g1.change_weight(innovation, new_weight);
       break;
     case 'd':
-      g.print_genome();
+      g1.print_genome();
+      break;
+    case 'f':
+      cout << "Enter in_node, out_node, new_weight: ";
+      cin >> in_node >> out_node >> new_weight;
+      g2.create_connection(in_node, out_node, new_weight);
+      break;
+    case 'g':
+      //select connection
+      cout << "Enter in_node, out_node: ";
+      cin >> in_node >> out_node;
+      g2.create_node(in_node, out_node);
+      break;
+    case 'h':
+      cout << "Enter innovation, new_weight: ";
+      cin >> innovation >> new_weight;
+      g2.change_weight(innovation, new_weight);
+      break;
+    case 'i':
+      g2.print_genome();
+      break;
+    case 'z':
+      g3 = crossover(g1, g2);
+      g3.print_genome();
       break;
   }
   } while (option != 'e');
