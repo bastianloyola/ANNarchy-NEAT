@@ -1,8 +1,8 @@
 CXX = g++
 
 
-output: main.o connection.o node.o genome.o crossover.o funciones.o
-	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o -o output 
+output: main.o connection.o node.o genome.o crossover.o funciones.o population.o
+	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o population.o -o output 
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
@@ -21,6 +21,9 @@ crossover.o: crossover.cpp
 
 funciones.o: funciones.cpp
 	$(CXX) $(CXXFLAGS) -c funciones.cpp
+
+population.o: population.cpp
+	$(CXX) $(CXXFLAGS) -c population.cpp
 
 clean:
 	rm *.o output

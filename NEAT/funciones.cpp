@@ -1,5 +1,5 @@
 #include "funciones.h"
-
+#include "population.h"
 #include <iostream>
 #include <vector>
 
@@ -9,85 +9,95 @@ using namespace std;
 
 void menu() {
      // Menu to test mutators
-  int in_node, out_node, new_weight, new_id, new_type, innovation;
+  int in_node, out_node, new_weight, new_id, new_type, innovation, n_genomes;
   char option;
+
+
+  //Ingresar la cantidad de genomes de la poblacion
+  cout << "Enter n_genomes: ";
+  cin >> n_genomes;
 
   //Ingresar cantidad de nodos de entrada y de salida
   int in, out;
   cout << "Enter in_nodes, out_nodes: ";
   cin >> in >> out;
 
-
-  Genome g1(in, out, 0, 0);
-  Genome g2(in, out, 0, 0);
-  Genome g3(in, out, 0, 0);
-  int max_innovation = g1.get_local_max();
+  // Crear poblacion
+  Population p(n_genomes, in, out);
+  
+  vector<Genome> g = p.get_genomes();
+  
+  int max_innovation = g.front().get_local_max();
   
 
   do {
-    cout << "Choose an option:  a. create_connection  b. create_node  c. change_weight  d. print_genome  f. create_connection  g. create_node  h. change_weight  i. print_genome z. cross" << endl;
+    cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population z. crossover" << endl;
     cin >> option;
     switch (option) {
     case 'a':
+      int genome_id;
+      //Select genome
+      cout << "Enter genome id: ";
+      cin >> genome_id;
+
       cout << "Enter in_node, out_node, new_weight: ";
       cin >> in_node >> out_node >> new_weight;
-      g1.create_connection(in_node, out_node, new_weight, max_innovation);
-      max_innovation = g1.get_local_max();
-      g1.set_max(max_innovation);
-      g2.set_max(max_innovation);
-      g3.set_max(max_innovation);
+      g[genome_id].create_connection(in_node, out_node, new_weight, max_innovation);
+      max_innovation = g[genome_id].get_local_max();
+      p.increase_max_innovation();
+      p.set_genomes(g);
       break;
     case 'b':
+      //Select genome
+      cout << "Enter genome id: ";
+      cin >> genome_id;
       //select connection
       cout << "Enter in_node, out_node: ";
       cin >> in_node >> out_node;
-      g1.create_node(in_node, out_node);
-      max_innovation = g1.get_local_max();
-      g1.set_max(max_innovation);
-      g2.set_max(max_innovation);
-      g3.set_max(max_innovation);
+      g[genome_id].create_node(in_node, out_node);
+      max_innovation = g[genome_id].get_local_max();
+      p.increase_max_innovation();
+      p.set_genomes(g);
       break;
     case 'c':
+      //Select genome
+      cout << "Enter genome id: ";
+      cin >> genome_id;
       cout << "Enter innovation, new_weight: ";
       cin >> innovation >> new_weight;
-      g1.change_weight(innovation, new_weight);
+      g[genome_id].change_weight(innovation, new_weight);
+      p.set_genomes(g);
       break;
     case 'd':
-      g1.print_genome();
+      //Select genome
+      cout << "Enter genome id: ";
+      cin >> genome_id;
+      g[genome_id].print_genome();
       break;
     case 'f':
-      cout << "Enter in_node, out_node, new_weight: ";
-      cin >> in_node >> out_node >> new_weight;
-      g2.create_connection(in_node, out_node, new_weight, max_innovation);
-      max_innovation = g2.get_local_max();
-      g1.set_max(max_innovation);
-      g2.set_max(max_innovation);
-      g3.set_max(max_innovation);
-      break;
-    case 'g':
-      //select connection
-      cout << "Enter in_node, out_node: ";
-      cin >> in_node >> out_node;
-      g2.create_node(in_node, out_node);
-      max_innovation = g2.get_local_max();
-      g1.set_max(max_innovation);
-      g2.set_max(max_innovation);
-      g3.set_max(max_innovation);
-      break;
-    case 'h':
-      cout << "Enter innovation, new_weight: ";
-      cin >> innovation >> new_weight;
-      g2.change_weight(innovation, new_weight);
-      break;
-    case 'i':
-      g2.print_genome();
+      //print all genomes 
+      for(int i = 0; i < g.size(); i++){
+        cout << "Genoma " << i << endl;
+        g[i].print_genome();
+        cout << "---------------------------------------------"<< endl;
+      }
       break;
     case 'z':
-      g3 = crossover(g1, g2);
-      g1.set_max(max_innovation);
-      g2.set_max(max_innovation);
-      g3.set_max(max_innovation);
+      //Select two genomes
+      int genome1, genome2;
+      cout << "Enter first genome id: ";
+      cin >> genome1;
+      cout << "Enter second genome id: ";
+      cin >> genome2;
+      Genome g3 = crossover(g[genome1], g[genome2]);
+
       g3.print_genome();
+
+      //Add new genome
+      g.push_back(g3);
+      p.set_genomes(g);
+      p.set_n_genomes(g.size());
+
       break;
   }
   } while (option != 'e');

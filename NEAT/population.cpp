@@ -53,4 +53,7 @@ void Population::set_max_innovation(int new_max_innovation){
 
 void Population::increase_max_innovation(){
     max_innovation++;
+    for (int i = 0; i < n_genomes; i++){
+        genomes[i].set_max(max_innovation);
+    }
 }
