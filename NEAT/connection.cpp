@@ -7,7 +7,7 @@ Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_ena
     out_node = c_out_node;
     weight = c_weight;
     enable = c_enable;
-    innovation = c_innovation; // tenemos que tener una variable global que permita ir poniendo este valor
+    innovation = c_innovation;
 }
 
 // Getters         

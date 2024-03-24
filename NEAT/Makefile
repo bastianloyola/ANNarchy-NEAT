@@ -1,8 +1,8 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -stdlib=libc++
+
 
 output: main.o connection.o node.o genome.o crossover.o funciones.o
-	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o -o output -L/Library/Frameworks/Python.framework/Versions/3.12/lib -lpython3.12
+	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o -o output 
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp

@@ -1,6 +1,8 @@
 #include "crossover.h"
 using namespace std;
 
+
+
 // Crossover
 Genome crossover(Genome a, Genome b){
 
@@ -24,7 +26,10 @@ Genome crossover(Genome a, Genome b){
     }
     int count_a=0, count_b = 0, random;
 
-    Genome offspring(in_nodes, out_nodes);
+    //
+
+
+    Genome offspring(in_nodes, out_nodes, max,0);
 
     // excess and disjoint fron fiiter parent (a)
     offspring.set_nodes(a.get_nodes());
@@ -48,3 +53,4 @@ Genome crossover(Genome a, Genome b){
 
     return offspring;
 }
+

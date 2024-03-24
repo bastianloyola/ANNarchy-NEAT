@@ -2,6 +2,7 @@
 #define CROSSOVER_H
 
 #include "genome.h"
+#include "stdlib.h"
 
 Genome crossover(Genome a, Genome b);
 

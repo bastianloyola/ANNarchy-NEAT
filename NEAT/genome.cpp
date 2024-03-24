@@ -6,7 +6,7 @@
 using namespace std;
 
 // Clase para Genoma
-Genome::Genome(int in, int out){
+Genome::Genome(int in, int out, int max_innovation, int initial_fitness){
     in_nodes = in;
     out_nodes = out;
     for (int i = 0; i < in_nodes; i++){
@@ -18,7 +18,7 @@ Genome::Genome(int in, int out){
         nodes.push_back(n);
     }
     //Crear conexiones entre todos los nodos de entrada y todos los nodos de salida
-    int new_innovation = 0;
+    int new_innovation = max_innovation;
     for (int i = 0; i < nodes.size(); i++){
         if (nodes[i].get_type() == 0){
             for (int j = 0; j < nodes.size(); j++){
@@ -30,6 +30,9 @@ Genome::Genome(int in, int out){
             }
         }
     }
+    max = new_innovation;
+    local_max = new_innovation;
+    fitness = initial_fitness;
 
 }
 
@@ -75,6 +78,14 @@ Node Genome::get_node(int id){
     return Node(0,0);
 }
 
+int Genome::get_max(){
+    return max;
+}
+
+int Genome::get_local_max(){
+    return local_max;
+}
+
 void Genome::set_connections(vector<Connection> new_connections){
     connections = new_connections;
 }
@@ -91,6 +102,17 @@ void Genome::set_out_nodes(int new_out){
     out_nodes = new_out;
 }
 
+void Genome::set_max(int new_max){
+    max = new_max;
+}
+
+void Genome::set_local_max(int new_local_max){
+    local_max = new_local_max;
+}
+
+void Genome::set_fittness(float new_fittness){
+    fitness = new_fittness;
+}
 // Mutators
 
 // Change weight, this depends
@@ -99,8 +121,7 @@ void Genome::change_weight(int innovation, float new_weight){
 }
 
 // Create new connection
-void Genome::create_connection(int in_node, int out_node, float new_weight){
-    int new_innovation = connections.size();
+void Genome::create_connection(int in_node, int out_node, float new_weight, int new_innovation){
     Connection c(in_node, out_node, new_weight, true, new_innovation);
     connections.push_back(c);
 }
@@ -121,10 +142,11 @@ void Genome::create_node(int in_node, int out_node){
     Node n(new_id, 2);
     nodes.push_back(n);
     // last innovation
-    int new_innovation = connections.size();
+    int new_innovation = max;
     // Add two new connections
     Connection c1(in_node, new_id, 1, true, new_innovation);
     Connection c2(new_id, out_node, new_weight, true, new_innovation+1);
+    local_max = new_innovation+2;
     connections.push_back(c1);
     connections.push_back(c2);
 }

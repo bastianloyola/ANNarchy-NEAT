@@ -23,7 +23,7 @@ class Connection {
     private:
         int in_node;
         int out_node;
-        float weight; //no se si es float         
+        float weight;        
         bool enable;
         int innovation;
 };
