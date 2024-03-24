@@ -24,14 +24,14 @@ class Genome {
         Node get_node(int id);
         int get_max();
         int get_local_max();
-        int get_fittness();
+        int get_fitness();
         void set_connections(vector<Connection> new_connections);
         void set_nodes(vector<Node> new_nodes);
         void set_in_nodes(int new_in);
         void set_out_nodes(int new_out);
         void set_max(int new_max);
         void set_local_max(int new_local_max);
-        void set_fittness(float new_fittness);
+        void set_fitness(float new_fittness);
 
         // Mutators
 

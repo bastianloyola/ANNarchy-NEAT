@@ -86,6 +86,10 @@ int Genome::get_local_max(){
     return local_max;
 }
 
+int Genome::get_fitness(){
+    return fitness;
+}
+
 void Genome::set_connections(vector<Connection> new_connections){
     connections = new_connections;
 }
@@ -110,7 +114,7 @@ void Genome::set_local_max(int new_local_max){
     local_max = new_local_max;
 }
 
-void Genome::set_fittness(float new_fittness){
+void Genome::set_fitness(float new_fittness){
     fitness = new_fittness;
 }
 // Mutators
@@ -122,7 +126,7 @@ void Genome::change_weight(int innovation, float new_weight){
 
 // Create new connection
 void Genome::create_connection(int in_node, int out_node, float new_weight, int new_innovation){
-    Connection c(in_node, out_node, new_weight, true, new_innovation);
+    Connection c(in_node, out_node, new_weight, 1, new_innovation);
     connections.push_back(c);
 }
 
@@ -131,8 +135,8 @@ void Genome::create_node(int in_node, int out_node){
     // Find connection and disable
     float new_weight = 1; // Valor default en caso que no exista una conexion previa
     for(int i = 0; i < connections.size(); i++){
-        if(connections[i].get_InNode() == in_node && connections.front().get_OutNode() == out_node){
-            connections[i].set_enable(false);
+        if(connections[i].get_InNode() == in_node && connections[i].get_OutNode() == out_node){
+            connections[i].set_enable(0);
             new_weight = connections[i].get_weight();
         }
     }
@@ -144,8 +148,8 @@ void Genome::create_node(int in_node, int out_node){
     // last innovation
     int new_innovation = max;
     // Add two new connections
-    Connection c1(in_node, new_id, 1, true, new_innovation);
-    Connection c2(new_id, out_node, new_weight, true, new_innovation+1);
+    Connection c1(in_node, new_id, 1, 1, new_innovation);
+    Connection c2(new_id, out_node, new_weight, 1, new_innovation+1);
     local_max = new_innovation+2;
     connections.push_back(c1);
     connections.push_back(c2);
@@ -154,6 +158,6 @@ void Genome::create_node(int in_node, int out_node){
 // Print genome
 void Genome::print_genome(){
     for(int i = 0; i < connections.size(); i++){
-        cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << endl;
+        cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << " " << connections[i].get_enable() << endl;
     }
 }

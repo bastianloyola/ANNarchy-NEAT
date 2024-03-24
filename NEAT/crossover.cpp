@@ -26,31 +26,57 @@ Genome crossover(Genome a, Genome b){
     }
     int count_a=0, count_b = 0, random;
 
-    //
 
 
-    Genome offspring(in_nodes, out_nodes, max,0);
+    Genome offspring(in_nodes, out_nodes, 0, 0);
+    offspring.set_local_max(max);
 
-    // excess and disjoint fron fiiter parent (a)
-    offspring.set_nodes(a.get_nodes());
-    for (int i = 0; i <= max; i++){
-        if (connections_a[count_a].get_Innovation() == i){
-            if (connections_b[count_b].get_Innovation() == i){
-                random = rand() % 2;
-                if (random == 0){
-                    connections.push_back(connections_a[count_a]);
-                }else{
-                    connections.push_back(connections_b[count_b]);
-                }
-                count_b++;
-            }else{
-                connections.push_back(connections_a[count_a]);
-            }
+    // select best fitness
+    if (a.get_fitness() > b.get_fitness())
+    {
+        offspring.set_fitness(a.get_fitness());
+    }else{
+        offspring.set_fitness(b.get_fitness());
+    }
+
+    // Add all connections based on the innovation number from both parents, if they are same add them randomly
+    // if they are different, add them in order
+    while (count_a < connection_size_a && count_b < connection_size_b)
+    {
+        if (connections_a[count_a].get_Innovation() == connections_b[count_b].get_Innovation())
+        {
+            connections.push_back(connections_a[count_a]);
+            count_a++;
+            count_b++;
+        }
+        else if (connections_a[count_a].get_Innovation() < connections_b[count_b].get_Innovation())
+        {
+            // Disjoint
+            connections.push_back(connections_a[count_a]);
             count_a++;
         }
+        else
+        {
+            // Excess
+            connections.push_back(connections_b[count_b]);
+            count_b++;
+        }
     }
-    offspring.set_connections(connections);
 
+    // Add the remaining connections
+    while (count_a < connection_size_a)
+    {
+        connections.push_back(connections_a[count_a]);
+        count_a++;
+    }
+    while (count_b < connection_size_b)
+    {
+        connections.push_back(connections_b[count_b]);
+        count_b++;
+    }
+
+    offspring.set_connections(connections);
     return offspring;
+
 }
 

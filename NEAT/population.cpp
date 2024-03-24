@@ -7,7 +7,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     n_outputs = n_outputs;
     max_innovation = 0;
     for (int i = 0; i < n_genomes; i++){
-        genomes.push_back(Genome(n_inputs, n_outputs, max_innovation));
+        genomes.push_back(Genome(n_inputs, n_outputs, max_innovation,0));
     }
 }
 
