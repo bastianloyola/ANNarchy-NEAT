@@ -3,8 +3,7 @@
 
 #define PY_SSIZE_T_CLEAN
 //revisar
-//#include <Python.h>
-#include </Library/Frameworks/Python.framework/Versions/3.12/include/python3.12/Python.h>
+#include "python3.12/Python.h"
 
 #include "node.h"
 #include "connection.h"
