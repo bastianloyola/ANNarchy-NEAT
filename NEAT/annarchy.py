@@ -1,7 +1,11 @@
 from ANNarchy import *
 import matplotlib.pyplot as plt
 
-def neuralNetwork(): 
+def printConnections(connections):
+    print(connections)
+    return 0
+
+def exampleIzhikevich(): 
     print("1")
     pop = Population(geometry=1000, neuron=Izhikevich)
     excSize = int(800)
@@ -9,7 +13,7 @@ def neuralNetwork():
     Inh = pop[800:]
     print("2")
 
-    re = np.random.random(800)  ; ri = np.random.random(200)
+    re = np.random.random(800)      ; ri = np.random.random(200)
     Exc.noise = 5.0                 ; Inh.noise = 2.0
     Exc.a = 0.02                    ; Inh.a = 0.02 + 0.08 * ri
     Exc.b = 0.2                     ; Inh.b = 0.25 - 0.05 * ri
@@ -57,4 +61,31 @@ def neuralNetwork():
 
     plt.tight_layout()
     plt.show()
+    return 0
+
+def neuralNetwork(connections): 
+    print(".1")
+    print(connections)
+    nodes = set()
+    for connection in connections:
+        print(connection)
+        nodes.add(connection[0])
+        print(connection[0])
+        nodes.add(connection[1])
+        print(connection[1])
+    print('.2')
+
+    pops = {}
+    for node in nodes:
+        pops[str(node)] = Population(geometry=1, neuron=Izhikevich)
+    print('.3')
+    projs = []
+    i = 0
+    for connection in connections:
+        projs[i] = Projection(pops[str(connection[0])],pops[str(connection[1])]).connect_all_to_all(weights=connection[2])
+        i += 1
+
+    print('.4')
+    compile()
+    print('.5')
     return 0

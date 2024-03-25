@@ -5,9 +5,35 @@
 
 using namespace std;
 
+PyObject* vectorConnection_to_TupleList( vector<Connection> &data) {
+  setenv("PYTHONPATH", ".", 1);
+  Py_Initialize();
+
+  PyObject* listObj = PyList_New( data.size() );
+  int count = 0;
+	if (!listObj) throw logic_error("Unable to allocate memory for Python list");
+	for (unsigned int i = 0; i < data.size(); i++) {
+    if (data[i].get_enable()){
+      PyObject* tuple = PyTuple_New( 3 );
+
+      PyObject *in = PyFloat_FromDouble( (double) data[i].get_InNode() );
+      PyObject *out = PyFloat_FromDouble( (double) data[i].get_OutNode() );
+      PyObject *weight = PyFloat_FromDouble( (double) data[i].get_weight() );
+
+      PyTuple_SET_ITEM(tuple, 0, in);
+      PyTuple_SET_ITEM(tuple, 1, out);
+      PyTuple_SET_ITEM(tuple, 2, weight);
+
+      PyList_SET_ITEM(listObj, count, tuple);
+      count++;
+    }
+	}
+  Py_Finalize();
+	return listObj;
+}
 
 
-void menu() {
+vector<Genome> menu() {
      // Menu to test mutators
   int in_node, out_node, new_weight, new_id, new_type, innovation, n_genomes;
   char option;
@@ -101,4 +127,5 @@ void menu() {
       break;
   }
   } while (option != 'e');
+  return g;
 }
