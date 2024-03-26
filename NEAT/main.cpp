@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void runPy(PyObject* list){
+void runPy(PyObject* list, int n){
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
 
@@ -22,8 +22,9 @@ void runPy(PyObject* list){
   load_module = PyImport_Import(name);
   
   //func = PyObject_GetAttrString(load_module, (char*)"printConnections");
-  func = PyObject_GetAttrString(load_module, (char*)"neuralNetwork");
-  args = PyTuple_Pack(1, list);
+  //func = PyObject_GetAttrString(load_module, (char*)"neuralNetwork");
+  func = PyObject_GetAttrString(load_module, (char*)"snn");
+  args = PyTuple_Pack(2, PyFloat_FromDouble(n), list);
   callfunc = PyObject_CallObject(func,args);
   double out = PyFloat_AsDouble(callfunc);
 
@@ -45,13 +46,13 @@ void runPy(PyObject* list){
   
   cout << out << endl;
   cout << out << endl;
-  
+  */
   Py_DECREF(name);
   Py_DECREF(load_module);
   Py_DECREF(func);
   Py_XDECREF(callfunc);
   Py_XDECREF(args);
-  */
+  
   Py_Finalize();
 }
 
@@ -74,7 +75,8 @@ int main() {
     // Convertir las conexiones a un objeto PyObject*
     PyObject* list_conecctions = vectorConnection_to_TupleList(connections);
     cout << 5 << endl;
-    runPy(list_conecctions);
+    int n = genome.get_nodes().size();
+    runPy(list_conecctions, n);
     cout << 6 << endl;
   }
   return 0;
