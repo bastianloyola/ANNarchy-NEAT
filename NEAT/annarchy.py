@@ -2,37 +2,39 @@ from ANNarchy import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-def printConnections(connections):
+def printArgs(connections):
     print(connections)
     return 0
 
-def snn(n, connections): 
+def snn(args): 
     print("0")
-    N = int(n)-1
-    matrix = np.array([[None]*N]*N)
-    print(matrix)
-    for connection in connections:
-        print(connection)
-        node_in = int(connection[0])
-        print(node_in)
-        node_out = int(connection[1])
-        print(node_out)
-        w = int(connection[2])
-        print(w)
-        matrix[node_out][node_in] = w
-    print(matrix)
-
-    pop = Population(geometry=n, neuron=Izhikevich)
-    proj = Projection(pre=pop, post=pop, target='exc')
-    proj.connect_from_matrix(matrix)
-
-    compile()
+    print(args)
+    for arg in args:
+        n = arg[0]
+        connections = arg[1:]
     
-    M = Monitor(pop, ['spike', 'v'])
-    simulate(1000.0, measure_time=True)
-    spikes = M.get('spike')
-    print(spikes)
-    
+        N = int(n)
+        matrix = np.array([[None]*N]*N)
+        print(matrix)
+        for connection in connections:
+            node_in = int(connection[0])
+            node_out = int(connection[1])
+            w = int(connection[2])
+            matrix[node_out][node_in] = w
+        print(matrix)
+
+        pop = Population(geometry=n, neuron=Izhikevich)
+        proj = Projection(pre=pop, post=pop, target='exc')
+        proj.connect_from_matrix(matrix)
+        compile()
+    """
+        M = Monitor(pop, ['spike', 'v'])
+        simulate(1000.0, measure_time=True)
+
+        spikes = M.get('spike')
+        print(spikes)
+   
+    """
     return 0
 
 def exampleIzhikevich(): 
@@ -64,6 +66,7 @@ def exampleIzhikevich():
     M = Monitor(pop, ['spike', 'v'])
 
     simulate(1000.0, measure_time=True)
+    print(simulate(1000.0, measure_time=True))
     print("6")
     spikes = M.get('spike')
     v = M.get('v')

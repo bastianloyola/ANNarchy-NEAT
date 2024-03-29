@@ -5,33 +5,73 @@
 
 using namespace std;
 
-PyObject* vectorConnection_to_TupleList( vector<Connection> &data) {
-  setenv("PYTHONPATH", ".", 1);
-  Py_Initialize();
+PyObject* vectorGenome_to_TupleList( vector<Genome> genome) {
 
-  PyObject* listObj = PyList_New( data.size() );
-  int count = 0;
-	if (!listObj) throw logic_error("Unable to allocate memory for Python list");
-	for (unsigned int i = 0; i < data.size(); i++) {
-    if (data[i].get_enable()){
-      PyObject* tuple = PyTuple_New( 3 );
+  PyObject* genome_connections_list = PyList_New( genome.size() );
 
-      PyObject *in = PyFloat_FromDouble( (double) data[i].get_InNode() );
-      PyObject *out = PyFloat_FromDouble( (double) data[i].get_OutNode() );
-      PyObject *weight = PyFloat_FromDouble( (double) data[i].get_weight() );
+  for (int i = 0; i < genome.size(); i++){
+    vector <Connection> data = genome[i].get_connections();
+    PyObject* listObj = PyList_New( data.size() +1);
+    
+    double num = genome[i].get_nodes().size();
+    PyObject *n = PyFloat_FromDouble(num);
 
-      PyTuple_SET_ITEM(tuple, 0, in);
-      PyTuple_SET_ITEM(tuple, 1, out);
-      PyTuple_SET_ITEM(tuple, 2, weight);
+    PyList_SET_ITEM(listObj, 0, n);
 
-      PyList_SET_ITEM(listObj, count, tuple);
-      count++;
-    }
-	}
-  Py_Finalize();
-	return listObj;
+    int count = 1;
+	  for (int j = 0; j < data.size(); j++) {
+      if (data[j].get_enable()){
+        PyObject* tuple = PyTuple_New(3);
+
+        PyObject *in = PyFloat_FromDouble( (double) data[j].get_InNode() );
+        PyObject *out = PyFloat_FromDouble( (double) data[j].get_OutNode() );
+        PyObject *weight = PyFloat_FromDouble( (double) data[j].get_weight() );
+
+        PyTuple_SET_ITEM(tuple, 0, in);
+        PyTuple_SET_ITEM(tuple, 1, out);
+        PyTuple_SET_ITEM(tuple, 2, weight);
+
+        PyList_SET_ITEM(listObj, count, tuple);
+        count++;
+      }
+	  }
+    PyList_SET_ITEM(genome_connections_list, i, listObj);
+  }
+	return genome_connections_list;
 }
 
+void createSNN(vector <Genome> g){
+
+  setenv("PYTHONPATH", ".", 1);
+  Py_Initialize();
+  cout << 1 << endl;
+  PyObject* list = vectorGenome_to_TupleList(g);
+  PyObject *name, *load_module, *func, *callfunc, *args, *n;
+  cout << 2 << endl;
+  name = PyUnicode_FromString("annarchy");
+  load_module = PyImport_Import(name);
+  cout << 2 << endl;
+  func = PyObject_GetAttrString(load_module, (char*)"snn");
+  //func = PyObject_GetAttrString(load_module, (char*)"printArgs");
+  //func = PyObject_GetAttrString(load_module, (char*)"exampleIzhikevich");
+  cout << 3 << endl;
+  args = PyTuple_Pack(1, list);
+  cout << 4 << endl;
+  callfunc = PyObject_CallObject(func,args);
+  //callfunc = PyObject_CallObject(func,NULL);
+  double out = PyFloat_AsDouble(callfunc);
+
+  cout << out << endl;
+
+  Py_DECREF(name);
+  Py_DECREF(load_module);
+  Py_DECREF(func);
+  Py_XDECREF(callfunc);
+  Py_XDECREF(args);
+  Py_DECREF(list);
+  
+  Py_Finalize();
+}
 
 vector<Genome> menu() {
      // Menu to test mutators
@@ -57,7 +97,7 @@ vector<Genome> menu() {
   
 
   do {
-    cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population z. crossover" << endl;
+    cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population g. create snn z. crossover" << endl;
     cin >> option;
     switch (option) {
     case 'a':
@@ -108,6 +148,12 @@ vector<Genome> menu() {
         cout << "---------------------------------------------"<< endl;
       }
       break;
+    case 'g':
+      //create snn 
+      cout << "Creando " << endl;
+      createSNN(g);
+      cout << "---------------------------------------------"<< endl;
+      break;
     case 'z':
       //Select two genomes
       int genome1, genome2;
@@ -125,7 +171,7 @@ vector<Genome> menu() {
       p.set_n_genomes(g.size());
 
       break;
-  }
+    }
   } while (option != 'e');
   return g;
 }

@@ -157,6 +157,7 @@ void Genome::create_node(int in_node, int out_node){
 
 // Print genome
 void Genome::print_genome(){
+    cout << "IN - OUT - W - Innov - Ennable" << endl;
     for(int i = 0; i < connections.size(); i++){
         cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << " " << connections[i].get_enable() << endl;
     }
