@@ -55,7 +55,18 @@ void createSNN(vector <Genome> g){
   //func = PyObject_GetAttrString(load_module, (char*)"printArgs");
   //func = PyObject_GetAttrString(load_module, (char*)"exampleIzhikevich");
   cout << 3 << endl;
-  args = PyTuple_Pack(1, list);
+  input_index = [];
+  output_index = [];
+  in_nodes = g.get_in_nodes();
+  out_nodes = g.get_out_nodes();
+  for (int i = 0; i < in_nodes; i++){
+    input_index.push_back(i);
+  }
+  for (int i = in_nodes; i < in_nodes + out_nodes; i++){
+    output_index.push_back(i);
+  }
+
+  args = PyTuple_Pack(1, [input_index, output_index],list);
   cout << 4 << endl;
   callfunc = PyObject_CallObject(func,args);
   //callfunc = PyObject_CallObject(func,NULL);

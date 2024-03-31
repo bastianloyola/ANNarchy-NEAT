@@ -11,7 +11,10 @@ def snn(args):
     print(args)
     for arg in args:
         n = arg[0]
-        connections = arg[1:]
+        indexes = arg[1]
+        input_index = indexes[0]
+        output_index = indexes[1]
+        connections = arg[2:]
     
         N = int(n)
         matrix = np.array([[None]*N]*N)
@@ -27,14 +30,14 @@ def snn(args):
         proj = Projection(pre=pop, post=pop, target='exc')
         proj.connect_from_matrix(matrix)
         compile()
-    """
         M = Monitor(pop, ['spike', 'v'])
+
+        fit = fitness(pop,input_index,output_index,xor)
         simulate(1000.0, measure_time=True)
 
         spikes = M.get('spike')
         print(spikes)
-   
-    """
+
     return 0
 
 def exampleIzhikevich(): 
@@ -95,3 +98,21 @@ def exampleIzhikevich():
     plt.tight_layout()
     plt.show()
     return 0
+
+def fitness(pop,input_index,output_index,funcion):
+    neurons = pop.r
+    input_neurons = neurons[input_index]
+    output_neurons = neurons[output_index]
+    expected_output = funcion(input_neurons)
+    fit = 0
+    for i in range(len(output_neurons)):
+        if output_neurons[i] == expected_output[i]:
+            fit += 1
+    return fit
+
+def xor(input_neurons):
+    return [abs(input_neurons[0] - input_neurons[1])]
+
+
+
+
