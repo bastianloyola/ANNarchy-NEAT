@@ -13,8 +13,12 @@
 using namespace std;
 
 int main() {
-
+  setenv("PYTHONPATH", ".", 1);
+  Py_Initialize();
+  
   vector<Genome> listGenome = menu();
   cout << "finalized" << endl;
+
+  Py_Finalize();
   return 0;
 }

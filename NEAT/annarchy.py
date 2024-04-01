@@ -1,24 +1,22 @@
 from ANNarchy import *
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import random as rd
 
-def printArgs(connections):
-    print(connections)
-    return 0
-
-def snn(args): 
-    print("0")
-    print(args)
-    for arg in args:
-        n = arg[0]
-        indexes = arg[1]
-        input_index = indexes[0]
-        output_index = indexes[1]
-        connections = arg[2:]
+def snn(input_index, output_index, args): 
     
+    print(args)
+    fits = []
+    fit = 0
+    for arg in args:
+        clear()
+        n = arg[0]
         N = int(n)
+        connections = arg[1:]
+        
         matrix = np.array([[None]*N]*N)
-        print(matrix)
+        print(connections)
         for connection in connections:
             node_in = int(connection[0])
             node_out = int(connection[1])
@@ -26,19 +24,59 @@ def snn(args):
             matrix[node_out][node_in] = w
         print(matrix)
 
+        a = rd.randint(0,1)
+        if a:
+            a = 0.
+        else:
+            a = 1.
+        
+        b = rd.randint(0,1)
+        if b:
+            b = 0.
+        else:
+            b = 1.
+        
         pop = Population(geometry=n, neuron=Izhikevich)
+        pop.set({'r': [a,b,pop.r[2]]})
+
         proj = Projection(pre=pop, post=pop, target='exc')
         proj.connect_from_matrix(matrix)
-        compile()
-        M = Monitor(pop, ['spike', 'v'])
 
+        compile(clean=True)
+        
         fit = fitness(pop,input_index,output_index,xor)
-        simulate(1000.0, measure_time=True)
+        print('Las neuronas son ')
+        
+        print(pop.r)
+        fits.append(fit)
+        print(fits)
 
-        spikes = M.get('spike')
-        print(spikes)
+    return fits
 
-    return 0
+def fitness(pop,input_index,output_index,funcion):
+    neurons = pop.r
+    input_neurons = []
+    for i in input_index:
+        input_neurons.append(neurons[int(i)])
+    output_neurons = []
+
+    for i in output_index:
+        output_neurons.append(neurons[int(i)])
+
+    expected_output = funcion(input_neurons)
+
+    fit = 0
+    for i in range(len(output_neurons)):
+        if output_neurons[i] == expected_output[i]:
+            fit += 1
+
+    return fit
+
+def xor(input_neurons):
+    return [abs(input_neurons[0] - input_neurons[1])]
+
+
+
 
 def exampleIzhikevich(): 
     print("1")
@@ -98,21 +136,3 @@ def exampleIzhikevich():
     plt.tight_layout()
     plt.show()
     return 0
-
-def fitness(pop,input_index,output_index,funcion):
-    neurons = pop.r
-    input_neurons = neurons[input_index]
-    output_neurons = neurons[output_index]
-    expected_output = funcion(input_neurons)
-    fit = 0
-    for i in range(len(output_neurons)):
-        if output_neurons[i] == expected_output[i]:
-            fit += 1
-    return fit
-
-def xor(input_neurons):
-    return [abs(input_neurons[0] - input_neurons[1])]
-
-
-
-

@@ -41,54 +41,71 @@ PyObject* vectorGenome_to_TupleList( vector<Genome> genome) {
 }
 
 void createSNN(vector <Genome> g){
-
-  setenv("PYTHONPATH", ".", 1);
-  Py_Initialize();
-  cout << 1 << endl;
-  PyObject* list = vectorGenome_to_TupleList(g);
-  PyObject *name, *load_module, *func, *callfunc, *args, *n;
-  cout << 2 << endl;
-  name = PyUnicode_FromString("annarchy");
-  load_module = PyImport_Import(name);
-  cout << 2 << endl;
-  func = PyObject_GetAttrString(load_module, (char*)"snn");
-  //func = PyObject_GetAttrString(load_module, (char*)"printArgs");
-  //func = PyObject_GetAttrString(load_module, (char*)"exampleIzhikevich");
-  cout << 3 << endl;
-  input_index = [];
-  output_index = [];
-  in_nodes = g.get_in_nodes();
-  out_nodes = g.get_out_nodes();
+  //Py_Initialize();
+  int in_nodes = g[0].get_in_nodes();
+  int out_nodes = g[0].get_out_nodes();
+  PyObject* input_index  = PyList_New( in_nodes );
+  PyObject* output_index  = PyList_New( out_nodes );
   for (int i = 0; i < in_nodes; i++){
-    input_index.push_back(i);
+    PyObject *in = PyFloat_FromDouble( (double) i);
+    PyList_SET_ITEM(input_index, i, in);
   }
+  int j = 0;
   for (int i = in_nodes; i < in_nodes + out_nodes; i++){
-    output_index.push_back(i);
+    PyObject *output = PyFloat_FromDouble( (double) i);
+    PyList_SET_ITEM(output_index, j, output);
+    j++;
   }
 
-  args = PyTuple_Pack(1, [input_index, output_index],list);
-  cout << 4 << endl;
-  callfunc = PyObject_CallObject(func,args);
-  //callfunc = PyObject_CallObject(func,NULL);
-  double out = PyFloat_AsDouble(callfunc);
+  PyObject* list = vectorGenome_to_TupleList(g);
 
-  cout << out << endl;
+  PyObject *name, *load_module, *func, *callfunc, *args, *n, *obj;
+  
+  name = PyUnicode_FromString("annarchy");
+  printf("llegue\n");
+  load_module = PyImport_Import(name);
+  printf("llegue\n");
+
+  func = PyObject_GetAttrString(load_module, (char*)"snn");
+  printf("llegue\n");
+
+  args = PyTuple_Pack(3, input_index, output_index,list);
+  
+  callfunc = PyObject_CallObject(func,args);
+  
+  vector <double> fits;
+
+  // Acceder a los elementos de la lista devuelta
+
+  if (PyList_Check(callfunc)) {
+    Py_ssize_t len = PyList_Size(callfunc);
+    for (Py_ssize_t i = 0; i < len; ++i) {
+      PyObject* item = PyList_GetItem(callfunc, i);
+      if (PyLong_Check(item)) {
+        double value = PyFloat_AsDouble(item);
+        cout << value << endl;
+        fits.push_back(value);
+        // Usa el valor según sea necesario
+      } else {
+        // Manejo de error si no es un flotante
+      }
+    }
+  }
 
   Py_DECREF(name);
   Py_DECREF(load_module);
   Py_DECREF(func);
-  Py_XDECREF(callfunc);
-  Py_XDECREF(args);
+  Py_DECREF(callfunc);
+  Py_DECREF(args);
   Py_DECREF(list);
   
-  Py_Finalize();
+  //Py_Finalize();
 }
 
 vector<Genome> menu() {
      // Menu to test mutators
   int in_node, out_node, new_weight, new_id, new_type, innovation, n_genomes;
   char option;
-
 
   //Ingresar la cantidad de genomes de la poblacion
   cout << "Enter n_genomes: ";
@@ -106,7 +123,6 @@ vector<Genome> menu() {
   
   int max_innovation = g.front().get_local_max();
   
-
   do {
     cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population g. create snn z. crossover" << endl;
     cin >> option;

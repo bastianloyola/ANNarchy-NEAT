@@ -1,8 +1,9 @@
 CXX = g++
-#CXXFLAGS = -std=c++11 -stdlib=libc++
+CXXFLAGS = -std=c++11 -stdlib=libc++
 
 output: main.o connection.o node.o genome.o crossover.o funciones.o population.o
-	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o population.o -o output 
+	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o population.o -o output -L/Library/Frameworks/Python.framework/Versions/3.12/lib -lpython3.12
+#$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o population.o -o output 
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
@@ -27,5 +28,5 @@ population.o: population.cpp
 
 clean:
 	rm *.o output
-	rm -rf __pycache__ 
+	rm -rf __pycache__
 	rm -rf annarchy
