@@ -1,29 +1,20 @@
 from ANNarchy import *
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 import random as rd
 
 def snn(input_index, output_index, args): 
     
     print(args)
+
     fits = []
     fit = 0
     for arg in args:
         clear()
         n = arg[0]
-        N = int(n)
-        connections = arg[1:]
         
-        matrix = np.array([[None]*N]*N)
-        print(connections)
-        for connection in connections:
-            node_in = int(connection[0])
-            node_out = int(connection[1])
-            w = int(connection[2])
-            matrix[node_out][node_in] = w
-        print(matrix)
-
+        matrix = arg[1]
+        
         a = rd.randint(0,1)
         if a:
             a = 0.

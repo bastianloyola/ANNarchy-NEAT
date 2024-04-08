@@ -1,47 +1,62 @@
 #include "funciones.h"
 #include "population.h"
+#include "numpy/arrayobject.h"
 #include <iostream>
 #include <vector>
 
 using namespace std;
+
+PyObject* create_numpy_array(vector<Connection> connections, int n) {
+    import_array();
+
+    npy_intp dims[2] = {n, n};
+    PyObject* numpy_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+
+    // Get a pointer to the data buffer of the NumPy array
+    double* data = (double*)PyArray_DATA((PyArrayObject*)numpy_array);
+
+    // Initialize all elements of the NumPy array to NaN (null)
+    for (int i = 0; i < n * n; ++i) {
+        data[i] = NAN;
+    }
+
+    // Populate the NumPy array with weights from connections
+    for (auto& connection : connections) {
+        int in_node = connection.get_InNode();
+        int out_node = connection.get_OutNode();
+        double weight = connection.get_weight();
+        // Check if the indices are within bounds
+        if (in_node >= 0 && in_node < n && out_node >= 0 && out_node < 3) {
+            // Calculate the index in the 1D data array corresponding to (out_node, in_node) in the 2D array
+            int index = out_node * n + in_node;
+            // Assign the weight to the corresponding element in the data buffer
+            data[index] = weight;
+        }
+    }
+    return numpy_array;
+}
 
 PyObject* vectorGenome_to_TupleList( vector<Genome> genome) {
 
   PyObject* genome_connections_list = PyList_New( genome.size() );
 
   for (int i = 0; i < genome.size(); i++){
-    vector <Connection> data = genome[i].get_connections();
-    PyObject* listObj = PyList_New( data.size() +1);
-    
-    double num = genome[i].get_nodes().size();
-    PyObject *n = PyFloat_FromDouble(num);
 
+    PyObject* listObj = PyList_New(2);
+ 
+    int num = genome[i].get_nodes().size();
+    PyObject *n = PyFloat_FromDouble(num);
     PyList_SET_ITEM(listObj, 0, n);
 
-    int count = 1;
-	  for (int j = 0; j < data.size(); j++) {
-      if (data[j].get_enable()){
-        PyObject* tuple = PyTuple_New(3);
-
-        PyObject *in = PyFloat_FromDouble( (double) data[j].get_InNode() );
-        PyObject *out = PyFloat_FromDouble( (double) data[j].get_OutNode() );
-        PyObject *weight = PyFloat_FromDouble( (double) data[j].get_weight() );
-
-        PyTuple_SET_ITEM(tuple, 0, in);
-        PyTuple_SET_ITEM(tuple, 1, out);
-        PyTuple_SET_ITEM(tuple, 2, weight);
-
-        PyList_SET_ITEM(listObj, count, tuple);
-        count++;
-      }
-	  }
+    PyObject *numpyArray = create_numpy_array(genome[i].get_connections(), num);
+    PyList_SET_ITEM(listObj, 1, numpyArray);
     PyList_SET_ITEM(genome_connections_list, i, listObj);
   }
 	return genome_connections_list;
 }
 
 void createSNN(vector <Genome> g){
-  //Py_Initialize();
+
   int in_nodes = g[0].get_in_nodes();
   int out_nodes = g[0].get_out_nodes();
   PyObject* input_index  = PyList_New( in_nodes );
@@ -62,15 +77,9 @@ void createSNN(vector <Genome> g){
   PyObject *name, *load_module, *func, *callfunc, *args, *n, *obj;
   
   name = PyUnicode_FromString("annarchy");
-  printf("llegue\n");
   load_module = PyImport_Import(name);
-  printf("llegue\n");
-
   func = PyObject_GetAttrString(load_module, (char*)"snn");
-  printf("llegue\n");
-
   args = PyTuple_Pack(3, input_index, output_index,list);
-  
   callfunc = PyObject_CallObject(func,args);
   
   vector <double> fits;
@@ -98,8 +107,6 @@ void createSNN(vector <Genome> g){
   Py_DECREF(callfunc);
   Py_DECREF(args);
   Py_DECREF(list);
-  
-  //Py_Finalize();
 }
 
 vector<Genome> menu() {
