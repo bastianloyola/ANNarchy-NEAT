@@ -3,7 +3,7 @@
 
 #include "genome.h"
 #include "crossover.h"
-#include "python3.12/Python.h"
+#include <python3.10/Python.h>
 
 void testing_all_classes_and_methods();
 PyObject* create_numpy_array();

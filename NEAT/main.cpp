@@ -2,7 +2,7 @@
 #include <vector>
 
 #define PY_SSIZE_T_CLEAN
-#include "python3.12/Python.h"
+#include <python3.10/Python.h>
 
 #include "node.h"
 #include "connection.h"

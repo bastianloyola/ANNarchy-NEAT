@@ -1,6 +1,6 @@
 #include "funciones.h"
 #include "population.h"
-#include "numpy/arrayobject.h"
+#include <python3.10/numpy/arrayobject.h>
 #include <iostream>
 #include <vector>
 
