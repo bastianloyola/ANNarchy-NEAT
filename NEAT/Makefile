@@ -1,31 +1,18 @@
-CXX = g++
-#CXXFLAGS = -std=c++11 -stdlib=libc++
-CXXFLAGS = 
-output: main.o connection.o node.o genome.o crossover.o funciones.o population.o
-	$(CXX) $(CXXFLAGS) main.o connection.o node.o genome.o crossover.o funciones.o population.o -o output -lpython3.10
+CC = g++
+CFLAGS = -Wall -Wextra -std=c++11
+INCLUDES = -I headers # Specify the directory containing header files
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+SRCS = $(wildcard src/*.cpp) # Specify the directory containing source files
+OBJS = $(SRCS:.cpp=.o)
 
-connection.o: connection.cpp
-	$(CXX) $(CXXFLAGS) -c connection.cpp
+all: NEAT
 
-node.o: node.cpp
-	$(CXX) $(CXXFLAGS) -c node.cpp
-
-genome.o: genome.cpp
-	$(CXX) $(CXXFLAGS) -c genome.cpp
-
-crossover.o: crossover.cpp
-	$(CXX) $(CXXFLAGS) -c crossover.cpp
-
-funciones.o: funciones.cpp
-	$(CXX) $(CXXFLAGS) -c funciones.cpp
-
-population.o: population.cpp
-	$(CXX) $(CXXFLAGS) -c population.cpp
+NEAT: $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ -lpython3.10
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 clean:
-	rm *.o output
+	rm -f $(OBJS) NEAT
 	rm -rf __pycache__
-	rm -rf annarchy
+	rm -rf annarchy-*

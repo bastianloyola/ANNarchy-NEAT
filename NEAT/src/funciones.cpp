@@ -1,5 +1,4 @@
-#include "funciones.h"
-#include "population.h"
+#include "../headers/funciones.h"
 #include <python3.10/numpy/arrayobject.h>
 #include <iostream>
 #include <vector>
@@ -36,6 +35,7 @@ PyObject* create_numpy_array(vector<Connection> connections, int n) {
     return numpy_array;
 }
 
+/*
 PyObject* vectorGenome_to_TupleList( vector<Genome> genome) {
 
   PyObject* genome_connections_list = PyList_New( genome.size() );
@@ -54,11 +54,12 @@ PyObject* vectorGenome_to_TupleList( vector<Genome> genome) {
   }
 	return genome_connections_list;
 }
+*/
 
-void createSNN(vector <Genome> g){
+void createSNN(vector <Genome> genomes){
 
-  int in_nodes = g[0].get_in_nodes();
-  int out_nodes = g[0].get_out_nodes();
+  int in_nodes = genomes[0].get_in_nodes();
+  int out_nodes = genomes[0].get_out_nodes();
   PyObject* input_index  = PyList_New( in_nodes );
   PyObject* output_index  = PyList_New( out_nodes );
   for (int i = 0; i < in_nodes; i++){
@@ -72,16 +73,31 @@ void createSNN(vector <Genome> g){
     j++;
   }
 
-  PyObject* list = vectorGenome_to_TupleList(g);
-
+  //PyObject* list = vectorGenome_to_TupleList(g);
+  
   PyObject *name, *load_module, *func, *callfunc, *args, *n, *obj;
   
   name = PyUnicode_FromString("annarchy");
   load_module = PyImport_Import(name);
   func = PyObject_GetAttrString(load_module, (char*)"snn");
-  args = PyTuple_Pack(3, input_index, output_index,list);
-  callfunc = PyObject_CallObject(func,args);
+
+  #pragma omp parrallel for
+  for (int i = 0; i < genomes.size(); i++){
+    PyObject* list = PyList_New(3);
+ 
+    int num = genomes[i].get_nodes().size();
+    PyObject *n = PyFloat_FromDouble(num);
+    PyObject *id = PyFloat_FromDouble(i);
+    PyList_SET_ITEM(list, 0, n);
+    PyList_SET_ITEM(list, 1, id);
+
+    PyObject *numpyArray = create_numpy_array(genomes[i].get_connections(), num);
+    PyList_SET_ITEM(list, 2, numpyArray);
+    args = PyTuple_Pack(3, input_index, output_index,list);
+    callfunc = PyObject_CallObject(func,args);
+  }
   
+
   vector <double> fits;
 
   // Acceder a los elementos de la lista devuelta
@@ -106,7 +122,6 @@ void createSNN(vector <Genome> g){
   Py_DECREF(func);
   Py_DECREF(callfunc);
   Py_DECREF(args);
-  Py_DECREF(list);
 }
 
 vector<Genome> menu() {

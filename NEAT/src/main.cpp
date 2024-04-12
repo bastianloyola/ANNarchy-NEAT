@@ -4,11 +4,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <python3.10/Python.h>
 
-#include "node.h"
-#include "connection.h"
-#include "genome.h"
-#include "crossover.h"
-#include "funciones.h"
+#include "../headers/all_headers.h"
 
 using namespace std;
 

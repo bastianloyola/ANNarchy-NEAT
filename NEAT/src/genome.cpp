@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "genome.h"
+#include "../headers/genome.h"
 
 using namespace std;
 

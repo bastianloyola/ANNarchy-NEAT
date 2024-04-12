@@ -1,4 +1,4 @@
-#include "node.h"
+#include "../headers/node.h"
 
 // Constructor de la clase
 Node::Node(int c_id, int c_type){

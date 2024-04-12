@@ -1,4 +1,4 @@
-#include "population.h"
+#include "../headers/population.h"
 using namespace std;
 
 Population::Population(int n_genomes, int n_inputs, int n_outputs){

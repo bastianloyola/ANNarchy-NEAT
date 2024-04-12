@@ -9,38 +9,27 @@ def snn(input_index, output_index, args):
 
     fits = []
     fit = 0
-    for arg in args:
-        clear()
-        n = arg[0]
-        
-        matrix = arg[1]
-        
-        a = rd.randint(0,1)
-        if a:
-            a = 0.
-        else:
-            a = 1.
-        
-        b = rd.randint(0,1)
-        if b:
-            b = 0.
-        else:
-            b = 1.
-        
-        pop = Population(geometry=n, neuron=Izhikevich)
-        pop.set({'r': [a,b,pop.r[2]]})
 
-        proj = Projection(pre=pop, post=pop, target='exc')
-        proj.connect_from_matrix(matrix)
+    clear()
+    n = args[0]
+    i = args[1]
+    matrix = args[2]
+    
+    pop = Population(geometry=n, neuron=Izhikevich)
 
-        compile(clean=True)
-        
-        fit = fitness(pop,input_index,output_index,xor)
-        print('Las neuronas son ')
-        
-        print(pop.r)
-        fits.append(fit)
-        print(fits)
+    proj = Projection(pre=pop, post=pop, target='exc')
+    proj.connect_from_matrix(matrix)
+
+    nombre = 'annarchy-'+str(i)
+
+    compile(directory=nombre)
+    
+    fit = fitness(pop,input_index,output_index,xor)
+    print('Las neuronas son ')
+    
+    print(pop.r)
+    fits.append(fit)
+    print(fits)
 
     return fits
 
