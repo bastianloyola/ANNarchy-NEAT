@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 import random as rd
 
 
-def snn(input_index, output_index, n, i, matrix): 
+    fits = []
+    fit = 0
+
     clear()
     
-    pop = Population(geometry=n, neuron=Izhikevich)
+    pop = Population(geometry=n, neuron=LIF)
+
     proj = Projection(pre=pop, post=pop, target='exc')
     proj.connect_from_matrix(matrix)
 
@@ -18,27 +21,39 @@ def snn(input_index, output_index, n, i, matrix):
 
     return fit
 
-def fitness(pop,input_index,output_index,funcion):
-    neurons = pop.r
-    input_neurons = []
-    for i in input_index:
-        input_neurons.append(neurons[int(i)])
-    output_neurons = []
-
-    for i in output_index:
-        output_neurons.append(neurons[int(i)])
-
-    expected_output = funcion(input_neurons)
+def fitness(pop,Monitor,input_index,output_index,funcion):
 
     fit = 0
-    for i in range(len(output_neurons)):
-        if output_neurons[i] == expected_output[i]:
-            fit += 1
-
+    fit =+ funcion(pop,Monitor,input_index,output_index)
     return fit
+     
 
-def xor(input_neurons):
-    return [abs(input_neurons[0] - input_neurons[1])]
+def xor(pop,Monitor,input_index,output_index):
+    print('xor')
+    entradas = []
+    for i in input_index:
+        entrada = rd.randint(0,1)
+        entradas.append(entrada)
+        pop[i].I = entrada
+    simulate(100.0)
+    spikes = Monitor.get('spike')
+    #Get the output
+    output = 0
+    for i in output_index:
+        output += len(spikes[i])
+    
+    #Get the average spikes of all neurons
+    average = 0
+    for i in range(len(pop)):
+        average += len(spikes[i])
+    average = average/len(pop)
+
+    decode_output = -1
+    if output > average:
+        decode_output = 1
+    else:
+        decode_output = 0
+
 
 
 def exampleIzhikevich(): 
@@ -69,15 +84,14 @@ def exampleIzhikevich():
     print("5")
     M = Monitor(pop, ['spike', 'v'])
 
-    simulate(1000.0, measure_time=True)
-    print(simulate(1000.0, measure_time=True))
+    simulate(3000.0, measure_time=True)
     print("6")
     spikes = M.get('spike')
     v = M.get('v')
     t, n = M.raster_plot(spikes)
     fr = M.histogram(spikes)
     print("7")
-
+    print(spikes[0])
     fig = plt.figure(figsize=(12, 12))
 
     # First plot: raster plot
