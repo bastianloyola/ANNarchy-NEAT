@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import random as rd
 
 
-    fits = []
-    fit = 0
 
+
+
+def snn(input_index, output_index, n, i, matrix): 
     clear()
     
     pop = Population(geometry=n, neuron=LIF)
-
     proj = Projection(pre=pop, post=pop, target='exc')
     proj.connect_from_matrix(matrix)
 
@@ -54,7 +54,17 @@ def xor(pop,Monitor,input_index,output_index):
     else:
         decode_output = 0
 
-
+    #comparar las entradas y la salida esperada con el output
+    if entradas[0] - entradas[1] == 0:
+        if decode_output == 0:
+            return 1
+        else:
+            return 0
+    else:
+        if decode_output == 1:
+            return 1
+        else:
+            return 0
 
 def exampleIzhikevich(): 
     print("1")
