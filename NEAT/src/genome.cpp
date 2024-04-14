@@ -6,9 +6,10 @@
 using namespace std;
 
 // Clase para Genoma
-Genome::Genome(int in, int out, int max_innovation, int initial_fitness){
+Genome::Genome(int in, int out, int max_innovation, int initial_fitness, int new_id){
     in_nodes = in;
     out_nodes = out;
+    id = new_id;
     for (int i = 0; i < in_nodes; i++){
         Node n(i, 0);
         nodes.push_back(n);
@@ -19,9 +20,9 @@ Genome::Genome(int in, int out, int max_innovation, int initial_fitness){
     }
     //Crear conexiones entre todos los nodos de entrada y todos los nodos de salida
     int new_innovation = max_innovation;
-    for (int i = 0; i < nodes.size(); i++){
+    for (int i = 0; i < static_cast<int>(nodes.size()); i++){
         if (nodes[i].get_type() == 0){
-            for (int j = 0; j < nodes.size(); j++){
+            for (int j = 0; j < static_cast<int>(nodes.size()); j++){
                 if (nodes[j].get_type() == 2){
                     Connection c(nodes[i].get_id(), nodes[j].get_id(), 1, true, new_innovation);
                     connections.push_back(c);
@@ -58,10 +59,13 @@ int Genome::get_in_nodes(){
 int Genome::get_out_nodes(){
     return out_nodes;
 }
+int Genome::get_id(){
+    return id;
+}
 
 Connection Genome::get_connection(int in_node, int out_node){
     //Find connection in vector
-    for(int i = 0; i < connections.size(); i++){
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].get_InNode() == in_node && connections[i].get_OutNode() == out_node){
             return connections[i];
         }
@@ -70,7 +74,7 @@ Connection Genome::get_connection(int in_node, int out_node){
 }
 
 Node Genome::get_node(int id){
-    for(int i = 0; i < nodes.size(); i++){
+    for(int i = 0; i < static_cast<int>(nodes.size()); i++){
         if(nodes.front().get_id() == id){
             return nodes.front();
         }
@@ -134,7 +138,7 @@ void Genome::create_connection(int in_node, int out_node, float new_weight, int 
 void Genome::create_node(int in_node, int out_node){
     // Find connection and disable
     float new_weight = 1; // Valor default en caso que no exista una conexion previa
-    for(int i = 0; i < connections.size(); i++){
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].get_InNode() == in_node && connections[i].get_OutNode() == out_node){
             connections[i].set_enable(0);
             new_weight = connections[i].get_weight();
@@ -158,7 +162,7 @@ void Genome::create_node(int in_node, int out_node){
 // Print genome
 void Genome::print_genome(){
     cout << "IN - OUT - W - Innov - Ennable" << endl;
-    for(int i = 0; i < connections.size(); i++){
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
         cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << " " << connections[i].get_enable() << endl;
     }
 }

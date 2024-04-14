@@ -4,7 +4,7 @@ using namespace std;
 
 
 // Crossover
-Genome crossover(Genome a, Genome b){
+Genome crossover(Genome a, Genome b, int id){
 
     vector<Connection> connections_a = a.get_connections();
     vector<Connection> connections_b = b.get_connections();
@@ -24,11 +24,11 @@ Genome crossover(Genome a, Genome b){
     }else{
         max = connections_b[connection_size_b -1].get_Innovation();
     }
-    int count_a=0, count_b = 0, random;
+    int count_a=0, count_b = 0;
 
 
 
-    Genome offspring(in_nodes, out_nodes, 0, 0);
+    Genome offspring(in_nodes, out_nodes, 0, 0, id);
     offspring.set_local_max(max);
 
     // select best fitness

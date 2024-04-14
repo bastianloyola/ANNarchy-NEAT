@@ -4,6 +4,6 @@
 #include "genome.h"
 #include "stdlib.h"
 
-Genome crossover(Genome a, Genome b);
+Genome crossover(Genome a, Genome b, int id);
 
 #endif

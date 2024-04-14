@@ -11,13 +11,13 @@ Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_ena
 }
 
 // Getters         
-int Connection::get_InNode(){
+int Connection::get_InNode() const{
     return in_node;
 }
-int Connection::get_OutNode(){
+int Connection::get_OutNode() const{
     return out_node;
 }
-float Connection::get_weight(){
+float Connection::get_weight() const{
     return weight;
 }
 bool Connection::get_enable(){

@@ -13,7 +13,7 @@ class Genome {
     
     public:  
 
-        Genome(int in, int out, int max_innovation, int initial_fitness);
+        Genome(int in, int out, int max_innovation, int initial_fitness, int id);
         void add_connection(Connection c);
         void add_node(Node c);  
         vector<Connection> get_connections();      
@@ -47,6 +47,9 @@ class Genome {
         // Print genome
         void print_genome();
 
+        //Get id
+        int get_id();
+
     private:
         int in_nodes;
         int out_nodes; 
@@ -55,6 +58,7 @@ class Genome {
         int max;
         int local_max;
         float fitness;
+        int id;
 };
 
 #endif

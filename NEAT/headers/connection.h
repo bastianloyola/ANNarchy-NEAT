@@ -9,9 +9,9 @@ class Connection {
     Connection(int c_in_node, int c_out_node, float c_weight, bool c_enable, int c_innovation);
 
     // Getters         
-    int get_InNode();
-    int get_OutNode();
-    float get_weight();
+    int get_InNode() const;
+    int get_OutNode() const;
+    float get_weight() const;
     bool get_enable();
     int get_Innovation();
 

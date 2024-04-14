@@ -7,6 +7,7 @@
 #include "genome.h"
 #include "node.h"
 #include "population.h"
+#include "menu.h"
 
 // Add more includes as needed
 

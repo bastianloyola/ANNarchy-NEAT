@@ -3,35 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
 
-def snn(input_index, output_index, args): 
-    
-    print(args)
 
-    fits = []
-    fit = 0
-
+def snn(input_index, output_index, n, i, matrix): 
     clear()
-    n = args[0]
-    i = args[1]
-    matrix = args[2]
     
     pop = Population(geometry=n, neuron=Izhikevich)
-
     proj = Projection(pre=pop, post=pop, target='exc')
     proj.connect_from_matrix(matrix)
 
-    nombre = 'annarchy-'+str(i)
-
+    nombre = 'annarchy-'+str(int(i))
+    print(nombre)
     compile(directory=nombre)
-    
     fit = fitness(pop,input_index,output_index,xor)
-    print('Las neuronas son ')
-    
-    print(pop.r)
-    fits.append(fit)
-    print(fits)
 
-    return fits
+    return fit
 
 def fitness(pop,input_index,output_index,funcion):
     neurons = pop.r
@@ -54,8 +39,6 @@ def fitness(pop,input_index,output_index,funcion):
 
 def xor(input_neurons):
     return [abs(input_neurons[0] - input_neurons[1])]
-
-
 
 
 def exampleIzhikevich(): 

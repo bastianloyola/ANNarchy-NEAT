@@ -1,18 +1,31 @@
-CC = g++
-CFLAGS = -Wall -Wextra -std=c++11
-INCLUDES = -I headers # Specify the directory containing header files
+CXX = g++
+CXXFLAGS = -Wall -std=c++11 -fopenmp -g
+LIBS = -lpython3.10
 
-SRCS = $(wildcard src/*.cpp) # Specify the directory containing source files
-OBJS = $(SRCS:.cpp=.o)
+SRCDIR = src
+BINDIR = bin
+HEADERDIR = headers
 
-all: NEAT
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
 
-NEAT: $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ -lpython3.10
-%.o: %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+EXECUTABLE = NEAT
 
+all: $(EXECUTABLE)
+
+$(BINDIR)/%.o: $(SRCDIR)/%.cpp | $(BINDIR)
+	$(CXX) $(CXXFLAGS) -I$(PYTHON_INCLUDE) -I$(NUMPY_INCLUDE) -c -o $@ $<
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(EXECUTABLE) $(OBJECTS) $(LIBS)
+
+$(BINDIR):
+	mkdir -p $(BINDIR)
+.PHONY: clean
 clean:
-	rm -f $(OBJS) NEAT
+	rm NEAT
+	rm -fr $(BINDIR)
 	rm -rf __pycache__
+	rm -rf annarchy-*
+Aclean:
 	rm -rf annarchy-*

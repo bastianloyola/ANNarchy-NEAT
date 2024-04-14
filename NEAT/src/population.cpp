@@ -6,8 +6,9 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     n_inputs = n_inputs;
     n_outputs = n_outputs;
     max_innovation = 0;
+    max_id = n_genomes;
     for (int i = 0; i < n_genomes; i++){
-        genomes.push_back(Genome(n_inputs, n_outputs, max_innovation,0));
+        genomes.push_back(Genome(n_inputs, n_outputs, max_innovation,0,i));
     }
 }
 
@@ -30,6 +31,9 @@ int Population::get_n_outputs(){
 int Population::get_max_innovation(){
     return max_innovation;
 }
+int Population::get_max_id(){
+    return max_id;
+}
 
 void Population::set_genomes(vector<Genome> new_genomes){
     genomes = new_genomes;
@@ -47,9 +51,14 @@ void Population::set_n_outputs(int new_n_outputs){
     n_outputs = new_n_outputs;
 }
 
+void Population::increase_max_id(){
+    max_id++;
+}
+
 void Population::set_max_innovation(int new_max_innovation){
     max_innovation = new_max_innovation;
 }
+
 
 void Population::increase_max_innovation(){
     max_innovation++;

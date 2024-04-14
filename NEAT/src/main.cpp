@@ -3,12 +3,13 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <python3.10/Python.h>
-
 #include "../headers/all_headers.h"
+//#include <omp.h>
 
 using namespace std;
 
 int main() {
+ 
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
   
@@ -17,4 +18,5 @@ int main() {
 
   Py_Finalize();
   return 0;
+
 }
