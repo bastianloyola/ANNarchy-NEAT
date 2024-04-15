@@ -3,55 +3,85 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
 
+import threading
 
+# Declarar un mutex global para sincronizar el acceso a compile()
+compile_mutex = threading.Lock()
 
+LIF = Neuron(
+    parameters = """
+    tau = 30.0 : population
+    I = 15.0
+    tau_I = 3.0 : population
+    """,
+    equations = """
+    tau * dv/dt = -v + g_exc - g_inh + I : init=13.5
+    tau_I * dg_exc/dt = -g_exc
+    tau_I * dg_inh/dt = -g_inh
+    """,
+    spike = "v >= 1",
+    reset = "v = 0",
+    refractory = 3.0
+)
 
-
-def snn(input_index, output_index, n, i, matrix): 
+def snn(n_entrada, n_salida, n, i, matrix): 
     clear()
-    
     pop = Population(geometry=n, neuron=LIF)
     proj = Projection(pre=pop, post=pop, target='exc')
     proj.connect_from_matrix(matrix)
-
+    print('nombre')
     nombre = 'annarchy-'+str(int(i))
     print(nombre)
-    compile(directory=nombre)
-    fit = fitness(pop,input_index,output_index,xor)
-
+    # Adquirir el bloqueo del mutex antes de llamar a compile()
+    compile_mutex.acquire()
+    try:
+        compile(directory=nombre)
+    finally:
+        # Liberar el bloqueo del mutex después de llamar a compile()
+        compile_mutex.release()
+    M = Monitor(pop, ['spike'])
+    input_index = []
+    output_index = []
+    n_entrada = int(n_entrada)
+    n_salida = int(n_salida)
+    for i in range(n_entrada):
+        input_index.append(i)
+    for i in range(n_entrada,n_salida+n_entrada):
+        output_index.append(i)
+    fit = fitness(pop,M,input_index,output_index,xor)
     return fit
 
 def fitness(pop,Monitor,input_index,output_index,funcion):
-
     fit = 0
-    fit =+ funcion(pop,Monitor,input_index,output_index)
+    fit = funcion(pop,Monitor,input_index,output_index)
     return fit
      
 
 def xor(pop,Monitor,input_index,output_index):
-    print('xor')
     entradas = []
     for i in input_index:
         entrada = rd.randint(0,1)
         entradas.append(entrada)
-        pop[i].I = entrada
+        pop[int(i)].I = entrada
     simulate(100.0)
     spikes = Monitor.get('spike')
+    print("spikes: ",spikes) 
+    print("entradas: ",entradas)
     #Get the output
     output = 0
     for i in output_index:
         output += len(spikes[i])
-    
+    print("spike output: ",output)
     #Get the average spikes of all neurons
     average = 0
     for i in range(len(pop)):
         average += len(spikes[i])
     average = average/len(pop)
-
-    decode_output = -1
+    print("average spikes: ",average)
+    decode_output = -2
     if output > average:
         decode_output = 1
-    else:
+    if output <= average:
         decode_output = 0
 
     #comparar las entradas y la salida esperada con el output

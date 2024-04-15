@@ -1,13 +1,13 @@
 #include "../headers/population.h"
 using namespace std;
 
-Population::Population(int n_genomes, int n_inputs, int n_outputs){
-    n_genomes = n_genomes;
-    n_inputs = n_inputs;
-    n_outputs = n_outputs;
+Population::Population(int n_genomas, int n_entradas, int n_salidas){
+    n_genomes = n_genomas;
+    n_inputs = n_entradas;
+    n_outputs = n_salidas;
     max_innovation = 0;
-    max_id = n_genomes;
-    for (int i = 0; i < n_genomes; i++){
+    max_id = n_genomas;
+    for (int i = 0; i < n_genomas; i++){
         genomes.push_back(Genome(n_inputs, n_outputs, max_innovation,0,i));
     }
 }
