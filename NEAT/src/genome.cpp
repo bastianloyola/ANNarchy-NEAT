@@ -73,6 +73,16 @@ Connection Genome::get_connection(int in_node, int out_node){
     return Connection(0,0,0,false,0);
 }
 
+Connection Genome::get_connection_id(int innovation){
+    //Find connection in vector
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
+        if(connections[i].get_Innovation() == innovation){
+            return connections[i];
+        }
+    }
+    return Connection(0,0,0,false,0);
+}
+
 Node Genome::get_node(int id){
     for(int i = 0; i < static_cast<int>(nodes.size()); i++){
         if(nodes.front().get_id() == id){

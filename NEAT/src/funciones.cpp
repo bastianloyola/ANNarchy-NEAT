@@ -93,54 +93,108 @@ void evaluate(Population &population){
     Py_DECREF(name);
 }
 
-// void evolution(Population &population){
-//     //probabilidades
-//     double weight_mutated = 0.8;
-//     double uniform_weight = 0.9; //falta implementar
-//     double disable_iherited = 0.75; //falta implementar
-//     double offspring_cross = 0.75;
-//     double interspecies = 0.001;
-//     double add_node_small = 0.03;
-//     double add_link_small = 0.05;
-//     double add_node_large = 0.03; //no aparece
-//     double add_link_large = 0.03;
+//vector<Genome> eliminate_less_fit(vector<Genome>)
 
-//     //
-//     int size_pop = population.get_genomes().size();
-//     int fitter = 0;
-//     int fit_fitter = population.get_genomes()[0].get_fitness();
-//     for (int i = 1; i < static_cast<int>(population.get_genomes().size()); i++){
-//         int mutated_id;
-//         // compare fitness
-//         if (fit_fitter < population.get_genomes()[i].get_fitness()){
-//             mutated_id = fitter;
-//             fitter = i;
-//             fit_fitter = population.get_genomes()[i].get_fitness();
-//         }else mutated_id = i;
-        
-//         if (getBooleanWithProbability(weight_mutated)){
-//             int n = population.get_genomes()[mutated_id].get_connections().size();
+void mutations(Population &population){
+    //probabilidades
+    double weight_mutated = 0.8;
+    double uniform_weight = 0.9; //falta implementar
+    double disable_iherited = 0.75; //falta implementar
+    double offspring_cross = 0.75;
+    double interspecies = 0.001;
+    double add_node_small = 0.03;
+    double add_link_small = 0.05;
+    double add_node_large = 0.03; //no aparece
+    double add_link_large = 0.03;
+    double add_node, add_link;
+    bool flag = true;
+    if (flag){
+        add_node = add_node_large;
+        add_link = add_link_large;
+    }else{
+        add_node = add_node_small;
+        add_link = add_link_small;
+    }
+    
+    //
+    int size_pop = population.get_genomes().size();
+    int fitter = 0;
+    int fit_fitter = population.get_genomes()[0].get_fitness();
 
-//             int innovation_id =  (int)(rand() % n)+1;
-//             while (!population.get_genomes()[mutated_id].get_connections()[innovation_id].get_enable())
-//             {
-//                 int innovation_id =  (int)(rand() % n)+1;
-//             }
-//             int weight = (rand() %10)/10;
-//             population.get_genomes()[mutated_id].change_weight(innovation_id,weight);
-//         }
-//     }
-// }
+    //mutate
+    for (int i = 1; i < static_cast<int>(population.get_genomes().size()); i++){
+        int mutated_id;
+        // compare fitness
+        if (fit_fitter < population.get_genomes()[i].get_fitness()){
+            mutated_id = fitter;
+            fitter = i;
+            fit_fitter = population.get_genomes()[i].get_fitness();
+        }else mutated_id = i;
+        cout << " -mutations_ " << mutated_id << endl;
+        // mutate weight
+        if (getBooleanWithProbability(weight_mutated)){
+        //if (true){
+            cout << " mutate weight " << endl;
+            int n = population.get_genomes()[mutated_id].get_connections().size();
 
-// bool getBooleanWithProbability(double probability) {
-//     // Generador de números aleatorios
-//     random_device rd;
-//     mt19937 gen(rd());
-//     uniform_real_distribution<> dis(0, 1); // Distribución uniforme entre 0 y 1
+            int innovation_id =  (int)(rand() % n)+1;
+            //int innovation_id = 1;
+            while (!population.get_genomes()[mutated_id].get_connections()[innovation_id].get_enable()){
+                innovation_id =  (int)(rand() % n)+1;
+            }
+            int weight = (rand() %10);
+            //int weight = 5;
+            population.get_genomes()[mutated_id].change_weight(innovation_id,weight);
+        }else cout << " no -mutate weight " << endl;
 
-//     // Generar un número aleatorio entre 0 y 1
-//     double randomValue = dis(gen);
+        // add node
+        if (getBooleanWithProbability(add_node)){
+        //if (true){
+            cout << " add node " << endl;
+            int n = population.get_genomes()[mutated_id].get_connections().size();
 
-//     // Comparar el número aleatorio con la probabilidad dada
-//     return randomValue < probability;
-// }
+            int innovation_id =  (int)(rand() % n)+1;
+            while (!population.get_genomes()[mutated_id].get_connections()[innovation_id].get_enable()){
+                int innovation_id =  (int)(rand() % n)+1;
+            }
+            Connection connection = population.get_genomes()[mutated_id].get_connection_id(innovation_id);
+            population.get_genomes()[mutated_id].create_node(connection.get_InNode(),connection.get_OutNode());
+        }else cout << " no -add node " << endl;
+
+        // add connection
+        if (getBooleanWithProbability(add_link)){
+            cout << " add connection " << endl;
+            int n = population.get_genomes()[mutated_id].get_nodes().size();
+
+            int in_node =  (int)(rand() % n);
+            int out_node =  (int)(rand() % n);
+            while (in_node == out_node){
+                int out_node =  (int)(rand() % n);
+            }
+            int weight = (rand() %10);
+            population.get_genomes()[mutated_id].create_connection(in_node, out_node, weight, population.get_max_innovation());
+        }else cout << " no -add connection " << endl;
+        population.get_genomes()[mutated_id].print_genome();
+    }
+}
+
+bool getBooleanWithProbability(double probability) {
+    // Generador de números aleatorios
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> dis(0, 1); // Distribución uniforme entre 0 y 1
+
+    // Generar un número aleatorio entre 0 y 1
+    double randomValue = dis(gen);
+     // Comparar el número aleatorio con la probabilidad dada
+    return randomValue < probability;
+}
+
+void evolution(Population &population,int n){
+
+    for (int i = 0; i < n; i++){
+        cout << " generación: " << i << endl; 
+        evaluate(population);
+        mutations(population);
+    }
+}

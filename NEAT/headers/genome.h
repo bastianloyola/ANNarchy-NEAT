@@ -21,6 +21,7 @@ class Genome {
         int get_in_nodes();
         int get_out_nodes();
         Connection get_connection(int in_node, int out_node);
+        Connection get_connection_id(int innovation);
         Node get_node(int id);
         int get_max();
         int get_local_max();

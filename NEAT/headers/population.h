@@ -25,12 +25,13 @@ class Population {
     void set_max_innovation(int new_max_innovation);
     void increase_max_id();
     void increase_max_innovation();
+    
+    vector<Genome> genomes;
 
   private:
     int n_genomes;
     int n_inputs;
     int n_outputs;
-    vector<Genome> genomes;
     int max_innovation;
     int max_id;
 

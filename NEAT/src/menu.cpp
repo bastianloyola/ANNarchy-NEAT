@@ -88,6 +88,21 @@ vector<Genome> menu() {
       evaluate(p);
       cout << "---------------------------------------------"<< endl;
       break;
+    case 'h':
+      //evolutionate
+      int n;
+      cout << "Enter number of evolutions: ";
+      cin >> n;
+      cout << "Evolucionando " << endl;
+      evolution(p,n);
+      cout << "---------------------------------------------"<< endl;
+      break;
+    case 'i':
+      //evolutionate
+      cout << "Mutate " << endl;
+      mutations(p);
+      cout << "---------------------------------------------"<< endl;
+      break;
     case 'z':
       //Select two genomes
       int genome1, genome2;
