@@ -121,50 +121,59 @@ void mutations(Population &population){
     int fitter = 0;
     int fit_fitter = population.get_genomes()[0].get_fitness();
 
+    vector <Genome> genomes = population.get_genomes();
     //mutate
-    for (int i = 1; i < static_cast<int>(population.get_genomes().size()); i++){
+    for (int i = 1; i < static_cast<int>(genomes.size()); i++){
         int mutated_id;
         // compare fitness
-        if (fit_fitter < population.get_genomes()[i].get_fitness()){
+        if (fit_fitter < genomes[i].get_fitness()){
             mutated_id = fitter;
             fitter = i;
-            fit_fitter = population.get_genomes()[i].get_fitness();
+            fit_fitter = genomes[i].get_fitness();
         }else mutated_id = i;
         cout << " -mutations_ " << mutated_id << endl;
+        
         // mutate weight
         if (getBooleanWithProbability(weight_mutated)){
         //if (true){
             cout << " mutate weight " << endl;
-            int n = population.get_genomes()[mutated_id].get_connections().size();
-
+            int n = genomes[mutated_id].get_connections().size();
+            cout << " n: " << n << endl;
             int innovation_id =  (int)(rand() % n)+1;
             //int innovation_id = 1;
-            while (!population.get_genomes()[mutated_id].get_connections()[innovation_id].get_enable()){
+            Connection connection = genomes[mutated_id].get_connections()[innovation_id];
+            cout << " inn_id: " << innovation_id << " enable: " << connection.get_enable() << endl;
+            
+            while (!connection.get_enable()){
                 innovation_id =  (int)(rand() % n)+1;
+                connection = genomes[mutated_id].get_connections()[innovation_id];
+                cout << " inn_id: " << innovation_id << endl;
             }
             int weight = (rand() %10);
+            cout << " new weight: " << weight << endl;
             //int weight = 5;
-            population.get_genomes()[mutated_id].change_weight(innovation_id,weight);
+            genomes[mutated_id].change_weight(connection.get_Innovation(),weight);
         }else cout << " no -mutate weight " << endl;
 
         // add node
         if (getBooleanWithProbability(add_node)){
-        //if (true){
+        //if (false){
             cout << " add node " << endl;
-            int n = population.get_genomes()[mutated_id].get_connections().size();
+            int n = genomes[mutated_id].get_connections().size();
 
             int innovation_id =  (int)(rand() % n)+1;
-            while (!population.get_genomes()[mutated_id].get_connections()[innovation_id].get_enable()){
+            while (!genomes[mutated_id].get_connections()[innovation_id].get_enable()){
                 int innovation_id =  (int)(rand() % n)+1;
             }
-            Connection connection = population.get_genomes()[mutated_id].get_connection_id(innovation_id);
-            population.get_genomes()[mutated_id].create_node(connection.get_InNode(),connection.get_OutNode());
+            Connection connection = genomes[mutated_id].get_connections()[innovation_id];
+            genomes[mutated_id].create_node(connection.get_InNode(),connection.get_OutNode());
         }else cout << " no -add node " << endl;
 
         // add connection
         if (getBooleanWithProbability(add_link)){
+        //if (true){
             cout << " add connection " << endl;
-            int n = population.get_genomes()[mutated_id].get_nodes().size();
+            int n = genomes[mutated_id].get_nodes().size();
 
             int in_node =  (int)(rand() % n);
             int out_node =  (int)(rand() % n);
@@ -172,8 +181,11 @@ void mutations(Population &population){
                 int out_node =  (int)(rand() % n);
             }
             int weight = (rand() %10);
-            population.get_genomes()[mutated_id].create_connection(in_node, out_node, weight, population.get_max_innovation());
+            genomes[mutated_id].create_connection(in_node, out_node, weight, population.get_max_innovation());
         }else cout << " no -add connection " << endl;
+        genomes[mutated_id].print_genome();
+        population.set_genomes(genomes);
+        cout << " --- " << endl;
         population.get_genomes()[mutated_id].print_genome();
     }
 }
