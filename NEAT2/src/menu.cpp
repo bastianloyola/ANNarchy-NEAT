@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 
-
 using namespace std;
 
 void menu() {
@@ -25,10 +24,11 @@ void menu() {
 
   // Crear poblacion
   Population p(n_genomes, in, out);
-  printf("1\n");
 
   do {
-    cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population g. create snn z. crossover" << endl;
+    cout << "Choose an option:  a. create_connection  b. create_node "
+        << "c. change weight d. print genome e. exit f. print population"
+        <<"g. create snn h. evolucionar i. mutarS z. crossover" << endl;
     cin >> option;
     switch (option) {
     case 'a':
@@ -36,8 +36,11 @@ void menu() {
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      cout << "Enter in_node, out_node, new_weight: ";
-      cin >> in_node >> out_node >> new_weight;
+      cout << "Enter in_node: ";
+      cin >> in_node;
+      cout << "Enter out_node: ";
+      cin >> new_weight;
+      cout << "Enter new_weight: ";
       p.genomes[genome_id].createConnection(in_node, out_node, new_weight,p.innov);
       break;
     case 'b':
@@ -45,16 +48,20 @@ void menu() {
       cout << "Enter genome id: ";
       cin >> genome_id;
       //select connection
-      cout << "Enter in_node, out_node: ";
-      cin >> in_node >> out_node;
+      cout << "Enter in_node: ";
+      cin >> in_node;
+      cout << "Enter out_node: ";
+      cin >> out_node;
       p.genomes[genome_id].createNode(in_node, out_node,p.innov);
       break;
     case 'c':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      cout << "Enter innovation, new_weight: ";
-      cin >> innovation >> new_weight;
+      cout << "Enter innovation: ";
+      cin >> innovation;
+      cout << "Enter new_weight: ";
+      cin >> new_weight;
       p.genomes[genome_id].changeWeight(innovation, new_weight);
       break;
     case 'd':
@@ -64,17 +71,8 @@ void menu() {
       p.genomes[genome_id].printGenome();
       break;
     case 'f':
-      //print all genomes 
-      for(int i = 0; i < n_genomes; i++){
-        cout << "Genoma " << i << endl;
-        Genome gen = p.findGenome(i);
-        if (gen.getNodes().size() == 0){
-          printf("null\n");
-        }else{
-        gen.printGenome();
-        }
-        cout << "---------------------------------------------"<< endl;
-      }
+      //print all genomes
+      p.print();
       break;
     case 'g':
       //create snn 
@@ -88,13 +86,13 @@ void menu() {
       cout << "Enter number of evolutions: ";
       cin >> n;
       cout << "Evolucionando " << endl;
-      //evolution(p,n);
+      p.evolution(n);
       cout << "---------------------------------------------"<< endl;
       break;
     case 'i':
       //evolutionate
       cout << "Mutate " << endl;
-      //mutations(p);
+      p.mutations();
       cout << "---------------------------------------------"<< endl;
       break;
     case 'z':

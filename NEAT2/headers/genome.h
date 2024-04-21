@@ -13,14 +13,14 @@ class Genome {
     
     public:  
         Genome();
-        Genome(int new_id, int num_in, int num_out, Innovation innov);
+        Genome(int new_id, int num_in, int num_out, Innovation &innov);
 
         std::vector<Connection> getConnections();
         std::vector<Node> getNodes();
 
         int getInNodes();
         int getOutNodes();
-        int getFitness();
+        float getFitness();
         int getId();
 
         Connection getConnection(int in_node, int out_node);
@@ -37,10 +37,10 @@ class Genome {
         void changeWeight(int innovation, float new_weight);
 
         // Create new connection
-        void createConnection(int in_node, int out_node, float new_weight, Innovation innov);
+        void createConnection(int in_node, int out_node, float new_weight, Innovation &innov);
 
         // Create new node
-        void createNode(int in_node, int out_node, Innovation innov);
+        void createNode(int in_node, int out_node, Innovation &innov);
 
         // Print genome
         void printGenome();
@@ -51,7 +51,7 @@ class Genome {
         int id;
         int numIn;
         int numOut;
-        int fitness;
+        float fitness;
         std::vector<Node> nodes; 
         std::vector<Connection> connections;
 };

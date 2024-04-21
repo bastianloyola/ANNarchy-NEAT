@@ -6,32 +6,27 @@
 
 // Constructors
 Genome::Genome(){}
-Genome::Genome(int new_id, int num_in, int num_out, Innovation innov){
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov){
     id = new_id;
     numIn = num_in;
     numOut = num_out;
     fitness = 0;
-    int nInnov;
     for (int i = 0; i < numIn; i++){
-        nInnov = innov.addNode(0,i+1);
-        Node n(nInnov, 0);
+        Node n(i+1, 0);
         nodes.push_back(n);
     }
     for (int i = numIn; i < numIn+numOut; i++){
-        nInnov = innov.addNode(i+1,0);
-        Node n(nInnov, 2);
+        Node n(i+1, 2);
         nodes.push_back(n);
     }
     int cInnov;
     for (int i = 0; i < numIn; i++){
         for (int j = numIn; j < numIn+numOut; j++){
-            cInnov = innov.addConnection(i,j);
-            Connection c(i, j, 1, true, cInnov);
+            cInnov = innov.addConnection(i+1,j+1);
+            Connection c(i+1, j+1, 1, true, cInnov);
             connections.push_back(c);
         }
     }
-    printf("%d, %d\n",static_cast<int>(nodes.size()),static_cast<int>(connections.size()));
-    printGenome();
 }
 
 std::vector<Connection> Genome::getConnections(){ return connections;} ;      
@@ -41,7 +36,7 @@ int Genome::getInNodes(){ return numIn;}
 
 int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
-int Genome::getFitness(){ return fitness;}
+float Genome::getFitness(){ return fitness;}
 
 Connection Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
@@ -83,14 +78,14 @@ void Genome::changeWeight(int innovation, float new_weight){
 }
 
 // Create new connection
-void Genome::createConnection(int in_node, int out_node, float new_weight, Innovation innov){
+void Genome::createConnection(int in_node, int out_node, float new_weight, Innovation &innov){
     int innovation = innov.addConnection(in_node,out_node);
     Connection c(in_node, out_node, new_weight, 1, innovation);
     connections.push_back(c);
 }
 
 // Create new node
-void Genome::createNode(int in_node, int out_node, Innovation innov){
+void Genome::createNode(int in_node, int out_node, Innovation &innov){
     // Find connection and disable
     float new_weight = 1; // Valor default en caso que no exista una conexion previa
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
@@ -102,6 +97,7 @@ void Genome::createNode(int in_node, int out_node, Innovation innov){
     
     // get last id
     int new_id = innov.addNode(in_node,out_node);
+
     // Add node
     Node n(new_id, 2);
     nodes.push_back(n);

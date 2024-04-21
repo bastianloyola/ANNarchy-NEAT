@@ -1,5 +1,4 @@
 #include "../headers/species.h"
-using namespace std;
 
 Species::Species(Genome genome_init){
     genome = genome_init;

@@ -10,6 +10,6 @@
 //void evaluate(Population &population);
 //void evolution(Population &population, int n);
 //void mutations(Population &population);
-//bool getBooleanWithProbability(double probability);
+bool getBooleanWithProbability(double probability);
 
 #endif

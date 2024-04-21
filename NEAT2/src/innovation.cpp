@@ -8,14 +8,19 @@ Innovation::Innovation(int in, int out){
     maxConnection = 0;
     Link link;
     Split split;
-    for (int i = 1; i <= in; i++){
+    for (int i = 0; i < in; i++){
         maxNode++;
-        split = {0,i,maxNode};
+        split = {0,0,maxNode};
         splits.push_back(split);
-        for (int j = 0; j < out; j++){
-            maxNode++;
-            split = {j,0,maxNode};
-            splits.push_back(split);
+    }
+    for (int i = 0; i < out; i++){
+        maxNode++;
+        split = {0,0,maxNode};
+        splits.push_back(split);
+    }
+    
+    for (int i = 1; i <= in; i++){
+        for (int j = in+1; j <= in+out; j++){
             maxConnection++;
             link = {i,j,maxConnection};
             links.push_back(link);
@@ -24,7 +29,6 @@ Innovation::Innovation(int in, int out){
 }
 
 int Innovation::addConnection(int in, int out){
-
     for (int i = 0; i < maxConnection ; i++){
         if (links[i].in == in && links[i].out == out){
             return links[i].id;
@@ -38,7 +42,7 @@ int Innovation::addConnection(int in, int out){
 
 int Innovation::addNode(int in, int out){
 
-    for (int i = 0; i <= maxNode ; i++){
+    for (int i = 0; i < maxNode ; i++){
         if (splits[i].in == in && splits[i].out == out){
             return splits[i].id;
         }

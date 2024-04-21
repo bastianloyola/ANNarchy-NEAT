@@ -3,6 +3,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+
 using namespace std;
 
 Population::Population(int n_genomes, int n_inputs, int n_outputs){
@@ -12,16 +13,11 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     maxGenome = n_genomes;
     innov = Innovation(nInputs, nOutputs);
     Genome g = Genome(0,nInputs, nOutputs,innov);
-    printf("---\n");
-    g.printGenome();
-    printf("---\n");
     Species s = Species(g);
     species.push_back(s);
+    genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
         g = Genome(i,nInputs, nOutputs,innov);
-        printf("---");
-        g.printGenome();
-        printf("---");
         genomes.push_back(g);
         species[0].add_genome(g);
     }
@@ -33,11 +29,17 @@ vector<Genome> Population::getGenomes(){
 
 Genome Population::findGenome(int id){
     for (int i = 0; i < nGenomes; i++){
-        if (genomes[i].getId() == i){
-            return genomes[i];
-        }
+        if (genomes[i].getId() == id){ return genomes[i];}
     }
     return Genome();
+}
+
+void Population::print(){
+    for(int i = 0; i < nGenomes; i++){
+        cout << "Genoma " << genomes[i].getId() << endl;
+        genomes[i].printGenome();
+        cout << "---------------------------------------------"<< endl;
+      }
 }
 
 void Population::evaluate(){
@@ -101,8 +103,6 @@ Genome Population::crossover(int id_a, int id_b){
     }
     int count_a=0, count_b = 0;
 
-
-
     Genome offspring(maxGenome, nInputs, nOutputs, innov);
     maxGenome++;
 
@@ -154,4 +154,101 @@ Genome Population::crossover(int id_a, int id_b){
     offspring.setNodes(offNodes);
     return offspring;
 
+}
+
+void Population::mutations(){
+    //probabilidades
+    double weight_mutated = 0.8;
+    //double uniform_weight = 0.9; //falta implementar
+    //double disable_iherited = 0.75; //falta implementar
+    //double offspring_cross = 0.75;
+    //double interspecies = 0.001;
+    double add_node_small = 0.03;
+    double add_link_small = 0.05;
+    double add_node_large = 0.03; //no aparece
+    double add_link_large = 0.03;
+    double add_node, add_link;
+    bool flag = true;
+    if (flag){
+        add_node = add_node_large;
+        add_link = add_link_large;
+    }else{
+        add_node = add_node_small;
+        add_link = add_link_small;
+    }
+    
+    //
+    int fitter = 0;
+    int fit_fitter = genomes[0].getFitness();
+
+    //mutate
+    for (int i = 1; i < nGenomes; i++){
+        int mutated_id;
+        // compare fitness
+        if (fit_fitter < genomes[i].getFitness()){
+            mutated_id = fitter;
+            fitter = i;
+            fit_fitter = genomes[i].getFitness();
+        }else mutated_id = i;
+        cout << " -mutations_ " << mutated_id << endl;
+        
+        // mutate weight
+        if (getBooleanWithProbability(weight_mutated)){
+        //if (false){
+            cout << " mutate weight " << endl;
+            int n = genomes[mutated_id].getConnections().size();
+            int index =  (int)(rand() % n)+1;
+            //int innovation_id = 1;
+            Connection connection = genomes[mutated_id].getConnections()[index];
+            
+            while (!connection.getEnabled()){
+                index =  (int)(rand() % n)+1;
+                connection = genomes[mutated_id].getConnections()[index];
+            }
+            int weight = (rand() %10);
+            genomes[mutated_id].changeWeight(connection.getInnovation(),weight);
+        }else cout << " no -mutate weight " << endl;
+
+        // add node
+        if (getBooleanWithProbability(add_node)){
+        //if (true){
+            cout << " add node " << endl;
+            int n = genomes[mutated_id].getConnections().size();
+
+            int index =  (int)(rand() % n)+1;
+            while (!genomes[mutated_id].getConnections()[index].getEnabled()){
+                index =  (int)(rand() % n)+1;
+            }
+            Connection connection = genomes[mutated_id].getConnections()[index];
+            genomes[mutated_id].createNode(connection.getInNode(),connection.getOutNode(), innov);
+        }else cout << " no -add node " << endl;
+
+        // add connection
+        if (getBooleanWithProbability(add_link)){
+        //if (false){
+            cout << " add connection " << endl;
+            int n = genomes[mutated_id].getNodes().size();
+
+            int in_node =  (int)(rand() % n);
+            int out_node =  (int)(rand() % n);
+            while (in_node == out_node){
+                out_node =  (int)(rand() % n);
+            }
+            int weight = (rand() %10);
+            genomes[mutated_id].createConnection(in_node, out_node, weight, innov);
+        }else cout << " no -add connection " << endl;
+    }
+
+    cout << " --- " << endl;
+}
+
+
+
+void Population::evolution(int n){
+
+    for (int i = 0; i < n; i++){
+        cout << " generación: " << i << endl; 
+        evaluate();
+        mutations();
+    }
 }

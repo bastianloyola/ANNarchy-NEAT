@@ -6,6 +6,7 @@
 #include "genome.h"
 #include "innovation.h"
 #include "species.h"
+#include "funciones.h"
 
 
 class Population {
@@ -18,6 +19,9 @@ class Population {
     std::vector<Genome> genomes;
     std::vector<Species> species;
     void evaluate();
+    void mutations();
+    void evolution(int n);
+    void print();
 
     int maxGenome;
 
