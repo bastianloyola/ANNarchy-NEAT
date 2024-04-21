@@ -25,10 +25,25 @@ LIF = Neuron(
 )
 
 def snn(n_entrada, n_salida, n, i, matrix): 
+    print(1)
+    print(n_entrada)
+    print(2)
+    print(n_salida)
+    print(3)
+    print(n)
+    print(4)
+    print(i)
+    print(5)
+    print(matrix)
+    print(6)
     clear()
+    print(7)
     pop = Population(geometry=n, neuron=LIF)
+    print(8)
     proj = Projection(pre=pop, post=pop, target='exc')
+    print(9)
     proj.connect_from_matrix(matrix)
+    print(10)
     print('nombre')
     nombre = 'annarchy-'+str(int(i))
     print(nombre)
@@ -68,7 +83,7 @@ def xor(pop,Monitor,input_index,output_index):
                 pop[int(i)].I = 0
         simulate(10000.0)
         spikes = Monitor.get('spike')
-        print("spikes: ",spikes) 
+        #print("spikes: ",spikes) 
         print("entradas: ",entrada)
         #Get the output
         output = 0
@@ -87,9 +102,9 @@ def xor(pop,Monitor,input_index,output_index):
         if output <= average:
             decode_output = 0
         t, n = Monitor.raster_plot(spikes)
-        plt.plot(t, n, 'b.')
-        plt.title('Raster plot')
-        plt.show()
+        #plt.plot(t, n, 'b.')
+        #plt.title('Raster plot')
+        #plt.show()
 
 
 

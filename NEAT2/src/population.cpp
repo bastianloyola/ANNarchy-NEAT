@@ -2,9 +2,10 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <mutex>
 #include <vector>
 #include <algorithm>
+#include <unistd.h>
+#include <sys/wait.h>
 
 using namespace std;
 
@@ -121,40 +122,35 @@ void Population::reproduce(){
 }
 
 void Population::evaluate(){
-
     // Importar modulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
 
-    for(int i = 0; i < nGenomes; i++){
-        genomes[i].singleEvaluation(load_module);
-    }
-    /*
-    std::vector<std::thread> threads;
+    // Vector para almacenar los IDs de procesos hijos
+    std::vector<pid_t> child_processes;
 
-    // Contador atómico para rastrear el número de hilos completados
-    std::atomic<int> threads_completed(0);
+    for (int i = 0; i < nGenomes; i++) {
+        // Crear un nuevo proceso hijo
+        pid_t pid = fork();
 
-    
-    // Función para ejecutar en un hilo
-    auto evaluate_genome = [&](Genome& genome) {
-        std::lock_guard<std::mutex> lock(genome_mutex);
-        cout << nInputs << " " << nOutputs << endl;
-        singleEvaluation(load_module);
-         // Bloquear el mutex antes de modificar threads_completed
-        threads_completed++;
-    };
-    
-    // Iniciar un hilo para cada genoma
-    for (auto& genome : genomes) {
-        threads.emplace_back(evaluate_genome, std::ref(genome));
+        if (pid == 0) {
+            // Código para el proceso hijo: llamar a singleEvaluation
+            genomes[i].singleEvaluation(load_module);
+            exit(0); // Salir del proceso hijo después de ejecutar singleEvaluation
+        } else if (pid < 0) {
+            // Manejo de error si fork() falla
+            std::cerr << "Error al crear proceso hijo" << std::endl;
+        } else {
+            // Almacenar el ID del proceso hijo
+            child_processes.push_back(pid);
+        }
     }
-    
-    // Esperar a que todos los hilos hayan terminado
-    for (auto& thread : threads) {
-        thread.join();
+
+    // Esperar a que todos los procesos hijos terminen
+    for (auto pid : child_processes) {
+        int status;
+        waitpid(pid, &status, 0);
     }
-    */
 
     // Decref
     Py_DECREF(load_module);

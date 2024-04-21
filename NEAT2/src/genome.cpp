@@ -130,16 +130,15 @@ void Genome::singleEvaluation(PyObject *load_module){
     //Obtener npArray
     double data[n*n];
     for (int i = 0; i < n * n; ++i) {
-        data[i] = NAN;
+        data[i] = 0;
     }
     for (int i = 0; i < numConnections; i++) {
         int in_node = connections[i].getInNode();
         int out_node = connections[i].getOutNode();
         double weight = connections[i].getWeight();
-        if (in_node >= 0 && in_node < n && out_node >= 0 && out_node < 3) {
-            int index = out_node * n + in_node;
+        if (in_node >= 0 && in_node < n && out_node >= 0 && out_node <= n) {
+            int index = (in_node-1) * n + (out_node-1);
             data[index] = weight;
-            std::cout << index << weight << std::endl;
         }
     }
     _import_array();
