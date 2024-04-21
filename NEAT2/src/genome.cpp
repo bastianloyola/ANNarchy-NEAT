@@ -154,7 +154,7 @@ void Genome::singleEvaluation(PyObject *load_module){
 
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    std::cout << "Fitness: " << value << std::endl;
+    std::cout << "Fitness " << id << ": "<< value << std::endl;
     fitness = value;
 
     //Decref de variables necesarias
@@ -168,8 +168,8 @@ void Genome::mutation(Innovation &innov){
     //double uniform_weight = 0.9; //falta implementar
     double add_node_small = 0.03;
     double add_link_small = 0.05;
-    double add_node_large = 0.03; //no aparece
-    double add_link_large = 0.03;
+    double add_node_large = 0.9; //no aparece
+    double add_link_large = 0.9;
     double add_node, add_link;
     bool flag = true;
     if (flag){

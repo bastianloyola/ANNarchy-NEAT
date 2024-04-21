@@ -25,28 +25,13 @@ LIF = Neuron(
 )
 
 def snn(n_entrada, n_salida, n, i, matrix): 
-    print(1)
-    print(n_entrada)
-    print(2)
-    print(n_salida)
-    print(3)
-    print(n)
-    print(4)
-    print(i)
-    print(5)
-    print(matrix)
-    print(6)
     clear()
-    print(7)
     pop = Population(geometry=n, neuron=LIF)
-    print(8)
     proj = Projection(pre=pop, post=pop, target='exc')
-    print(9)
     proj.connect_from_matrix(matrix)
-    print(10)
-    print('nombre')
+    #print('nombre')
     nombre = 'annarchy-'+str(int(i))
-    print(nombre)
+    #print(nombre)
     # Adquirir el bloqueo del mutex antes de llamar a compile()
     compile_mutex.acquire()
     try:
@@ -84,18 +69,18 @@ def xor(pop,Monitor,input_index,output_index):
         simulate(10000.0)
         spikes = Monitor.get('spike')
         #print("spikes: ",spikes) 
-        print("entradas: ",entrada)
+        #print("entradas: ",entrada)
         #Get the output
         output = 0
         for i in output_index:
             output += len(spikes[i])
-        print("spike output: ",output)
+        #print("spike output: ",output)
         #Get the average spikes of all neurons
         average = 0
         for i in range(len(pop)):
             average += len(spikes[i])
         average = average/len(pop)
-        print("average spikes: ",average)
+        #print("average spikes: ",average)
         decode_output = -2
         if output > average:
             decode_output = 1
@@ -115,7 +100,6 @@ def xor(pop,Monitor,input_index,output_index):
     return fitness
         
 def exampleIzhikevich(): 
-    print("1")
     pop = Population(geometry=1000, neuron=Izhikevich)
     excSize = int(800)
     Exc = pop[:800]
@@ -130,25 +114,20 @@ def exampleIzhikevich():
     Exc.d = 8.0 - 6.0 * re**2       ; Inh.d = 2.0
     Exc.v = -65.0                   ; Inh.v = -65.0
     Exc.u = Exc.v * Exc.b           ; Inh.u = Inh.v * Inh.b
-    print("3")
     exc_proj = Projection(pre=Exc, post=pop, target='exc')
     exc_proj.connect_all_to_all(weights=Uniform(0.0, 0.5))
 
     inh_proj = Projection(pre=Inh, post=pop, target='inh')
     inh_proj.connect_all_to_all(weights=Uniform(0.0, 1.0))
 
-    print("4")
     compile()
-    print("5")
     M = Monitor(pop, ['spike', 'v'])
 
     simulate(3000.0, measure_time=True)
-    print("6")
     spikes = M.get('spike')
     v = M.get('v')
     t, n = M.raster_plot(spikes)
     fr = M.histogram(spikes)
-    print("7")
     print(spikes[0])
     fig = plt.figure(figsize=(12, 12))
 
