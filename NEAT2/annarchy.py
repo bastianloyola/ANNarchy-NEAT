@@ -19,8 +19,8 @@ LIF = Neuron(
     tau_I * dg_exc/dt = -g_exc
     tau_I * dg_inh/dt = -g_inh
     """,
-    spike = "v >= 1",
-    reset = "v = 0",
+    spike = "v >= 15.0",
+    reset = "v = 13.5",
     refractory = 3.0
 )
 
@@ -58,44 +58,47 @@ def fitness(pop,Monitor,input_index,output_index,funcion):
      
 
 def xor(pop,Monitor,input_index,output_index):
-    entradas = []
-    for i in input_index:
-        entrada = rd.randint(0,1)
-        entradas.append(entrada)
-        pop[int(i)].I = entrada
-    simulate(100.0)
-    spikes = Monitor.get('spike')
-    print("spikes: ",spikes) 
-    print("entradas: ",entradas)
-    #Get the output
-    output = 0
-    for i in output_index:
-        output += len(spikes[i])
-    print("spike output: ",output)
-    #Get the average spikes of all neurons
-    average = 0
-    for i in range(len(pop)):
-        average += len(spikes[i])
-    average = average/len(pop)
-    print("average spikes: ",average)
-    decode_output = -2
-    if output > average:
-        decode_output = 1
-    if output <= average:
-        decode_output = 0
+    entradas = [(0, 0), (0, 1), (1, 0), (1, 1)]
+    fitness = 0
+    for entrada in entradas:
+        for i, val in zip(input_index, entrada):
+            if val == 1:
+                pop[int(i)].I = 20
+            else:
+                pop[int(i)].I = 0
+        simulate(10000.0)
+        spikes = Monitor.get('spike')
+        print("spikes: ",spikes) 
+        print("entradas: ",entrada)
+        #Get the output
+        output = 0
+        for i in output_index:
+            output += len(spikes[i])
+        print("spike output: ",output)
+        #Get the average spikes of all neurons
+        average = 0
+        for i in range(len(pop)):
+            average += len(spikes[i])
+        average = average/len(pop)
+        print("average spikes: ",average)
+        decode_output = -2
+        if output > average:
+            decode_output = 1
+        if output <= average:
+            decode_output = 0
+        t, n = Monitor.raster_plot(spikes)
+        plt.plot(t, n, 'b.')
+        plt.title('Raster plot')
+        plt.show()
 
-    #comparar las entradas y la salida esperada con el output
-    if entradas[0] - entradas[1] == 0:
-        if decode_output == 0:
-            return 1
-        else:
-            return 0
-    else:
-        if decode_output == 1:
-            return 1
-        else:
-            return 0
 
+
+        #comparar las entradas y la salida esperada con el output
+        if entrada[0] ^ entrada[1] == decode_output:
+            fitness += 1
+        reset(pop)
+    return fitness
+        
 def exampleIzhikevich(): 
     print("1")
     pop = Population(geometry=1000, neuron=Izhikevich)
