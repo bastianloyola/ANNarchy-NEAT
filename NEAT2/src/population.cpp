@@ -3,6 +3,8 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -11,6 +13,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     nInputs = n_inputs;
     nOutputs = n_outputs;
     maxGenome = n_genomes;
+    keep = 0.5;
     innov = Innovation(nInputs, nOutputs);
     Genome g = Genome(0,nInputs, nOutputs,innov);
     Species s = Species(g);
@@ -23,9 +26,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     }
 }
 
-vector<Genome> Population::getGenomes(){
-    return genomes;
-}
+vector<Genome> Population::getGenomes(){ return genomes;}
 
 Genome Population::findGenome(int id){
     for (int i = 0; i < nGenomes; i++){
@@ -33,13 +34,68 @@ Genome Population::findGenome(int id){
     }
     return Genome();
 }
+int Population::findIndexGenome(int id){
+    for (int i = 0; i < nGenomes; i++){
+        if (genomes[i].getId() == id){ return i;}
+    }
+    return 0;
+}
 
 void Population::print(){
-    for(int i = 0; i < nGenomes; i++){
+    for(int i = 0; i < genomes.size(); i++){
         cout << "Genoma " << genomes[i].getId() << endl;
         genomes[i].printGenome();
         cout << "---------------------------------------------"<< endl;
       }
+}
+
+void Population::eliminate(){
+    for (int i = 0; i < species.size(); i++){
+        int id,index;
+        std::sort(species[i].genomes.begin(), species[i].genomes.end(),compareFitness);
+        int n = species[i].genomes.size()*0.5;
+        for (int j = 0; j < n; j++){
+            id = species[i].genomes.back().getId();
+            index = findIndexGenome(id);
+            auto x = genomes.begin() + index;
+            genomes.erase(x);
+            species[i].genomes.pop_back();
+        }
+    }
+    print();
+}
+
+void Population::reproduce(){
+    Genome offspring,g1,g2;
+    vector<Genome> offsprings;
+    int indexG1,indexG2,indexS1,indexS2,index;
+    float interspecies = 0.001;
+    float noCrossoverOff = 0.25;
+    int n = nGenomes - static_cast<int>(genomes.size());
+    int noCrossover = n*noCrossoverOff;
+    for (int i = 0; i < noCrossover; i++){
+        index = rand() % nGenomes;
+        offspring = genomes[index];
+        offspring.mutation(innov);
+        offsprings.push_back(offspring);
+    }
+
+    for (int i = noCrossover; i < n; i++){
+        if (getBooleanWithProbability(interspecies)){
+            indexS1 = rand() % species.size();
+            indexS2 = rand() % species.size();
+            while(indexS1 == indexS2){
+                indexS2 = (indexS1 + 1) % species.size();
+            }
+        }else{
+            indexS1 = rand() % species.size();
+            indexS2 = indexS1;
+        }
+        g1 = species[indexS1].genomes[rand() % species[indexS1].genomes.size()];
+        g2 = species[indexS2].genomes[rand() % species[indexS2].genomes.size()];
+        offspring = crossover(g1,g2);
+        offsprings.push_back(offspring);
+    }
 }
 
 void Population::evaluate(){
@@ -84,10 +140,10 @@ void Population::evaluate(){
 }
 
 // Crossover
-Genome Population::crossover(int id_a, int id_b){
+Genome Population::crossover(Genome g1, Genome g2){
 
-    vector<Connection> connections_a = genomes[id_a].getConnections();
-    vector<Connection> connections_b = genomes[id_b].getConnections();
+    vector<Connection> connections_a = g1.getConnections();
+    vector<Connection> connections_b = g2.getConnections();
 
     vector<Connection> connections;
 
@@ -105,12 +161,14 @@ Genome Population::crossover(int id_a, int id_b){
 
     Genome offspring(maxGenome, nInputs, nOutputs, innov);
     maxGenome++;
-
+    vector<Node> offNodes;
     // select best fitness
-    if (genomes[id_a].getFitness() > genomes[id_b].getFitness()){
-        offspring.setFitness(genomes[id_a].getFitness());
+    if (g1.getFitness() > g2.getFitness()){
+        offspring.setFitness(g1.getFitness());
+        offNodes = g1.getNodes();
     }else{
-        offspring.setFitness(genomes[id_b].getFitness());
+        offspring.setFitness(g2.getFitness());
+        offNodes = g2.getNodes();
     }
 
     // Add all connections based on the innovation number from both parents, if they are same add them randomly
@@ -150,99 +208,25 @@ Genome Population::crossover(int id_a, int id_b){
     }
 
     offspring.setConnections(connections);
-    vector<Node> offNodes = genomes[id_a].getNodes();
     offspring.setNodes(offNodes);
     return offspring;
 
 }
 
 void Population::mutations(){
-    //probabilidades
-    double weight_mutated = 0.8;
-    //double uniform_weight = 0.9; //falta implementar
-    //double disable_iherited = 0.75; //falta implementar
-    //double offspring_cross = 0.75;
-    //double interspecies = 0.001;
-    double add_node_small = 0.03;
-    double add_link_small = 0.05;
-    double add_node_large = 0.03; //no aparece
-    double add_link_large = 0.03;
-    double add_node, add_link;
-    bool flag = true;
-    if (flag){
-        add_node = add_node_large;
-        add_link = add_link_large;
-    }else{
-        add_node = add_node_small;
-        add_link = add_link_small;
-    }
-    
-    //
-    int fitter = 0;
-    int fit_fitter = genomes[0].getFitness();
-
+    int mutated_id,index;
     //mutate
-    for (int i = 1; i < nGenomes; i++){
-        int mutated_id;
-        // compare fitness
-        if (fit_fitter < genomes[i].getFitness()){
-            mutated_id = fitter;
-            fitter = i;
-            fit_fitter = genomes[i].getFitness();
-        }else mutated_id = i;
-        cout << " -mutations_ " << mutated_id << endl;
-        
-        // mutate weight
-        if (getBooleanWithProbability(weight_mutated)){
-        //if (false){
-            cout << " mutate weight " << endl;
-            int n = genomes[mutated_id].getConnections().size();
-            int index =  (int)(rand() % n)+1;
-            //int innovation_id = 1;
-            Connection connection = genomes[mutated_id].getConnections()[index];
-            
-            while (!connection.getEnabled()){
-                index =  (int)(rand() % n)+1;
-                connection = genomes[mutated_id].getConnections()[index];
-            }
-            int weight = (rand() %10);
-            genomes[mutated_id].changeWeight(connection.getInnovation(),weight);
-        }else cout << " no -mutate weight " << endl;
-
-        // add node
-        if (getBooleanWithProbability(add_node)){
-        //if (true){
-            cout << " add node " << endl;
-            int n = genomes[mutated_id].getConnections().size();
-
-            int index =  (int)(rand() % n)+1;
-            while (!genomes[mutated_id].getConnections()[index].getEnabled()){
-                index =  (int)(rand() % n)+1;
-            }
-            Connection connection = genomes[mutated_id].getConnections()[index];
-            genomes[mutated_id].createNode(connection.getInNode(),connection.getOutNode(), innov);
-        }else cout << " no -add node " << endl;
-
-        // add connection
-        if (getBooleanWithProbability(add_link)){
-        //if (false){
-            cout << " add connection " << endl;
-            int n = genomes[mutated_id].getNodes().size();
-
-            int in_node =  (int)(rand() % n);
-            int out_node =  (int)(rand() % n);
-            while (in_node == out_node){
-                out_node =  (int)(rand() % n);
-            }
-            int weight = (rand() %10);
-            genomes[mutated_id].createConnection(in_node, out_node, weight, innov);
-        }else cout << " no -add connection " << endl;
+    for (int i = 0; i < species.size(); i++){
+        sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
+        for (int j = 1; j < species[i].genomes.size(); j++){
+            mutated_id = species[i].genomes[j].getId();
+            cout << " -mutations_ " << mutated_id << endl;
+            index = findIndexGenome(mutated_id);
+            genomes[mutated_id].mutation(innov);
+        }
     }
-
     cout << " --- " << endl;
 }
-
-
 
 void Population::evolution(int n){
 

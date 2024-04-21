@@ -11,5 +11,8 @@
 //void evolution(Population &population, int n);
 //void mutations(Population &population);
 bool getBooleanWithProbability(double probability);
-
+// Función de comparación personalizada para ordenar objetos MiObjeto por su atributo valor
+bool compareFitness(Genome& a,Genome& b);
+bool compareInnovation(Connection& a,Connection& b);
+bool compareIdNode(Node& a,Node& b);
 #endif

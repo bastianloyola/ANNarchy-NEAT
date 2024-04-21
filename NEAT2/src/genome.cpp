@@ -1,8 +1,11 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <python3.10/numpy/arrayobject.h>
 
 #include "../headers/genome.h"
+#include "../headers/funciones.h"
+using namespace std;
 
 // Constructors
 Genome::Genome(){}
@@ -85,16 +88,13 @@ void Genome::createConnection(int in_node, int out_node, float new_weight, Innov
 }
 
 // Create new node
-void Genome::createNode(int in_node, int out_node, Innovation &innov){
+void Genome::createNode(int index, Innovation &innov){
     // Find connection and disable
-    float new_weight = 1; // Valor default en caso que no exista una conexion previa
-    for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        if(connections[i].getInNode() == in_node && connections[i].getOutNode() == out_node){
-            connections[i].setEnabled(0);
-            new_weight = connections[i].getWeight();
-        }
-    }
-    
+    connections[index].setEnabled(0);
+    float new_weight = connections[index].getWeight();
+    int in_node = connections[index].getInNode();
+    int out_node = connections[index].getOutNode();
+
     // get last id
     int new_id = innov.addNode(in_node,out_node);
 
@@ -161,4 +161,79 @@ void Genome::singleEvaluation(PyObject *load_module){
     //Decref de variables necesarias
     Py_DECREF(numpy_array);
     Py_DECREF(args);
+}
+
+void Genome::mutation(Innovation &innov){
+    //probabilidades
+    double weight_mutated = 0.8;
+    //double uniform_weight = 0.9; //falta implementar
+    double add_node_small = 0.03;
+    double add_link_small = 0.05;
+    double add_node_large = 0.03; //no aparece
+    double add_link_large = 0.03;
+    double add_node, add_link;
+    bool flag = true;
+    if (flag){
+        add_node = add_node_large;
+        add_link = add_link_large;
+    }else{
+        add_node = add_node_small;
+        add_link = add_link_small;
+    }
+    
+    // mutate weight
+    if (getBooleanWithProbability(weight_mutated)){
+        cout << " mutate weight " << endl;
+        int n = connections.size();
+        int index =  (int)(rand() % n)+1;
+        //int innovation_id = 1;
+        Connection connection = connections[index];
+        
+        while (!connection.getEnabled()){
+            index =  (int)(rand() % n)+1;
+            connection = connections[index];
+        }
+        int weight = (rand() %10);
+        changeWeight(connection.getInnovation(),weight);
+    }else cout << " no -mutate weight " << endl;
+
+    // add node
+    if (getBooleanWithProbability(add_node)){
+    //if (true){
+        cout << " add node " << endl;
+        int n = connections.size();
+
+        int index =  (int)(rand() % n)+1;
+        while (!connections[index].getEnabled()){
+            index =  (int)(rand() % n)+1;
+        }
+        Connection connection = connections[index];
+        createNode(connection.getInnovation(), innov);
+    }else cout << " no -add node " << endl;
+
+    // add connection
+    if (getBooleanWithProbability(add_link)){
+    //if (false){
+        cout << " add connection " << endl;
+        int n = nodes.size();
+
+        int in_node =  (int)(rand() % n);
+        int out_node =  (int)(rand() % n);
+        while (in_node == out_node){
+            out_node =  (int)(rand() % n);
+        }
+        int weight = (rand() %10);
+        createConnection(in_node, out_node, weight, innov);
+    }else cout << " no -add connection " << endl;
+}
+
+int Genome::compatibility(Genome g1){
+    int c1,c2,c3;
+    sort(connections.begin(), connections.end(), compareInnovation);
+    sort(g1.connections.begin(), g1.connections.end(), compareInnovation);
+    sort(nodes.begin(), nodes.end(), compareIdNode);
+    sort(g1.nodes.begin(), g1.nodes.end(), compareIdNode);
+
+    return 0;
+
 }

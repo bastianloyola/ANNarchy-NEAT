@@ -40,12 +40,16 @@ class Genome {
         void createConnection(int in_node, int out_node, float new_weight, Innovation &innov);
 
         // Create new node
-        void createNode(int in_node, int out_node, Innovation &innov);
+        void createNode(int index, Innovation &innov);
 
         // Print genome
         void printGenome();
 
         void singleEvaluation(PyObject *load_module);
+
+        void mutation(Innovation &innov);
+
+        int compatibility(Genome g1);
 
     private:
         int id;

@@ -27,16 +27,20 @@ class Population {
 
     // Getters
     std::vector<Genome> getGenomes();
-    Genome findGenome(int id);
     // Setters
 
     //
-    Genome crossover(int id_1, int id_2);
+    Genome findGenome(int id);
+    int findIndexGenome(int id);
+    void eliminate();
+    void reproduce();
+    Genome crossover(Genome g1, Genome g2);
   
   private:
     int nGenomes;
     int nInputs;
     int nOutputs;
+    int keep;
 
 };
 
