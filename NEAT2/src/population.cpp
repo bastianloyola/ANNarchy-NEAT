@@ -14,9 +14,10 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     nOutputs = n_outputs;
     maxGenome = n_genomes;
     keep = 0.5;
+    threshold = 0.4;
     innov = Innovation(nInputs, nOutputs);
     Genome g = Genome(0,nInputs, nOutputs,innov);
-    Species s = Species(g);
+    Species s = Species(g, threshold);
     species.push_back(s);
     genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
@@ -95,6 +96,27 @@ void Population::reproduce(){
         g2 = species[indexS2].genomes[rand() % species[indexS2].genomes.size()];
         offspring = crossover(g1,g2);
         offsprings.push_back(offspring);
+    }
+
+    float bestCompatibility = 0;
+    int bestIndex = 0;
+    int aux;
+    Species newSpecies;
+    for (int i = 0; i < offsprings.size(); i++){
+        for (int j = 0; j < species.size(); j++){
+            aux = offsprings[i].compatibility(species[j].genome);
+            if (aux > bestCompatibility){
+                bestCompatibility = aux;
+                bestIndex = j;
+            }
+        }
+        if (bestCompatibility >= species[bestIndex].threshold){
+            species[bestIndex].add_genome(offsprings[i]);
+        }else{
+            newSpecies = Species(offsprings[i],threshold);
+            species.push_back(newSpecies);
+        }
+        genomes.push_back(offsprings[i]);
     }
 }
 
@@ -233,6 +255,8 @@ void Population::evolution(int n){
     for (int i = 0; i < n; i++){
         cout << " generación: " << i << endl; 
         evaluate();
+        eliminate();
         mutations();
+        reproduce();
     }
 }

@@ -227,13 +227,81 @@ void Genome::mutation(Innovation &innov){
     }else cout << " no -add connection " << endl;
 }
 
-int Genome::compatibility(Genome g1){
-    int c1,c2,c3;
+float Genome::compatibility(Genome g1){
+    float c1, c2, c3, e, d, w, n, value;
     sort(connections.begin(), connections.end(), compareInnovation);
     sort(g1.connections.begin(), g1.connections.end(), compareInnovation);
     sort(nodes.begin(), nodes.end(), compareIdNode);
     sort(g1.nodes.begin(), g1.nodes.end(), compareIdNode);
 
-    return 0;
+    int maxConnection, notMaxConnection;
+    bool flag;
+    if (g1.connections.back().getInnovation() > connections.back().getInnovation()){
+        maxConnection = g1.connections.back().getInnovation();
+        notMaxConnection = connections.back().getInnovation();
+        flag = true;
+    }else{
+        maxConnection = connections.back().getInnovation();
+        notMaxConnection = g1.connections.back().getInnovation();
+        flag = false;
+    }
+
+    if (g1.nodes.size() < 20 && nodes.size() < 20){
+        n = 1;
+    }else{
+        if (g1.nodes.size() > nodes.size()){
+            n = g1.nodes.size();
+        }else{
+            n = nodes.size();
+        }
+    }
+    
+    
+    int matching = 0;
+    int weightDifference = 0;
+
+    int count1 = 0;
+    int count2 = 0;
+    d=0;
+    e=0;
+
+    for (int i = 0; i < notMaxConnection; i++){
+        if (g1.connections[count1].getInnovation() == i){
+            if (connections[count2].getInnovation() == i){
+                matching++;
+                weightDifference += abs(g1.connections[count1].getWeight() - connections[count2].getWeight());
+                count1++;
+                count2++;
+            }else{
+                d++;
+                count1++;
+            }   
+        }else if (connections[count2].getInnovation() == i){
+            d++;
+            count2++;
+        }
+    }
+    for (int i = notMaxConnection; i < maxConnection; i++){
+        if (flag){
+            if (g1.connections[count1].getInnovation() == i){
+                e++;
+                count1++;
+            }
+        }else{
+            if (connections[count2].getInnovation() == i){
+                e++;
+                count2++;
+            }
+        }   
+    }
+    
+    c1 = 1.0;
+    c2 = 1.0;
+    c3 = 0.4;
+
+    value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/n);
+    
+
+    return value;
 
 }

@@ -49,7 +49,7 @@ class Genome {
 
         void mutation(Innovation &innov);
 
-        int compatibility(Genome g1);
+        float compatibility(Genome g1);
 
     private:
         int id;

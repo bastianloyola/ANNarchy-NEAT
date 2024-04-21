@@ -18,6 +18,7 @@ class Population {
     Innovation innov;
     std::vector<Genome> genomes;
     std::vector<Species> species;
+    float threshold;
     void evaluate();
     void mutations();
     void evolution(int n);
