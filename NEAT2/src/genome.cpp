@@ -13,12 +13,12 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation innov){
     fitness = 0;
     int nInnov;
     for (int i = 0; i < numIn; i++){
-        nInnov = innov.addNode(0,i);
+        nInnov = innov.addNode(0,i+1);
         Node n(nInnov, 0);
         nodes.push_back(n);
     }
     for (int i = numIn; i < numIn+numOut; i++){
-        nInnov = innov.addNode(i,0);
+        nInnov = innov.addNode(i+1,0);
         Node n(nInnov, 2);
         nodes.push_back(n);
     }
