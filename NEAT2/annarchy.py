@@ -28,6 +28,7 @@ def snn(n_entrada, n_salida, n, i, matrix):
     clear()
     pop = Population(geometry=n, neuron=LIF)
     proj = Projection(pre=pop, post=pop, target='exc')
+    print(matrix,"\n")
     proj.connect_from_matrix(matrix)
     #print('nombre')
     nombre = 'annarchy-'+str(int(i))

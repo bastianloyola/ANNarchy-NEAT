@@ -38,7 +38,7 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (p.findGenome(genome_id).getId() == 0) {
+      if (&p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
@@ -58,14 +58,15 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (p.findGenome(genome_id).getId() == 0) {
+      if (&p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
         //select connection
         cout << "Enter innovation: ";
         cin >> innov_c;
-        p.findGenome(genome_id).createNode(innov_c,p.innov);
+        int index = p.findGenome(genome_id).getIndexConnection(innov_c);
+        p.findGenome(genome_id).createNode(index,p.innov);
         break;
       }
     case 'c':
@@ -74,7 +75,7 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (p.findGenome(genome_id).getId() == 0) {
+      if (&p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
@@ -92,7 +93,7 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (p.findGenome(genome_id).getId() == 0) {
+      if (&p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
@@ -139,7 +140,7 @@ void menu() {
       cin >> genome2;
 
       //Verificar si los genomas existen
-      if (p.findGenome(genome1).getId() == 0 || p.findGenome(genome2).getId() == 0) {
+      if (&p.findGenome(genome1) == nullptr || &p.findGenome(genome2) == nullptr) {
         cout << "Genomes not found" << endl;
         break;
       }else{

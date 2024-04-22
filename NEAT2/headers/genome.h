@@ -26,6 +26,8 @@ class Genome {
         Connection& getConnection(int in_node, int out_node);
         Connection& getConnectionId(int innovation);
 
+        int getIndexConnection(int innovation);
+
         Node& getNode(int id);
 
         void setFitness(int new_fitness);

@@ -63,6 +63,16 @@ Connection& Genome::getConnectionId(int innovation){
     return null_connection;
 }
 
+int Genome::getIndexConnection(int innovation){
+    //Find connection in vector
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
+        if(connections[i].getInnovation() == innovation){
+            return i;
+        }
+    }
+    return -1;
+}
+
 Node& Genome::getNode(int id){
     for(int i = 0; i < static_cast<int>(nodes.size()); i++){
         if(nodes.front().get_id() == id){
@@ -133,7 +143,7 @@ void Genome::singleEvaluation(PyObject *load_module){
     //Obtener npArray
     double data[n*n];
     for (int i = 0; i < n * n; ++i) {
-        data[i] = 0;
+        data[i] = NULL;
     }
     for (int i = 0; i < numConnections; i++) {
         int in_node = connections[i].getInNode();
@@ -171,7 +181,7 @@ void Genome::mutation(Innovation &innov){
     //double uniform_weight = 0.9; //falta implementar
     double add_node_small = 0.03;
     double add_link_small = 0.05;
-    double add_node_large = 1; //no aparece
+    double add_node_large = 1; 
     double add_link_large = 0.9;
     double add_node, add_link;
     bool flag = true;
