@@ -7,7 +7,7 @@ class Connection {
   public:  
     // Constructor de la clase
     Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int innovation);
-
+    Connection();
     // Getters         
     int getInNode() const;
     int getOutNode() const;

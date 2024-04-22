@@ -30,11 +30,12 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
 
 vector<Genome> Population::getGenomes(){ return genomes;}
 
-Genome Population::findGenome(int id){
+Genome& Population::findGenome(int id){
     for (int i = 0; i < nGenomes; i++){
         if (genomes[i].getId() == id){ return genomes[i];}
     }
-    return Genome();
+    static Genome null_genome; // Genoma nulo
+    return null_genome;
 }
 int Population::findIndexGenome(int id){
     for (int i = 0; i < nGenomes; i++){

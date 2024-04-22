@@ -41,33 +41,36 @@ int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
 float Genome::getFitness(){ return fitness;}
 
-Connection Genome::getConnection(int in_node, int out_node){
+Connection& Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].getInNode() == in_node && connections[i].getOutNode() == out_node){ 
             return connections[i];
         }
     }
-    return Connection(0,0,0,false,0);
+    static Connection null_connection;
+    return null_connection;
 }
 
-Connection Genome::getConnectionId(int innovation){
+Connection& Genome::getConnectionId(int innovation){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].getInnovation() == innovation){
             return connections[i];
         }
     }
-    return Connection(0,0,0,false,0);
+    static Connection null_connection;
+    return null_connection;
 }
 
-Node Genome::getNode(int id){
+Node& Genome::getNode(int id){
     for(int i = 0; i < static_cast<int>(nodes.size()); i++){
         if(nodes.front().get_id() == id){
             return nodes.front();
         }
     }
-    return Node(0,0);
+    static Node null_node;
+    return null_node;
 }
 
 void Genome::setFitness(int new_fitness){ fitness = new_fitness;}

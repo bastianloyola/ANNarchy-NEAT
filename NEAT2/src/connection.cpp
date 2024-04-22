@@ -9,6 +9,9 @@ Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_ena
     innovation = c_innovation;
 }
 
+Connection::Connection(){
+}
+
 // Getters         
 int Connection::getInNode() const{
     return in;

@@ -6,6 +6,9 @@ Node::Node(int c_id, int c_type){
     type = c_type;
 }
 
+Node::Node(){
+}
+
 // Getters
 int Node::get_id(){
     return id;

@@ -31,7 +31,7 @@ class Population {
     // Setters
 
     //
-    Genome findGenome(int id);
+    Genome& findGenome(int id);
     int findIndexGenome(int id);
     void eliminate();
     void reproduce();

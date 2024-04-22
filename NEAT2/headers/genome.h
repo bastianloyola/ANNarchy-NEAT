@@ -23,10 +23,10 @@ class Genome {
         float getFitness();
         int getId();
 
-        Connection getConnection(int in_node, int out_node);
-        Connection getConnectionId(int innovation);
+        Connection& getConnection(int in_node, int out_node);
+        Connection& getConnectionId(int innovation);
 
-        Node getNode(int id);
+        Node& getNode(int id);
 
         void setFitness(int new_fitness);
         void setConnections(std::vector<Connection> new_connections);
