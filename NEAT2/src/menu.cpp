@@ -36,38 +36,69 @@ void menu() {
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      cout << "Enter in_node: ";
-      cin >> in_node;
-      cout << "Enter out_node: ";
-      cin >> new_weight;
-      cout << "Enter new_weight: ";
-      p.genomes[genome_id].createConnection(in_node, out_node, new_weight,p.innov);
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id).getId() == 0) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        //Ingresar datos de la conexion
+        cout << "Enter in_node: ";
+        cin >> in_node;
+        cout << "Enter out_node: ";
+        cin >> out_node;
+        cout << "Enter new_weight: ";
+        cin >> new_weight;
+        p.findGenome(genome_id).createConnection(in_node, out_node, new_weight,p.innov);
+        break;
+      }
     case 'b':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      //select connection
-      cout << "Enter innovation: ";
-      cin >> innov_c;
-      p.genomes[genome_id].createNode(innov_c,p.innov);
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id).getId() == 0) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        //select connection
+        cout << "Enter innovation: ";
+        cin >> innov_c;
+        p.findGenome(genome_id).createNode(innov_c,p.innov);
+        break;
+      }
     case 'c':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      cout << "Enter innovation: ";
-      cin >> innovation;
-      cout << "Enter new_weight: ";
-      cin >> new_weight;
-      p.genomes[genome_id].changeWeight(innovation, new_weight);
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id).getId() == 0) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+
+        cout << "Enter innovation: ";
+        cin >> innovation;
+        cout << "Enter new_weight: ";
+        cin >> new_weight;
+        p.findGenome(genome_id).changeWeight(innovation, new_weight);
+        break;
+      }
     case 'd':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      p.genomes[genome_id].printGenome();
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id).getId() == 0) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        p.findGenome(genome_id).printGenome();
+        break;
+      }
     case 'f':
       //print all genomes
       p.print();
@@ -106,14 +137,19 @@ void menu() {
       cin >> genome1;
       cout << "Enter second genome id: ";
       cin >> genome2;
-      Genome g3 = p.crossover(p.genomes[genome1], p.genomes[genome2]);
-      p.maxGenome++;
 
-      g3.printGenome();
-
-      //Add new genome
-      p.genomes.push_back(g3);
-      break;
+      //Verificar si los genomas existen
+      if (p.findGenome(genome1).getId() == 0 || p.findGenome(genome2).getId() == 0) {
+        cout << "Genomes not found" << endl;
+        break;
+      }else{
+        Genome g3 = p.crossover(p.findGenome(genome1), p.findGenome(genome2));
+        p.maxGenome++;
+        g3.printGenome();
+        //Add new genome
+        p.genomes.push_back(g3);
+        break;
+      }
     }
   } while (option != 'e');
 }

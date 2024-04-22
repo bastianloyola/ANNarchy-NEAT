@@ -161,7 +161,7 @@ void Population::evaluate(){
 
 // Crossover
 Genome Population::crossover(Genome g1, Genome g2){
-
+    
     vector<Connection> connections_a = g1.getConnections();
     vector<Connection> connections_b = g2.getConnections();
 
@@ -178,7 +178,6 @@ Genome Population::crossover(Genome g1, Genome g2){
         max = connections_b[connection_size_b -1].getInnovation();
     }
     int count_a=0, count_b = 0;
-
     Genome offspring(maxGenome, nInputs, nOutputs, innov);
     maxGenome++;
     vector<Node> offNodes;
@@ -242,7 +241,7 @@ void Population::mutations(){
             mutated_id = species[i].genomes[j].getId();
             cout << " -mutations_ " << mutated_id << endl;
             index = findIndexGenome(mutated_id);
-            genomes[mutated_id].mutation(innov);
+            genomes[index].mutation(innov);
         }
     }
     cout << " --- " << endl;

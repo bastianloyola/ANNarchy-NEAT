@@ -168,7 +168,7 @@ void Genome::mutation(Innovation &innov){
     //double uniform_weight = 0.9; //falta implementar
     double add_node_small = 0.03;
     double add_link_small = 0.05;
-    double add_node_large = 0.9; //no aparece
+    double add_node_large = 1; //no aparece
     double add_link_large = 0.9;
     double add_node, add_link;
     bool flag = true;
