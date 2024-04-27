@@ -1,7 +1,9 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 
-#include "all_headers.h"
+#include "node.h"
+#include "connection.h"
+#include "genome.h"
 #include <python3.10/Python.h>
 
 //PyObject* create_numpy_array(vector<Connection> connections, int n, PyObject* numpy_array);
@@ -12,7 +14,7 @@
 //void mutations(Population &population);
 bool getBooleanWithProbability(double probability);
 // Función de comparación personalizada para ordenar objetos MiObjeto por su atributo valor
-bool compareFitness(Genome& a,Genome& b);
+bool compareFitness(Genome* a,Genome* b);
 bool compareInnovation(Connection& a,Connection& b);
 bool compareIdNode(Node& a,Node& b);
 #endif

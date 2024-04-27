@@ -25,8 +25,8 @@ bool getBooleanWithProbability(double probability) {
      // Comparar el número aleatorio con la probabilidad dada
     return randomValue < probability;
 }
-bool compareFitness(Genome& a,Genome& b) {
-    return a.getFitness() < b.getFitness();
+bool compareFitness(Genome* a,Genome* b) {
+    return a->getFitness() < b->getFitness();
 }
 bool compareInnovation(Connection& a,Connection& b) {
     return a.getInnovation() < b.getInnovation();

@@ -7,13 +7,14 @@
 #include "node.h"
 #include "connection.h"
 #include "innovation.h"
+#include "parameters.h"
 
 // Clase para Genoma
 class Genome {
     
     public:  
         Genome();
-        Genome(int new_id, int num_in, int num_out, Innovation &innov);
+        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters);
 
         std::vector<Connection> getConnections();
         std::vector<Node> getNodes();
@@ -39,17 +40,17 @@ class Genome {
         void changeWeight(int innovation, float new_weight);
 
         // Create new connection
-        void createConnection(int in_node, int out_node, float new_weight, Innovation &innov);
+        void createConnection(int in_node, int out_node, float new_weight);
 
         // Create new node
-        void createNode(int index, Innovation &innov);
+        void createNode(int index);
 
         // Print genome
         void printGenome();
 
         void singleEvaluation(PyObject *load_module);
 
-        void mutation(Innovation &innov);
+        void mutation();
 
         float compatibility(Genome g1);
 
@@ -60,6 +61,8 @@ class Genome {
         float fitness;
         std::vector<Node> nodes; 
         std::vector<Connection> connections;
+        Innovation* innov;
+        Parameters* parameters;
 };
 
 #endif

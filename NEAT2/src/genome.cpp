@@ -9,11 +9,13 @@ using namespace std;
 
 // Constructors
 Genome::Genome(){}
-Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov){
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters){
     id = new_id;
     numIn = num_in;
     numOut = num_out;
     fitness = 0;
+    innov = innov;
+    parameters = parameters;  
     for (int i = 0; i < numIn; i++){
         Node n(i+1, 0);
         nodes.push_back(n);
@@ -30,6 +32,7 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov){
             connections.push_back(c);
         }
     }
+    std::cout << "Genome created id: " << id << std::endl;
 }
 
 std::vector<Connection> Genome::getConnections(){ return connections;} ;      
@@ -94,14 +97,14 @@ void Genome::changeWeight(int innovation, float new_weight){
 }
 
 // Create new connection
-void Genome::createConnection(int in_node, int out_node, float new_weight, Innovation &innov){
-    int innovation = innov.addConnection(in_node,out_node);
+void Genome::createConnection(int in_node, int out_node, float new_weight){
+    int innovation = innov->addConnection(in_node,out_node);
     Connection c(in_node, out_node, new_weight, 1, innovation);
     connections.push_back(c);
 }
 
 // Create new node
-void Genome::createNode(int index, Innovation &innov){
+void Genome::createNode(int index){
     // Find connection and disable
     connections[index].setEnabled(0);
     float new_weight = connections[index].getWeight();
@@ -109,15 +112,15 @@ void Genome::createNode(int index, Innovation &innov){
     int out_node = connections[index].getOutNode();
 
     // get last id
-    int new_id = innov.addNode(in_node,out_node);
+    int new_id = innov->addNode(in_node,out_node);
 
     // Add node
     Node n(new_id, 2);
     nodes.push_back(n);
 
     // last innovation
-    int new_innovation1 = innov.addConnection(in_node,new_id);
-    int new_innovation2 = innov.addConnection(new_id,out_node);
+    int new_innovation1 = innov->addConnection(in_node,new_id);
+    int new_innovation2 = innov->addConnection(new_id,out_node);
 
     // Add two new connections
     Connection c1(in_node, new_id, 1, 1, new_innovation1);
@@ -175,30 +178,23 @@ void Genome::singleEvaluation(PyObject *load_module){
     Py_DECREF(args);
 }
 
-void Genome::mutation(Innovation &innov){
-    //probabilidades
-    double weight_mutated = 0.8;
-    //double uniform_weight = 0.9; //falta implementar
-    double add_node_small = 0.03;
-    double add_link_small = 0.05;
-    double add_node_large = 1; 
-    double add_link_large = 0.9;
-    double add_node, add_link;
-    bool flag = true;
-    if (flag){
-        add_node = add_node_large;
-        add_link = add_link_large;
+void Genome::mutation(){
+    std::cout << "getBooleanWithProbability: 1 : " << getBooleanWithProbability(1) << std::endl;
+    float add_node, add_link;
+
+    if (static_cast<int>(nodes.size()) < parameters->largeSize){
+        add_node = parameters->probabilityAddNodeLarge;
+        add_link = parameters->probabilityAddLinkLarge;
     }else{
-        add_node = add_node_small;
-        add_link = add_link_small;
+        add_node = parameters->probabilityAddNodeSmall;
+        add_link = parameters->probabilityAddLinkSmall;
     }
-    
+    std::cout << "pase" << std::endl;
     // mutate weight
-    if (getBooleanWithProbability(weight_mutated)){
+    if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
         cout << " mutate weight " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n)+1;
-        //int innovation_id = 1;
         Connection connection = connections[index];
         
         while (!connection.getEnabled()){
@@ -220,7 +216,7 @@ void Genome::mutation(Innovation &innov){
             index =  (int)(rand() % n)+1;
         }
         Connection connection = connections[index];
-        createNode(connection.getInnovation(), innov);
+        createNode(connection.getInnovation());
     }else cout << " no -add node " << endl;
 
     // add connection
@@ -235,7 +231,7 @@ void Genome::mutation(Innovation &innov){
             out_node =  (int)(rand() % n);
         }
         int weight = (rand() %10);
-        createConnection(in_node, out_node, weight, innov);
+        createConnection(in_node, out_node, weight);
     }else cout << " no -add connection " << endl;
 }
 
@@ -307,9 +303,9 @@ float Genome::compatibility(Genome g1){
         }   
     }
     
-    c1 = 1.0;
-    c2 = 1.0;
-    c3 = 0.4;
+    c1 = parameters->c1;
+    c2 = parameters->c2;
+    c3 = parameters->c3;
 
     value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/n);
     

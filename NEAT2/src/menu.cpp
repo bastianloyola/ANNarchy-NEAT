@@ -38,7 +38,7 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (&p.findGenome(genome_id) == nullptr) {
+      if (p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
@@ -49,7 +49,7 @@ void menu() {
         cin >> out_node;
         cout << "Enter new_weight: ";
         cin >> new_weight;
-        p.findGenome(genome_id).createConnection(in_node, out_node, new_weight,p.innov);
+        p.findGenome(genome_id)->createConnection(in_node, out_node, new_weight);
         break;
       }
     case 'b':
@@ -58,15 +58,15 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (&p.findGenome(genome_id) == nullptr) {
+      if (p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
         //select connection
         cout << "Enter innovation: ";
         cin >> innov_c;
-        int index = p.findGenome(genome_id).getIndexConnection(innov_c);
-        p.findGenome(genome_id).createNode(index,p.innov);
+        int index = p.findGenome(genome_id)->getIndexConnection(innov_c);
+        p.findGenome(genome_id)->createNode(index);
         break;
       }
     case 'c':
@@ -75,7 +75,7 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (&p.findGenome(genome_id) == nullptr) {
+      if (p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
@@ -84,7 +84,7 @@ void menu() {
         cin >> innovation;
         cout << "Enter new_weight: ";
         cin >> new_weight;
-        p.findGenome(genome_id).changeWeight(innovation, new_weight);
+        p.findGenome(genome_id)->changeWeight(innovation, new_weight);
         break;
       }
     case 'd':
@@ -93,11 +93,11 @@ void menu() {
       cin >> genome_id;
 
       //Verificar si el genoma existe
-      if (&p.findGenome(genome_id) == nullptr) {
+      if (p.findGenome(genome_id) == nullptr) {
         cout << "Genome not found" << endl;
         break;
       }else{
-        p.findGenome(genome_id).printGenome();
+        p.findGenome(genome_id)->printGenome();
         break;
       }
     case 'f':
@@ -140,13 +140,13 @@ void menu() {
       cin >> genome2;
 
       //Verificar si los genomas existen
-      if (&p.findGenome(genome1) == nullptr || &p.findGenome(genome2) == nullptr) {
+      if (p.findGenome(genome1) == nullptr || p.findGenome(genome2) == nullptr) {
         cout << "Genomes not found" << endl;
         break;
       }else{
-        Genome g3 = p.crossover(p.findGenome(genome1), p.findGenome(genome2));
+        Genome* g3 = p.crossover(p.findGenome(genome1), p.findGenome(genome2));
         p.maxGenome++;
-        g3.printGenome();
+        g3->printGenome();
         //Add new genome
         p.genomes.push_back(g3);
         break;
