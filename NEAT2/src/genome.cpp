@@ -9,13 +9,13 @@ using namespace std;
 
 // Constructors
 Genome::Genome(){}
-Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters){
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E){
     id = new_id;
     numIn = num_in;
     numOut = num_out;
     fitness = 0;
-    innov = innov;
-    parameters = parameters;  
+    innov = &innov_E;
+    parameters = &parameters_E;  
     for (int i = 0; i < numIn; i++){
         Node n(i+1, 0);
         nodes.push_back(n);
@@ -27,12 +27,11 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameter
     int cInnov;
     for (int i = 0; i < numIn; i++){
         for (int j = numIn; j < numIn+numOut; j++){
-            cInnov = innov.addConnection(i+1,j+1);
+            cInnov = innov->addConnection(i+1,j+1);
             Connection c(i+1, j+1, 1, true, cInnov);
             connections.push_back(c);
         }
     }
-    std::cout << "Genome created id: " << id << std::endl;
 }
 
 std::vector<Connection> Genome::getConnections(){ return connections;} ;      
@@ -113,7 +112,6 @@ void Genome::createNode(int index){
 
     // get last id
     int new_id = innov->addNode(in_node,out_node);
-
     // Add node
     Node n(new_id, 2);
     nodes.push_back(n);
@@ -179,17 +177,14 @@ void Genome::singleEvaluation(PyObject *load_module){
 }
 
 void Genome::mutation(){
-    std::cout << "getBooleanWithProbability: 1 : " << getBooleanWithProbability(1) << std::endl;
     float add_node, add_link;
-
-    if (static_cast<int>(nodes.size()) < parameters->largeSize){
+    if (nodes.size() < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
     }else{
         add_node = parameters->probabilityAddNodeSmall;
         add_link = parameters->probabilityAddLinkSmall;
     }
-    std::cout << "pase" << std::endl;
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
         cout << " mutate weight " << endl;
@@ -207,18 +202,15 @@ void Genome::mutation(){
 
     // add node
     if (getBooleanWithProbability(add_node)){
-    //if (true){
         cout << " add node " << endl;
         int n = connections.size();
-
-        int index =  (int)(rand() % n)+1;
-        while (!connections[index].getEnabled()){
-            index =  (int)(rand() % n)+1;
+        int index =  (int)(rand() % n);
+        while (!(connections[index].getEnabled())){
+            index =  (int)(rand() % n);
         }
         Connection connection = connections[index];
         createNode(connection.getInnovation());
     }else cout << " no -add node " << endl;
-
     // add connection
     if (getBooleanWithProbability(add_link)){
     //if (false){

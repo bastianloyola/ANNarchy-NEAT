@@ -17,6 +17,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     maxGenome = n_genomes;
     parameters = Parameters(nGenomes, nInputs, nOutputs);
     
+
     innov = Innovation(nInputs, nOutputs);
     Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
     Species s = Species(g, threshold);
@@ -27,6 +28,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
         genomes.push_back(g);
         species[0].add_genome(g);
     }
+    keep = parameters.keep;
 }
 
 vector<Genome*> Population::getGenomes(){ return genomes;}
@@ -57,7 +59,7 @@ void Population::eliminate(){
     for (int i = 0; i < species.size(); i++){
         int id,index;
         std::sort(species[i].genomes.begin(), species[i].genomes.end(),compareFitness);
-        int n = species[i].genomes.size()*(1-keep); 
+        int n = species[i].genomes.size() * (1-keep); 
         for (int j = 0; j < n; j++){
             id = species[i].genomes.back()->getId();
             index = findIndexGenome(id);
@@ -66,7 +68,6 @@ void Population::eliminate(){
             species[i].genomes.pop_back();
         }
     }
-    print();
 }
 
 void Population::reproduce(){
@@ -74,7 +75,6 @@ void Population::reproduce(){
     Genome *g1, *g2;
     vector<Genome*> offsprings;
     int indexG1,indexG2,indexS1,indexS2,index;
-
     int n = nGenomes - static_cast<int>(genomes.size());
     int noCrossover = n*parameters.percentageNoCrossoverOff;
     for (int i = 0; i < noCrossover; i++){
@@ -83,7 +83,6 @@ void Population::reproduce(){
         offspring->mutation();
         offsprings.push_back(offspring);
     }
-
     for (int i = noCrossover; i < n; i++){
         if (getBooleanWithProbability(parameters.probabilityInterespecies)){
             indexS1 = rand() % species.size();
@@ -235,13 +234,11 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 void Population::mutations(){
     int mutated_id,index;
     //mutate
-    for (int i = 0; i <  static_cast<int>(species.size()); i++){
+    for (int i = 0; i < species.size(); i++){
         sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
-        for (int j = 1; j < static_cast<int>(species[i].genomes.size()); j++){
-            //mutated_id = species[i].genomes[j]->getId();
+        for (int j = 1; j < species[i].genomes.size(); j++){
             cout << " -mutations_ " << species[i].genomes[j]->getId() << endl;
-            //index = findIndexGenome(mutated_id);
-            species[i].genomes[index]->mutation();
+            species[i].genomes[j]->mutation();
         }
     }
     cout << " --- " << endl;
@@ -253,6 +250,7 @@ void Population::evolution(int n){
         cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
+        std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
         reproduce();
     }
