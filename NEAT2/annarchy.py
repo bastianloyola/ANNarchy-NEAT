@@ -29,17 +29,17 @@ def snn(n_entrada, n_salida, n, i, matrix):
     pop = Population(geometry=n, neuron=LIF)
     proj = Projection(pre=pop, post=pop, target='exc')
     #print(matrix,"\n")
+    #Matrix to numpy array
+    matrix = np.array(matrix)
+
+    #Reemplazar los valores 0 por None
+    matrix[matrix == 0] = None
+
     proj.connect_from_matrix(matrix)
     #print('nombre')
     nombre = 'annarchy-'+str(int(i))
     #print(nombre)
-    # Adquirir el bloqueo del mutex antes de llamar a compile()
-    compile_mutex.acquire()
-    try:
-        compile(directory=nombre)
-    finally:
-        # Liberar el bloqueo del mutex después de llamar a compile()
-        compile_mutex.release()
+    compile(directory=nombre)
     M = Monitor(pop, ['spike'])
     input_index = []
     output_index = []
@@ -69,7 +69,7 @@ def xor(pop,Monitor,input_index,output_index):
                 pop[int(i)].I = 0
         simulate(10000.0)
         spikes = Monitor.get('spike')
-        #print("spikes: ",spikes) 
+        print("spikes: ",spikes) 
         #print("entradas: ",entrada)
         #Get the output
         output = 0
@@ -87,7 +87,7 @@ def xor(pop,Monitor,input_index,output_index):
             decode_output = 1
         if output <= average:
             decode_output = 0
-        t, n = Monitor.raster_plot(spikes)
+        #t, n = Monitor.raster_plot(spikes)
         #plt.plot(t, n, 'b.')
         #plt.title('Raster plot')
         #plt.show()
