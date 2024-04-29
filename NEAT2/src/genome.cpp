@@ -136,7 +136,7 @@ void Genome::printGenome(){
     }
 }
 
-void Genome::singleEvaluation(PyObject *load_module){
+float Genome::singleEvaluation(PyObject *load_module){
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int numConnections = static_cast<int>(connections.size());
@@ -169,11 +169,14 @@ void Genome::singleEvaluation(PyObject *load_module){
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
     std::cout << "Fitness " << id << ": "<< value << std::endl;
-    fitness = value;
+    setFitness(value);
+
 
     //Decref de variables necesarias
     Py_DECREF(numpy_array);
     Py_DECREF(args);
+
+    return value;
 }
 
 void Genome::mutation(){

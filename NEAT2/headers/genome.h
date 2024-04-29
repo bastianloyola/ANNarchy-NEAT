@@ -48,7 +48,7 @@ class Genome {
         // Print genome
         void printGenome();
 
-        void singleEvaluation(PyObject *load_module);
+        float singleEvaluation(PyObject *load_module);
 
         void mutation();
 

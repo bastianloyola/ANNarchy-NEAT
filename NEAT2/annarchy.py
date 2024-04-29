@@ -98,6 +98,7 @@ def xor(pop,Monitor,input_index,output_index):
         if entrada[0] ^ entrada[1] == decode_output:
             fitness += 1
         reset(pop)
+    #fitness = rd.randint(1,4)
     return fitness
         
 def exampleIzhikevich(): 

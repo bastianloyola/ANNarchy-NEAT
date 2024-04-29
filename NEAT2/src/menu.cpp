@@ -131,6 +131,12 @@ void menu() {
       p.eliminate();
       cout << "---------------------------------------------"<< endl;
       break;
+    case 'y':
+      //Print fitness for each genome
+      for (int i = 0; i < p.genomes.size(); i++) {
+        cout << "Genome " << p.genomes[i]->getId() << " fitness: " << p.genomes[i]->getFitness() << endl;
+      }
+      break;
     case 'z':
       //Select two genomes
       int genome1, genome2;

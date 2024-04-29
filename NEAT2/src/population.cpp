@@ -1,6 +1,5 @@
 #include "../headers/population.h"
 #include <iostream>
-#include <thread>
 #include <atomic>
 #include <vector>
 #include <algorithm>
@@ -8,6 +7,12 @@
 #include <sys/wait.h>
 
 using namespace std;
+
+// Declarar un mutex global
+#include <mutex>
+#include <fcntl.h>
+
+std::mutex mtx;
 
 Population::Population(){}
 Population::Population(int n_genomes, int n_inputs, int n_outputs){
@@ -122,22 +127,39 @@ void Population::reproduce(){
 
 }
 
-void Population::evaluate(){
+void Population::evaluate() {
     // Importar modulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
+    // Crear un vector para almacenar los valores de fitness de cada genoma
+    std::vector<float> fitness_values(nGenomes, 0.0f);
 
-    // Vector para almacenar los IDs de procesos hijos
+    // Crear un vector de pipes para la comunicación con los procesos hijos
+    std::vector<int[2]> pipes(nGenomes);
+
+    // Crear un vector para almacenar los IDs de procesos hijos
     std::vector<pid_t> child_processes;
 
-
     for (int i = 0; i < nGenomes; i++) {
+        // Crear un nuevo pipe para la comunicación con el proceso hijo
+        if (pipe(pipes[i]) == -1) {
+            // Manejo de error si pipe() falla
+            std::cerr << "Error al crear pipe" << std::endl;
+            return;
+        }
+
         // Crear un nuevo proceso hijo
         pid_t pid = fork();
 
         if (pid == 0) {
             // Código para el proceso hijo: llamar a singleEvaluation
-            genomes[i]->singleEvaluation(load_module);
+            float fitness = genomes[i]->singleEvaluation(load_module);
+
+            // Escribir el valor de fitness en el pipe
+            close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
+            write(pipes[i][1], &fitness, sizeof(float));
+            close(pipes[i][1]); // Cerrar el extremo de escritura del pipe
+
             exit(0); // Salir del proceso hijo después de ejecutar singleEvaluation
         } else if (pid < 0) {
             // Manejo de error si fork() falla
@@ -148,16 +170,30 @@ void Population::evaluate(){
         }
     }
 
-    // Esperar a que todos los procesos hijos terminen
-    for (auto pid : child_processes) {
-        int status;
-        waitpid(pid, &status, 0);
+    // Esperar a que todos los procesos hijos terminen y leer los valores de fitness de los pipes
+    for (int i = 0; i < nGenomes; i++) {
+        // Cerrar el extremo de escritura del pipe
+        close(pipes[i][1]);
+
+        // Leer el valor de fitness desde el pipe
+        float fitness;
+        read(pipes[i][0], &fitness, sizeof(float));
+        fitness_values[i] = fitness;
+
+        // Cerrar el extremo de lectura del pipe
+        close(pipes[i][0]);
+    }
+
+    // Actualizar los valores de fitness en los genomas correspondientes
+    for (int i = 0; i < nGenomes; i++) {
+        mtx.lock(); // Bloquear el mutex antes de acceder a los datos compartidos
+        genomes[i]->setFitness(fitness_values[i]);
+        mtx.unlock(); // Desbloquear el mutex después de actualizar el fitness
     }
 
     // Decref
     Py_DECREF(load_module);
     Py_DECREF(name);
-
 }
 
 // Crossover
@@ -247,6 +283,11 @@ void Population::evolution(int n){
     for (int i = 0; i < n; i++){
         //cout << " generación: " << i << endl; 
         evaluate();
+
+        //print fitness
+        for (int i = 0; i < genomes.size(); i++) {
+            cout << "Genome " << genomes[i]->getId() << " fitnessadaks: " << genomes[i]->getFitness() << endl;
+        }
         eliminate();
         //std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
