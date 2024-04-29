@@ -1,39 +1,41 @@
 #include "../headers/connection.h"
 
-
 // Constructor de la clase
-Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_enable, int c_innovation){
-    in_node = c_in_node;
-    out_node = c_out_node;
+Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int c_innovation){
+    in = c_in_node;
+    out = c_out_node;
     weight = c_weight;
-    enable = c_enable;
+    enabled = c_enabled;
     innovation = c_innovation;
 }
 
+Connection::Connection(){
+}
+
 // Getters         
-int Connection::get_InNode() const{
-    return in_node;
+int Connection::getInNode() const{
+    return in;
 }
-int Connection::get_OutNode() const{
-    return out_node;
+int Connection::getOutNode() const{
+    return out;
 }
-float Connection::get_weight() const{
+float Connection::getWeight() const{
     return weight;
 }
-bool Connection::get_enable(){
-    return enable;
+bool Connection::getEnabled(){
+    return enabled;
 }
-int Connection::get_Innovation(){
+int Connection::getInnovation(){
     return innovation;
 }
 
 // Setters 
-void Connection::set_enable(bool new_enable){
-    enable = new_enable;
+void Connection::setEnabled(bool new_enabled){
+    enabled = new_enabled;
 }
-void Connection::set_weight(int new_weight){
+void Connection::setWeight(int new_weight){
     weight = new_weight;
 }
-void Connection::change_enable(){
-    enable = !enable;
+void Connection::changeEnabled(){
+    enabled = !enabled;
 }

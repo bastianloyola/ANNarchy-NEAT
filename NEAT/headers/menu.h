@@ -1,11 +1,9 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "genome.h"
-#include "population.h"
-#include "funciones.h"
+#include "all_headers.h"
 #include "stdlib.h"
 
-vector<Genome> menu();
+void menu();
 
 #endif

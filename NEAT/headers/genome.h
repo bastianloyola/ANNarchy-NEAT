@@ -2,64 +2,67 @@
 #define GENOME_H
 
 #include <vector>
-
+#include <iostream> 
+#include <python3.10/numpy/arrayobject.h>
 #include "node.h"
 #include "connection.h"
-
-using namespace std;
+#include "innovation.h"
+#include "parameters.h"
 
 // Clase para Genoma
 class Genome {
     
     public:  
+        Genome();
+        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters);
 
-        Genome(int in, int out, int max_innovation, int initial_fitness, int id);
-        void add_connection(Connection c);
-        void add_node(Node c);  
-        vector<Connection> get_connections();      
-        vector<Node> get_nodes();
-        int get_in_nodes();
-        int get_out_nodes();
-        Connection get_connection(int in_node, int out_node);
-        Connection get_connection_id(int innovation);
-        Node get_node(int id);
-        int get_max();
-        int get_local_max();
-        int get_fitness();
-        void set_connections(vector<Connection> new_connections);
-        void set_nodes(vector<Node> new_nodes);
-        void set_in_nodes(int new_in);
-        void set_out_nodes(int new_out);
-        void set_max(int new_max);
-        void set_local_max(int new_local_max);
-        void set_fitness(float new_fittness);
+        std::vector<Connection> getConnections();
+        std::vector<Node> getNodes();
 
+        int getInNodes();
+        int getOutNodes();
+        float getFitness();
+        int getId();
+
+        Connection& getConnection(int in_node, int out_node);
+        Connection& getConnectionId(int innovation);
+
+        int getIndexConnection(int innovation);
+
+        Node& getNode(int id);
+
+        void setFitness(int new_fitness);
+        void setConnections(std::vector<Connection> new_connections);
+        void setNodes(std::vector<Node> new_nodes);
         // Mutators
 
         // Change weight, this depends
-        void change_weight(int innovation, float new_weight);
+        void changeWeight(int innovation, float new_weight);
 
         // Create new connection
-        void create_connection(int in_node, int out_node, float new_weight, int max);
+        void createConnection(int in_node, int out_node, float new_weight);
 
         // Create new node
-        void create_node(int in_node, int out_node);
+        void createNode(int index);
 
         // Print genome
-        void print_genome();
+        void printGenome();
 
-        //Get id
-        int get_id();
+        float singleEvaluation(PyObject *load_module);
+
+        void mutation();
+
+        float compatibility(Genome g1);
 
     private:
-        int in_nodes;
-        int out_nodes; 
-        vector<Connection> connections;
-        vector<Node> nodes;
-        int max;
-        int local_max;
-        float fitness;
         int id;
+        int numIn;
+        int numOut;
+        float fitness;
+        std::vector<Node> nodes; 
+        std::vector<Connection> connections;
+        Innovation* innov;
+        Parameters* parameters;
 };
 
 #endif

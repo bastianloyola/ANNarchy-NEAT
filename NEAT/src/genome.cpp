@@ -1,178 +1,309 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <python3.10/numpy/arrayobject.h>
 
 #include "../headers/genome.h"
-
+#include "../headers/funciones.h"
 using namespace std;
 
-// Clase para Genoma
-Genome::Genome(int in, int out, int max_innovation, int initial_fitness, int new_id){
-    in_nodes = in;
-    out_nodes = out;
+// Constructors
+Genome::Genome(){}
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E){
     id = new_id;
-    for (int i = 0; i < in_nodes; i++){
-        Node n(i, 0);
+    numIn = num_in;
+    numOut = num_out;
+    fitness = 0;
+    innov = &innov_E;
+    parameters = &parameters_E;  
+    for (int i = 0; i < numIn; i++){
+        Node n(i+1, 0);
         nodes.push_back(n);
     }
-    for (int i = 0; i < out_nodes; i++){
-        Node n(i + in_nodes, 2);
+    for (int i = numIn; i < numIn+numOut; i++){
+        Node n(i+1, 2);
         nodes.push_back(n);
     }
-    //Crear conexiones entre todos los nodos de entrada y todos los nodos de salida
-    int new_innovation = max_innovation;
-    for (int i = 0; i < static_cast<int>(nodes.size()); i++){
-        if (nodes[i].get_type() == 0){
-            for (int j = 0; j < static_cast<int>(nodes.size()); j++){
-                if (nodes[j].get_type() == 2){
-                    Connection c(nodes[i].get_id(), nodes[j].get_id(), 1, true, new_innovation);
-                    connections.push_back(c);
-                    new_innovation++;
-                }
-            }
+    int cInnov;
+    for (int i = 0; i < numIn; i++){
+        for (int j = numIn; j < numIn+numOut; j++){
+            cInnov = innov->addConnection(i+1,j+1);
+            Connection c(i+1, j+1, 1, true, cInnov);
+            connections.push_back(c);
         }
     }
-    max = new_innovation;
-    local_max = new_innovation;
-    fitness = initial_fitness;
-
 }
 
-void Genome::add_connection(Connection c){
-    connections.push_back(c);
-}
-void Genome::add_node(Node c){
-    nodes.push_back(c);
-}  
+std::vector<Connection> Genome::getConnections(){ return connections;} ;      
+std::vector<Node> Genome::getNodes(){ return nodes;}
 
-vector<Connection> Genome::get_connections(){
-    return connections;
-}       
+int Genome::getInNodes(){ return numIn;}
 
-vector<Node> Genome::get_nodes(){
-    return nodes;
-}
+int Genome::getOutNodes(){ return numOut;}
+int Genome::getId(){ return id;}
+float Genome::getFitness(){ return fitness;}
 
-int Genome::get_in_nodes(){
-    return in_nodes;
-}
-
-int Genome::get_out_nodes(){
-    return out_nodes;
-}
-int Genome::get_id(){
-    return id;
-}
-
-Connection Genome::get_connection(int in_node, int out_node){
+Connection& Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        if(connections[i].get_InNode() == in_node && connections[i].get_OutNode() == out_node){
+        if(connections[i].getInNode() == in_node && connections[i].getOutNode() == out_node){ 
             return connections[i];
         }
     }
-    return Connection(0,0,0,false,0);
+    static Connection null_connection;
+    return null_connection;
 }
 
-Connection Genome::get_connection_id(int innovation){
+Connection& Genome::getConnectionId(int innovation){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        if(connections[i].get_Innovation() == innovation){
+        if(connections[i].getInnovation() == innovation){
             return connections[i];
         }
     }
-    return Connection(0,0,0,false,0);
+    static Connection null_connection;
+    return null_connection;
 }
 
-Node Genome::get_node(int id){
+int Genome::getIndexConnection(int innovation){
+    //Find connection in vector
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
+        if(connections[i].getInnovation() == innovation){
+            return i;
+        }
+    }
+    return -1;
+}
+
+Node& Genome::getNode(int id){
     for(int i = 0; i < static_cast<int>(nodes.size()); i++){
         if(nodes.front().get_id() == id){
             return nodes.front();
         }
     }
-    return Node(0,0);
+    static Node null_node;
+    return null_node;
 }
 
-int Genome::get_max(){
-    return max;
-}
-
-int Genome::get_local_max(){
-    return local_max;
-}
-
-int Genome::get_fitness(){
-    return fitness;
-}
-
-void Genome::set_connections(vector<Connection> new_connections){
-    connections = new_connections;
-}
-
-void Genome::set_nodes(vector<Node> new_nodes){
-    nodes = new_nodes;
-}
-
-void Genome::set_in_nodes(int new_in){
-    in_nodes = new_in;
-}
-
-void Genome::set_out_nodes(int new_out){
-    out_nodes = new_out;
-}
-
-void Genome::set_max(int new_max){
-    max = new_max;
-}
-
-void Genome::set_local_max(int new_local_max){
-    local_max = new_local_max;
-}
-
-void Genome::set_fitness(float new_fittness){
-    fitness = new_fittness;
-}
+void Genome::setFitness(int new_fitness){ fitness = new_fitness;}
+void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
+void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 // Mutators
 
 // Change weight, this depends
-void Genome::change_weight(int innovation, float new_weight){
-        connections[innovation-1].set_weight(new_weight);
+void Genome::changeWeight(int innovation, float new_weight){
+    connections[innovation-1].setWeight(new_weight);
 }
 
 // Create new connection
-void Genome::create_connection(int in_node, int out_node, float new_weight, int new_innovation){
-    Connection c(in_node, out_node, new_weight, 1, new_innovation);
+void Genome::createConnection(int in_node, int out_node, float new_weight){
+    int innovation = innov->addConnection(in_node,out_node);
+    Connection c(in_node, out_node, new_weight, 1, innovation);
     connections.push_back(c);
 }
 
 // Create new node
-void Genome::create_node(int in_node, int out_node){
+void Genome::createNode(int index){
     // Find connection and disable
-    float new_weight = 1; // Valor default en caso que no exista una conexion previa
-    for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        if(connections[i].get_InNode() == in_node && connections[i].get_OutNode() == out_node){
-            connections[i].set_enable(0);
-            new_weight = connections[i].get_weight();
-        }
-    }
+    connections[index].setEnabled(0);
+    float new_weight = connections[index].getWeight();
+    int in_node = connections[index].getInNode();
+    int out_node = connections[index].getOutNode();
+
     // get last id
-    int new_id = nodes.back().get_id() + 1;
+    int new_id = innov->addNode(in_node,out_node);
     // Add node
     Node n(new_id, 2);
     nodes.push_back(n);
+
     // last innovation
-    int new_innovation = max;
+    int new_innovation1 = innov->addConnection(in_node,new_id);
+    int new_innovation2 = innov->addConnection(new_id,out_node);
+
     // Add two new connections
-    Connection c1(in_node, new_id, 1, 1, new_innovation);
-    Connection c2(new_id, out_node, new_weight, 1, new_innovation+1);
-    local_max = new_innovation+2;
+    Connection c1(in_node, new_id, 1, 1, new_innovation1);
+    Connection c2(new_id, out_node, new_weight, 1, new_innovation2);
+    
     connections.push_back(c1);
     connections.push_back(c2);
 }
 
 // Print genome
-void Genome::print_genome(){
-    cout << "IN - OUT - W - Innov - Ennable" << endl;
+void Genome::printGenome(){
+    std::cout << "IN - OUT - W - Innov - Ennable" << std::endl;
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        cout << connections[i].get_InNode() << " " << connections[i].get_OutNode() << " " << connections[i].get_weight() << " " << connections[i].get_Innovation() << " " << connections[i].get_enable() << endl;
+        std::cout << connections[i].getInNode() << " " << connections[i].getOutNode() << " " << connections[i].getWeight() << " " << connections[i].getInnovation() << " " << connections[i].getEnabled() << std::endl;
     }
+}
+
+float Genome::singleEvaluation(PyObject *load_module){
+    //Inicializar varibles necesarias
+    int n = static_cast<int>(nodes.size());
+    int numConnections = static_cast<int>(connections.size());
+
+    //Obtener npArray
+    double data[n*n];
+    for (int i = 0; i < n * n; ++i) {
+        data[i] = NULL;
+    }
+    for (int i = 0; i < numConnections; i++) {
+        int in_node = connections[i].getInNode();
+        int out_node = connections[i].getOutNode();
+        double weight = connections[i].getWeight();
+        if (in_node >= 0 && in_node < n && out_node >= 0 && out_node <= n) {
+            int index = (in_node-1) * n + (out_node-1);
+            data[index] = weight;
+        }
+    }
+    _import_array();
+    npy_intp dims[2] = {n, n};
+    PyObject* numpy_array = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, data);
+
+    //Llamado a función
+    PyObject* func = PyObject_GetAttrString(load_module, "snn");
+
+    PyObject* args = PyTuple_Pack(5, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n)), PyFloat_FromDouble(double(id)), numpy_array);
+
+    PyObject* callfunc = PyObject_CallObject(func, args);
+
+    //Set de fit
+    double value = PyFloat_AsDouble(callfunc);
+    std::cout << "Fitness " << id << ": "<< value << std::endl;
+    setFitness(value);
+
+
+    //Decref de variables necesarias
+    Py_DECREF(numpy_array);
+    Py_DECREF(args);
+
+    return value;
+}
+
+void Genome::mutation(){
+    float add_node, add_link;
+    if (nodes.size() < parameters->largeSize){
+        add_node = parameters->probabilityAddNodeLarge;
+        add_link = parameters->probabilityAddLinkLarge;
+    }else{
+        add_node = parameters->probabilityAddNodeSmall;
+        add_link = parameters->probabilityAddLinkSmall;
+    }
+    // mutate weight
+    if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
+        //cout << " mutate weight " << endl;
+        int n = connections.size();
+        int index =  (int)(rand() % n)+1;
+        Connection connection = connections[index];
+        
+        while (!connection.getEnabled()){
+            index =  (int)(rand() % n)+1;
+            connection = connections[index];
+        }
+        int weight = (rand() %10);
+        changeWeight(connection.getInnovation(),weight);
+    }//else cout << " no -mutate weight " << endl;
+
+    // add node
+    if (getBooleanWithProbability(add_node)){
+        //cout << " add node " << endl;
+        int n = connections.size();
+        int index =  (int)(rand() % n);
+        while (!(connections[index].getEnabled())){
+            index =  (int)(rand() % n);
+        }
+        createNode(index);
+    }//else cout << " no -add node " << endl;
+    // add connection
+    if (getBooleanWithProbability(add_link)){
+    //if (false){
+        //cout << " add connection " << endl;
+        int n = nodes.size();
+
+        int in_node =  (int)(rand() % n);
+        int out_node =  (int)(rand() % n);
+        while (in_node == out_node){
+            out_node =  (int)(rand() % n);
+        }
+        int weight = (rand() %10);
+        createConnection(in_node, out_node, weight);
+    }//else cout << " no -add connection " << endl;
+}
+
+float Genome::compatibility(Genome g1){
+    float c1, c2, c3, e, d, w, n, value;
+    sort(connections.begin(), connections.end(), compareInnovation);
+    sort(g1.connections.begin(), g1.connections.end(), compareInnovation);
+    sort(nodes.begin(), nodes.end(), compareIdNode);
+    sort(g1.nodes.begin(), g1.nodes.end(), compareIdNode);
+
+    int maxConnection, notMaxConnection;
+    bool flag;
+    if (g1.connections.back().getInnovation() > connections.back().getInnovation()){
+        maxConnection = g1.connections.back().getInnovation();
+        notMaxConnection = connections.back().getInnovation();
+        flag = true;
+    }else{
+        maxConnection = connections.back().getInnovation();
+        notMaxConnection = g1.connections.back().getInnovation();
+        flag = false;
+    }
+
+    if (g1.nodes.size() < 20 && nodes.size() < 20){
+        n = 1;
+    }else{
+        if (g1.nodes.size() > nodes.size()){
+            n = g1.nodes.size();
+        }else{
+            n = nodes.size();
+        }
+    }
+    
+    
+    int matching = 0;
+    int weightDifference = 0;
+
+    int count1 = 0;
+    int count2 = 0;
+    d=0;
+    e=0;
+
+    for (int i = 0; i < notMaxConnection; i++){
+        if (g1.connections[count1].getInnovation() == i){
+            if (connections[count2].getInnovation() == i){
+                matching++;
+                weightDifference += abs(g1.connections[count1].getWeight() - connections[count2].getWeight());
+                count1++;
+                count2++;
+            }else{
+                d++;
+                count1++;
+            }   
+        }else if (connections[count2].getInnovation() == i){
+            d++;
+            count2++;
+        }
+    }
+    for (int i = notMaxConnection; i < maxConnection; i++){
+        if (flag){
+            if (g1.connections[count1].getInnovation() == i){
+                e++;
+                count1++;
+            }
+        }else{
+            if (connections[count2].getInnovation() == i){
+                e++;
+                count2++;
+            }
+        }   
+    }
+    
+    c1 = parameters->c1;
+    c2 = parameters->c2;
+    c3 = parameters->c3;
+
+    value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/n);
+    
+
+    return value;
+
 }

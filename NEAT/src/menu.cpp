@@ -4,12 +4,11 @@
 #include <iostream>
 #include <vector>
 
-
 using namespace std;
 
-vector<Genome> menu() {
+void menu() {
      // Menu to test mutators
-  int in_node, out_node, new_weight, innovation, n_genomes;
+  int in_node, out_node, new_weight, innovation, n_genomes, innov_c;
   char option;
 
   //Ingresar la cantidad de genomes de la poblacion
@@ -25,13 +24,11 @@ vector<Genome> menu() {
 
   // Crear poblacion
   Population p(n_genomes, in, out);
-  
-  vector<Genome> g = p.get_genomes();
-  
-  int max_innovation = g.front().get_local_max();
-  cout << "max_id" << p.get_max_id() << endl;
+
   do {
-    cout << "Choose an option:  a. create_connection  b. create_node  c. change weight d. print genome e. exit f. print population g. create snn z. crossover" << endl;
+    cout << "Choose an option:  a. create_connection  b. create_node "
+        << "c. change weight d. print genome e. exit f. print population"
+        <<"g. create snn h. evolucionar i. mutar z. crossover" << endl;
     cin >> option;
     switch (option) {
     case 'a':
@@ -40,52 +37,77 @@ vector<Genome> menu() {
       cout << "Enter genome id: ";
       cin >> genome_id;
 
-      cout << "Enter in_node, out_node, new_weight: ";
-      cin >> in_node >> out_node >> new_weight;
-      g[genome_id].create_connection(in_node, out_node, new_weight, max_innovation);
-      max_innovation = g[genome_id].get_local_max();
-      p.increase_max_innovation();
-      p.set_genomes(g);
-      break;
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id) == nullptr) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        //Ingresar datos de la conexion
+        cout << "Enter in_node: ";
+        cin >> in_node;
+        cout << "Enter out_node: ";
+        cin >> out_node;
+        cout << "Enter new_weight: ";
+        cin >> new_weight;
+        p.findGenome(genome_id)->createConnection(in_node, out_node, new_weight);
+        break;
+      }
     case 'b':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      //select connection
-      cout << "Enter in_node, out_node: ";
-      cin >> in_node >> out_node;
-      g[genome_id].create_node(in_node, out_node);
-      max_innovation = g[genome_id].get_local_max();
-      p.increase_max_innovation();
-      p.set_genomes(g);
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id) == nullptr) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        //select connection
+        cout << "Enter innovation: ";
+        cin >> innov_c;
+        int index = p.findGenome(genome_id)->getIndexConnection(innov_c);
+        p.findGenome(genome_id)->createNode(index);
+        break;
+      }
     case 'c':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      cout << "Enter innovation, new_weight: ";
-      cin >> innovation >> new_weight;
-      g[genome_id].change_weight(innovation, new_weight);
-      p.set_genomes(g);
-      break;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id) == nullptr) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+
+        cout << "Enter innovation: ";
+        cin >> innovation;
+        cout << "Enter new_weight: ";
+        cin >> new_weight;
+        p.findGenome(genome_id)->changeWeight(innovation, new_weight);
+        break;
+      }
     case 'd':
       //Select genome
       cout << "Enter genome id: ";
       cin >> genome_id;
-      g[genome_id].print_genome();
-      break;
-    case 'f':
-      //print all genomes 
-      for(int i = 0; i < static_cast<int>(g.size()); i++){
-        cout << "Genoma " << i << endl;
-        g[i].print_genome();
-        cout << "---------------------------------------------"<< endl;
+
+      //Verificar si el genoma existe
+      if (p.findGenome(genome_id) == nullptr) {
+        cout << "Genome not found" << endl;
+        break;
+      }else{
+        p.findGenome(genome_id)->printGenome();
+        break;
       }
+    case 'f':
+      //print all genomes
+      p.print();
       break;
     case 'g':
       //create snn 
       cout << "Creando " << endl;
-      evaluate(p);
+      p.evaluate();
       cout << "---------------------------------------------"<< endl;
       break;
     case 'h':
@@ -94,14 +116,26 @@ vector<Genome> menu() {
       cout << "Enter number of evolutions: ";
       cin >> n;
       cout << "Evolucionando " << endl;
-      evolution(p,n);
+      p.evolution(n);
       cout << "---------------------------------------------"<< endl;
       break;
     case 'i':
       //evolutionate
       cout << "Mutate " << endl;
-      mutations(p);
+      p.mutations();
       cout << "---------------------------------------------"<< endl;
+      break;
+    case 'j':
+      //evolutionate
+      cout << "Eliminate " << endl;
+      p.eliminate();
+      cout << "---------------------------------------------"<< endl;
+      break;
+    case 'y':
+      //Print fitness for each genome
+      for (int i = 0; i < p.genomes.size(); i++) {
+        cout << "Genome " << p.genomes[i]->getId() << " fitness: " << p.genomes[i]->getFitness() << endl;
+      }
       break;
     case 'z':
       //Select two genomes
@@ -110,18 +144,19 @@ vector<Genome> menu() {
       cin >> genome1;
       cout << "Enter second genome id: ";
       cin >> genome2;
-      Genome g3 = crossover(g[genome1], g[genome2],p.get_max_id());
-      p.increase_max_id();
 
-      g3.print_genome();
-
-      //Add new genome
-      g.push_back(g3);
-      p.set_genomes(g);
-      p.set_n_genomes(g.size());
-
-      break;
+      //Verificar si los genomas existen
+      if (p.findGenome(genome1) == nullptr || p.findGenome(genome2) == nullptr) {
+        cout << "Genomes not found" << endl;
+        break;
+      }else{
+        Genome* g3 = p.crossover(p.findGenome(genome1), p.findGenome(genome2));
+        p.maxGenome++;
+        g3->printGenome();
+        //Add new genome
+        p.genomes.push_back(g3);
+        break;
+      }
     }
   } while (option != 'e');
-  return g;
 }

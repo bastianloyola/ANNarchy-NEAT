@@ -23,7 +23,7 @@ $(BINDIR):
 	mkdir -p $(BINDIR)
 .PHONY: clean
 clean:
-	rm NEAT
+	rm -f NEAT
 	rm -fr $(BINDIR)
 	rm -rf __pycache__
 	rm -rf annarchy-*

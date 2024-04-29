@@ -6,26 +6,26 @@ class Connection {
 
   public:  
     // Constructor de la clase
-    Connection(int c_in_node, int c_out_node, float c_weight, bool c_enable, int c_innovation);
-
+    Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int innovation);
+    Connection();
     // Getters         
-    int get_InNode() const;
-    int get_OutNode() const;
-    float get_weight() const;
-    bool get_enable();
-    int get_Innovation();
+    int getInNode() const;
+    int getOutNode() const;
+    float getWeight() const;
+    bool getEnabled();
+    int getInnovation();
 
     // Setters 
-    void set_enable(bool new_enable);
-    void set_weight(int new_weight);
-    void change_enable();
+    void setEnabled(bool new_enable);
+    void setWeight(int new_weight);
+    void changeEnabled();
 
-    private:
-        int in_node;
-        int out_node;
-        float weight;        
-        bool enable;
-        int innovation;
+  private:
+    int in;
+    int out;
+    float weight;        
+    bool enabled;
+    int innovation;
 };
 
 #endif

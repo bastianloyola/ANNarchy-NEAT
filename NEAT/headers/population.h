@@ -1,40 +1,50 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 
-#include "genome.h"
+#include <vector>
 
-class Population {
+#include "genome.h"
+#include "innovation.h"
+#include "species.h"
+#include "funciones.h"
+#include "parameters.h"
+
+
+class Population{
     
   public:  
     // Constructor de la clase
+    Population();
     Population(int n_genomes, int n_inputs, int n_outputs);
 
+    Parameters parameters;
+    Innovation innov;
+    std::vector<Genome*> genomes;
+    std::vector<Species> species;
+    float threshold;
+    void evaluate();
+    void mutations();
+    void evolution(int n);
+    void print();
+
+    int maxGenome;
+
     // Getters
-    vector<Genome> get_genomes();
-    int get_n_genomes();
-    int get_n_inputs();
-    int get_n_outputs();
-    int get_max_innovation();
-    int get_max_id();
-
+    std::vector<Genome*> getGenomes();
     // Setters
-    void set_genomes(vector<Genome> new_genomes);
-    void set_n_genomes(int new_n_genomes);
-    void set_n_inputs(int new_n_inputs);
-    void set_n_outputs(int new_n_outputs);
-    void set_max_innovation(int new_max_innovation);
-    void increase_max_id();
-    void increase_max_innovation();
-    
-    vector<Genome> genomes;
 
+    //
+    Genome* findGenome(int id);
+    int findIndexGenome(int id);
+    void eliminate();
+    void reproduce();
+    Genome* crossover(Genome* g1, Genome* g2);
+  
   private:
-    int n_genomes;
-    int n_inputs;
-    int n_outputs;
-    int max_innovation;
-    int max_id;
-
+    int nGenomes;
+    int nInputs;
+    int nOutputs;
+    float keep;
 };
 
 #endif

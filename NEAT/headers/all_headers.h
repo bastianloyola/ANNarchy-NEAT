@@ -2,13 +2,14 @@
 #define ALL_HEADERS_H
 
 #include "connection.h"
-#include "crossover.h"
-#include "funciones.h"
-#include "genome.h"
 #include "node.h"
+#include "parameters.h"
+#include "innovation.h"
+#include "genome.h"
+#include "species.h"
 #include "population.h"
+#include "funciones.h"
 #include "menu.h"
 
-// Add more includes as needed
 
 #endif
