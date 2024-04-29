@@ -187,7 +187,7 @@ void Genome::mutation(){
     }
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
-        cout << " mutate weight " << endl;
+        //cout << " mutate weight " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n)+1;
         Connection connection = connections[index];
@@ -198,23 +198,22 @@ void Genome::mutation(){
         }
         int weight = (rand() %10);
         changeWeight(connection.getInnovation(),weight);
-    }else cout << " no -mutate weight " << endl;
+    }//else cout << " no -mutate weight " << endl;
 
     // add node
     if (getBooleanWithProbability(add_node)){
-        cout << " add node " << endl;
+        //cout << " add node " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n);
         while (!(connections[index].getEnabled())){
             index =  (int)(rand() % n);
         }
-        Connection connection = connections[index];
-        createNode(connection.getInnovation());
-    }else cout << " no -add node " << endl;
+        createNode(index);
+    }//else cout << " no -add node " << endl;
     // add connection
     if (getBooleanWithProbability(add_link)){
     //if (false){
-        cout << " add connection " << endl;
+        //cout << " add connection " << endl;
         int n = nodes.size();
 
         int in_node =  (int)(rand() % n);
@@ -224,7 +223,7 @@ void Genome::mutation(){
         }
         int weight = (rand() %10);
         createConnection(in_node, out_node, weight);
-    }else cout << " no -add connection " << endl;
+    }//else cout << " no -add connection " << endl;
 }
 
 float Genome::compatibility(Genome g1){

@@ -103,25 +103,23 @@ void Population::reproduce(){
     float bestCompatibility = 0;
     int bestIndex = 0;
     int aux;
-/*
     for (int i = 0; i < offsprings.size(); i++){
         for (int j = 0; j < species.size(); j++){
-            aux = offsprings[i].compatibility(species[j].genome);
+            aux = (*offsprings[j]).compatibility(*species[j].genome);
             if (aux > bestCompatibility){
                 bestCompatibility = aux;
                 bestIndex = j;
             }
         }
         if (bestCompatibility >= species[bestIndex].threshold){
-            species[bestIndex].add_genome(&offsprings[i]);
+            species[bestIndex].add_genome(offsprings[i]);
         }else{
-            newSpecies = Species(offsprings[i],threshold);
+            Species newSpecies = Species(offsprings[i],threshold);
             species.push_back(newSpecies);
         }
         genomes.push_back(offsprings[i]);
     }
 
-*/
 }
 
 void Population::evaluate(){
@@ -237,20 +235,20 @@ void Population::mutations(){
     for (int i = 0; i < species.size(); i++){
         sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         for (int j = 1; j < species[i].genomes.size(); j++){
-            cout << " -mutations_ " << species[i].genomes[j]->getId() << endl;
+            //cout << " -mutations_ " << species[i].genomes[j]->getId() << endl;
             species[i].genomes[j]->mutation();
         }
     }
-    cout << " --- " << endl;
+    //cout << " --- " << endl;
 }
 
 void Population::evolution(int n){
 
     for (int i = 0; i < n; i++){
-        cout << " generación: " << i << endl; 
+        //cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
-        std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
+        //std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
         reproduce();
     }
