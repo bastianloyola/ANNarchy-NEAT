@@ -37,7 +37,7 @@ def snn(n_entrada, n_salida, n, i, matrix):
 
     proj.connect_from_matrix(matrix)
     #print('nombre')
-    nombre = 'annarchy-'+str(int(i))
+    nombre = 'annarchy/annarchy-'+str(int(i))
     #print(nombre)
     compile(directory=nombre)
     M = Monitor(pop, ['spike'])
