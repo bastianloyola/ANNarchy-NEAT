@@ -285,11 +285,12 @@ void Population::mutations(){
 void Population::evolution(int n){
 
     for (int i = 0; i < n; i++){
-        //cout << " generación: " << i << endl; 
+        cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
         //std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
         reproduce();
+        //speciation();
     }
 }

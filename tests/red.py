@@ -154,7 +154,7 @@ def exampleIzhikevich():
     return 0
 
 
-def snn(n_entrada, n_salida, n, i, matrix): 
+def snn2(n_entrada, n_salida, n, i, matrix): 
     clear()
     pop = Population(geometry=n, neuron=LIF)
     proj = Projection(pre=pop, post=pop, target='exc')
@@ -170,7 +170,7 @@ def snn(n_entrada, n_salida, n, i, matrix):
     M = Monitor(pop, ['spike'])
 
     pop[0:n_entrada].I = 20.
-    simulate(10000.0, measure_time=True)
+    simulate(1000.0, measure_time=True)
 
     spikes = M.get('spike')
     t, n = M.raster_plot(spikes)
@@ -182,8 +182,8 @@ def snn(n_entrada, n_salida, n, i, matrix):
     return 0
 
 #main
-p = 1
+p = 10.0
 #matriz = [[0,0,p],[0,0,p],[0,0,0]]
 matriz = [[0,0,0],[0,0,0],[p,p,0]]
 
-snn(2,1,3,0,matriz)
+snn2(2,1,3,0,matriz)
