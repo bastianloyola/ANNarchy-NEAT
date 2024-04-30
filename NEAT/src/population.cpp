@@ -20,9 +20,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     nInputs = n_inputs;
     nOutputs = n_outputs;
     maxGenome = n_genomes;
-    parameters = Parameters(nGenomes, nInputs, nOutputs);
-    
-
+    parameters = Parameters(nGenomes, nInputs, nOutputs, keep=0.5);
     innov = Innovation(nInputs, nOutputs);
     Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
     Species s = Species(g, threshold);
@@ -80,11 +78,14 @@ void Population::reproduce(){
     Genome *g1, *g2;
     vector<Genome*> offsprings;
     int indexG1,indexG2,indexS1,indexS2,index;
+    cout << "Reproduciendo..." << endl;
     int n = nGenomes - static_cast<int>(genomes.size());
     int noCrossover = n*parameters.percentageNoCrossoverOff;
     for (int i = 0; i < noCrossover; i++){
         index = rand() % nGenomes;
         offspring = genomes[index];
+        offspring->setId(maxGenome);
+        maxGenome++;
         offspring->mutation();
         offsprings.push_back(offspring);
     }
@@ -124,7 +125,6 @@ void Population::reproduce(){
         }
         genomes.push_back(offsprings[i]);
     }
-
 }
 
 void Population::evaluate() {

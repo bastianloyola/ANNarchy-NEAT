@@ -31,6 +31,7 @@ class Genome {
 
         Node& getNode(int id);
 
+        void setId(int new_id);
         void setFitness(int new_fitness);
         void setConnections(std::vector<Connection> new_connections);
         void setNodes(std::vector<Node> new_nodes);

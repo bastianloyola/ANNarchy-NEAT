@@ -26,6 +26,6 @@ clean:
 	rm -f NEAT
 	rm -fr $(BINDIR)
 	rm -rf __pycache__
-	rm -rf annarchy-*
+	rm -rf annarchy
 Aclean:
-	rm -rf annarchy-*
+	rm -rf annarchy

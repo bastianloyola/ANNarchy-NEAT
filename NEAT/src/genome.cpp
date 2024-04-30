@@ -85,6 +85,7 @@ Node& Genome::getNode(int id){
     return null_node;
 }
 
+void Genome::setId(int new_id){ id = new_id;}
 void Genome::setFitness(int new_fitness){ fitness = new_fitness;}
 void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
 void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
