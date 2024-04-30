@@ -127,6 +127,10 @@ void Population::reproduce(){
     }
 }
 
+void Population::speciation(){
+    
+}
+
 void Population::evaluate() {
     // Importar modulo
     PyObject* name = PyUnicode_FromString("annarchy");

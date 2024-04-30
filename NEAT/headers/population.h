@@ -38,6 +38,7 @@ class Population{
     int findIndexGenome(int id);
     void eliminate();
     void reproduce();
+    void speciation();
     Genome* crossover(Genome* g1, Genome* g2);
   
   private:
