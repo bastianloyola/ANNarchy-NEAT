@@ -39,3 +39,6 @@ void Connection::setWeight(int new_weight){
 void Connection::changeEnabled(){
     enabled = !enabled;
 }
+void Connection::chngeWeight(float new_weight){
+    weight = weight + new_weight;
+}
