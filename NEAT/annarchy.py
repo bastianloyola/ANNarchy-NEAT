@@ -3,24 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
 
-import threading
-
-# Declarar un mutex global para sincronizar el acceso a compile()
-compile_mutex = threading.Lock()
-
 LIF = Neuron(
     parameters = """
-    tau = 30.0 : population
-    I = 15.0
-    tau_I = 3.0 : population
+    tau = 50.0 : population
+    I = 0.0
+    tau_I = 10.0 : population
     """,
     equations = """
-    tau * dv/dt = -v + g_exc - g_inh + I : init=13.5
+    tau * dv/dt = -v + g_exc - g_inh + I : init=0
     tau_I * dg_exc/dt = -g_exc
     tau_I * dg_inh/dt = -g_inh
     """,
     spike = "v >= 15.0",
-    reset = "v = 13.5",
+    reset = "v = 0",
     refractory = 3.0
 )
 
@@ -33,7 +28,7 @@ def snn(n_entrada, n_salida, n, i, matrix):
     matrix = np.array(matrix)
 
     #Reemplazar los valores 0 por None
-    matrix[matrix == 0] = None
+    #matrix[matrix == 0] = None
 
     proj.connect_from_matrix(matrix)
     #print('nombre')
@@ -59,46 +54,40 @@ def fitness(pop,Monitor,input_index,output_index,funcion):
      
 
 def xor(pop,Monitor,input_index,output_index):
+    Monitor.reset()
     entradas = [(0, 0), (0, 1), (1, 0), (1, 1)]
     fitness = 0
     for entrada in entradas:
         for i, val in zip(input_index, entrada):
             if val == 1:
-                pop[int(i)].I = 20
+                pop[int(i)].I = 15.1
             else:
                 pop[int(i)].I = 0
         simulate(10000.0)
         spikes = Monitor.get('spike')
-        print("spikes: ",spikes) 
-        #print("entradas: ",entrada)
+        #print("spikes: ",spikes) 
         #Get the output
         output = 0
         for i in output_index:
-            output += len(spikes[i])
+            output += np.size(spikes[i])
         #print("spike output: ",output)
         #Get the average spikes of all neurons
         average = 0
-        for i in range(len(pop)):
-            average += len(spikes[i])
-        average = average/len(pop)
+        for i in range(np.size(pop)):
+            average += np.size(spikes[i])
+        average = average/np.size(pop)
         #print("average spikes: ",average)
         decode_output = -2
         if output > average:
             decode_output = 1
         if output <= average:
             decode_output = 0
-        #t, n = Monitor.raster_plot(spikes)
-        #plt.plot(t, n, 'b.')
-        #plt.title('Raster plot')
-        #plt.show()
 
 
-
+        Monitor.reset()
         #comparar las entradas y la salida esperada con el output
         if entrada[0] ^ entrada[1] == decode_output:
             fitness += 1
-        reset(pop)
-    #fitness = rd.randint(1,4)
     return fitness
         
 def exampleIzhikevich(): 
