@@ -61,7 +61,7 @@ void Population::print(){
 void Population::eliminate(){
     for (int i = 0; i < species.size(); i++){
         int id,index;
-        std::sort(species[i].genomes.begin(), species[i].genomes.end(),compareFitness);
+        species[i].sort_genomes();
         int n = species[i].genomes.size() * (1-keep); 
         for (int j = 0; j < n; j++){
             id = species[i].genomes.back()->getId();
@@ -273,7 +273,8 @@ void Population::mutations(){
     int mutated_id,index;
     //mutate
     for (int i = 0; i < species.size(); i++){
-        sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
+        //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
+        species[i].sort_genomes();
         for (int j = 1; j < species[i].genomes.size(); j++){
             //cout << " -mutations_ " << species[i].genomes[j]->getId() << endl;
             species[i].genomes[j]->mutation();
@@ -287,10 +288,11 @@ void Population::evolution(int n){
     for (int i = 0; i < n; i++){
         cout << " generación: " << i << endl; 
         evaluate();
-        //eliminate();
-        //std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
+        eliminate();
+        std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
-        //reproduce();
+        reproduce();
+        nGenomes = genomes.size();
         //speciation();
     }
 }

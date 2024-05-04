@@ -15,6 +15,8 @@ public:
 
     // Method to add a genome to the species
     void add_genome(Genome *genome);
+    void sort_genomes();
+    void print();
 
 private:
 };
