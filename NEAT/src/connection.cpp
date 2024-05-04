@@ -1,4 +1,7 @@
 #include "../headers/connection.h"
+#include <stdio.h>
+
+using namespace std;
 
 // Constructor de la clase
 Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int c_innovation){
@@ -39,6 +42,6 @@ void Connection::setWeight(int new_weight){
 void Connection::changeEnabled(){
     enabled = !enabled;
 }
-void Connection::chngeWeight(float new_weight){
+void Connection::changeWeight(float new_weight){
     weight = weight + new_weight;
 }

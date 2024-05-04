@@ -19,7 +19,7 @@ class Connection {
     void setEnabled(bool new_enable);
     void setWeight(int new_weight);
     void changeEnabled();
-    void chngeWeight(float new_weight);
+    void changeWeight(float new_weight);
 
   private:
     int in;

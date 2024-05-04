@@ -293,6 +293,6 @@ void Population::evolution(int n){
         mutations();
         reproduce();
         nGenomes = genomes.size();
-        //speciation();
+        speciation();
     }
 }

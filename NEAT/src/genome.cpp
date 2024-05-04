@@ -92,8 +92,8 @@ void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 // Mutators
 
 // Change weight, this depends
-void Genome::changeWeight(int innovation, float new_weight){
-    connections[innovation-1].chngeWeight(new_weight);
+void Genome::changeWeight(int index, float new_weight){
+    connections[index].changeWeight(new_weight);
 }
 
 // Create new connection
@@ -200,13 +200,9 @@ void Genome::mutation(){
             index =  (int)(rand() % n)+1;
             connection = connections[index];
         }
-        int weight = (rand() %10);
-        if (weight < 5){
-            weight = weight+1;
-        }else{
-            weight = 4-weight;
-        }
-        changeWeight(connection.getInnovation(),weight);
+        //Random weight between -1 and 1
+        float weight = (rand() % 200 - 100)/100.0;
+        changeWeight(index,weight);
     }//else cout << " no -mutate weight " << endl;
 
     // add node
@@ -230,7 +226,8 @@ void Genome::mutation(){
         while (in_node == out_node){
             out_node =  (int)(rand() % n);
         }
-        int weight = (rand() %10);
+        float weight = (rand() % 200 - 100)/100.0;
+        weight = weight + parameters->initial_weight;
         createConnection(in_node, out_node, weight);
     }//else cout << " no -add connection " << endl;
 }
