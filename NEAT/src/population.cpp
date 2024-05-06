@@ -128,6 +128,36 @@ void Population::reproduce(){
 }
 
 void Population::speciation(){
+    //Define new representative for each species
+    for (int i = 0; i < (int)(species.size()); i++){
+        species[i].sort_genomes();
+        species[i].genome = species[i].genomes[0];
+    }
+
+    //Clear genomes from species
+    for (int i = 0; i < (int)(species.size()); i++){
+        species[i].genomes.clear();
+    }
+
+    //Add genomes to species
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        float bestCompatibility = 0;
+        int bestIndex = 0;
+        int aux;
+        for (int j = 0; j < (int)(species.size()); j++){
+            aux = (*genomes[i]).compatibility(*species[j].genome);
+            if (aux > bestCompatibility){
+                bestCompatibility = aux;
+                bestIndex = j;
+            }
+        }
+        if (bestCompatibility >= species[bestIndex].threshold){
+            species[bestIndex].add_genome(genomes[i]);
+        }else{
+            Species newSpecies = Species(genomes[i],threshold);
+            species.push_back(newSpecies);
+        }
+    }
     
 }
 
