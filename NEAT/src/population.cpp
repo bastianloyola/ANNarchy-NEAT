@@ -51,7 +51,7 @@ int Population::findIndexGenome(int id){
 }
 
 void Population::print(){
-    for(int i = 0; i < genomes.size(); i++){
+    for(int i = 0; i < (int)(genomes.size()); i++){
         cout << "Genoma " << genomes[i]->getId() << endl;
         genomes[i]->printGenome();
         cout << "---------------------------------------------"<< endl;
@@ -59,7 +59,7 @@ void Population::print(){
 }
 
 void Population::eliminate(){
-    for (int i = 0; i < species.size(); i++){
+    for (int i = 0; i < (int)(species.size()); i++){
         int id,index;
         species[i].sort_genomes();
         int n = species[i].genomes.size() * (1-keep); 
@@ -77,7 +77,7 @@ void Population::reproduce(){
     Genome* offspring;
     Genome *g1, *g2;
     vector<Genome*> offsprings;
-    int indexG1,indexG2,indexS1,indexS2,index;
+    int indexS1,indexS2,index;
     cout << "Reproduciendo..." << endl;
     int n = nGenomes - static_cast<int>(genomes.size());
     int noCrossover = n*parameters.percentageNoCrossoverOff;
@@ -109,8 +109,8 @@ void Population::reproduce(){
     float bestCompatibility = 0;
     int bestIndex = 0;
     int aux;
-    for (int i = 0; i < offsprings.size(); i++){
-        for (int j = 0; j < species.size(); j++){
+    for (int i = 0; i < (int)(offsprings.size()); i++){
+        for (int j = 0; j < (int)(species.size()); j++){
             aux = (*offsprings[j]).compatibility(*species[j].genome);
             if (aux > bestCompatibility){
                 bestCompatibility = aux;
@@ -211,13 +211,6 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
     int connection_size_a = connections_a.size();
     int connection_size_b = connections_b.size();
 
-    int max;
-    if (connections_a[connection_size_a -1].getInnovation() > connections_b[connection_size_b -1].getInnovation())
-    {
-        max = connections_a[connection_size_a -1].getInnovation();
-    }else{
-        max = connections_b[connection_size_b -1].getInnovation();
-    }
     int count_a=0, count_b = 0;
     Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters);
     maxGenome++;
@@ -270,12 +263,11 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
-    int mutated_id,index;
     //mutate
-    for (int i = 0; i < species.size(); i++){
+    for (int i = 0; i < (int)(species.size()); i++){
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i].sort_genomes();
-        for (int j = 1; j < species[i].genomes.size(); j++){
+        for (int j = 1; j < (int)(species[i].genomes.size()); j++){
             //cout << " -mutations_ " << species[i].genomes[j]->getId() << endl;
             species[i].genomes[j]->mutation();
         }

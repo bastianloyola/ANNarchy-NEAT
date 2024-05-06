@@ -13,8 +13,8 @@ void Species::add_genome(Genome *genome){
 
 //Sort genomes by fitness in descending order
 void Species::sort_genomes(){
-    for (int i = 0; i < genomes.size(); i++){
-        for (int j = i+1; j < genomes.size(); j++){
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        for (int j = i+1; j < (int)(genomes.size()); j++){
             if (genomes[i]->getFitness() < genomes[j]->getFitness()){
                 Genome *temp = genomes[i];
                 genomes[i] = genomes[j];
@@ -25,7 +25,7 @@ void Species::sort_genomes(){
 }
 
 void Species::print(){
-    for (int i = 0; i < genomes.size(); i++){
+    for (int i = 0; i < (int)(genomes.size()); i++){
         cout << "Genome " << genomes[i]->getId() << " fitness: " << genomes[i]->getFitness() << endl;
     }
 }   

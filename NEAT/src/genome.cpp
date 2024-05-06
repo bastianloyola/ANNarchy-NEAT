@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 
 #include "../headers/genome.h"
@@ -155,7 +156,7 @@ float Genome::singleEvaluation(PyObject *load_module){
     //Obtener npArray
     double data[n*n];
     for (int i = 0; i < n * n; ++i) {
-        data[i] = NULL;
+        data[i] = 0.0;
     }
     for (int i = 0; i < numConnections; i++) {
         int in_node = connections[i].getInNode();
@@ -192,7 +193,7 @@ float Genome::singleEvaluation(PyObject *load_module){
 
 void Genome::mutation(){
     float add_node, add_link;
-    if (nodes.size() < parameters->largeSize){
+    if ((int)(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
     }else{
@@ -248,7 +249,7 @@ void Genome::mutation(){
 }
 
 float Genome::compatibility(Genome g1){
-    float c1, c2, c3, e, d, w, n, value;
+    float c1, c2, c3, e, d, n, value;
     sort(connections.begin(), connections.end(), compareInnovation);
     sort(g1.connections.begin(), g1.connections.end(), compareInnovation);
     sort(nodes.begin(), nodes.end(), compareIdNode);

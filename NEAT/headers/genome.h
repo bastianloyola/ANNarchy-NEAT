@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream> 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 #include "node.h"
 #include "connection.h"

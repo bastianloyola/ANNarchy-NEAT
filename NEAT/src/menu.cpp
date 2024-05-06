@@ -134,7 +134,7 @@ void menu() {
       break;
     case 'y':
       //Print fitness for each genome
-      for (int i = 0; i < p.genomes.size(); i++) {
+      for (int i = 0; i < (int)(p.genomes.size()); i++) {
         cout << "Genome " << p.genomes[i]->getId() << " fitness: " << p.genomes[i]->getFitness() << endl;
       }
       break;
