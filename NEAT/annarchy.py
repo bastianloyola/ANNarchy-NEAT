@@ -19,34 +19,37 @@ LIF = Neuron(
     refractory = 3.0
 )
 
-def snn(n_entrada, n_salida, n, i, matrix): 
-    clear()
-    pop = Population(geometry=n, neuron=LIF)
-    proj = Projection(pre=pop, post=pop, target='exc')
-    #print(matrix,"\n")
-    #Matrix to numpy array
-    matrix = np.array(matrix)
+def snn(n_entrada, n_salida, n, i, matrix):
+    try:
+        clear()
+        pop = Population(geometry=n, neuron=LIF)
+        proj = Projection(pre=pop, post=pop, target='exc')
+        #print(matrix,"\n")
+        #Matrix to numpy array
+        matrix = np.array(matrix)
 
-    #Reemplazar los valores 0 por None
-    #matrix[matrix == 0] = None
+        #Reemplazar los valores 0 por None
+        #matrix[matrix == 0] = None
 
-    proj.connect_from_matrix(matrix)
-    #print('nombre')
-    nombre = 'annarchy/annarchy-'+str(int(i))
-    #print(nombre)
-    compile(directory=nombre)
-    M = Monitor(pop, ['spike'])
-    input_index = []
-    output_index = []
-    n_entrada = int(n_entrada)
-    n_salida = int(n_salida)
-    for i in range(n_entrada):
-        input_index.append(i)
-    for i in range(n_entrada,n_salida+n_entrada):
-        output_index.append(i)
-    fit = fitness(pop,M,input_index,output_index,xor)
-    return fit
-
+        proj.connect_from_matrix(matrix)
+        #print('nombre')
+        nombre = 'annarchy/annarchy-'+str(int(i))
+        #print(nombre)
+        compile(directory=nombre)
+        M = Monitor(pop, ['spike'])
+        input_index = []
+        output_index = []
+        n_entrada = int(n_entrada)
+        n_salida = int(n_salida)
+        for i in range(n_entrada):
+            input_index.append(i)
+        for i in range(n_entrada,n_salida+n_entrada):
+            output_index.append(i)
+        fit = fitness(pop,M,input_index,output_index,xor)
+        return fit
+    except Exception as e:
+        # Capturar y manejar excepciones
+        print("Error:", e)
 def fitness(pop,Monitor,input_index,output_index,funcion):
     fit = 0
     fit = funcion(pop,Monitor,input_index,output_index)
