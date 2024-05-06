@@ -28,7 +28,8 @@ void menu() {
   do {
     cout << "Choose an option:  a. create_connection  b. create_node "
         << "c. change weight d. print genome e. exit f. print population"
-        <<"g. create snn h. evolucionar i. mutar z. crossover" << endl;
+        <<" g. create snn h. evolucionar i. mutar z. crossover"
+        <<" y. print fitness" << endl;
     cin >> option;
     switch (option) {
     case 'a':

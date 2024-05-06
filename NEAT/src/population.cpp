@@ -289,7 +289,6 @@ void Population::evolution(int n){
         cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
-        std::cout << "Numero de genomas restantes:" << genomes.size() << std::endl;
         mutations();
         reproduce();
         nGenomes = genomes.size();

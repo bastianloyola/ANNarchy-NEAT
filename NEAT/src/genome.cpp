@@ -28,7 +28,12 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     for (int i = 0; i < numIn; i++){
         for (int j = numIn; j < numIn+numOut; j++){
             cInnov = innov->addConnection(i+1,j+1);
-            Connection c(i+1, j+1, parameters->initial_weight, true, cInnov);
+            //exh or inh value (1 or -1)
+            float inh = (rand() % 2);
+            if (inh == 0){
+                inh = -1;
+            }
+            Connection c(i+1, j+1, inh*parameters->initial_weight, true, cInnov);
             connections.push_back(c);
         }
     }
@@ -122,7 +127,12 @@ void Genome::createNode(int index){
     int new_innovation2 = innov->addConnection(new_id,out_node);
 
     // Add two new connections
-    Connection c1(in_node, new_id, parameters->initial_weight, 1, new_innovation1);
+    //exh or inh value (1 or -1)
+    float inh = (rand() % 2);
+    if (inh == 0){
+        inh = -1;
+    }
+    Connection c1(in_node, new_id, inh*parameters->initial_weight, 1, new_innovation1);
     Connection c2(new_id, out_node, new_weight, 1, new_innovation2);
     
     connections.push_back(c1);
@@ -228,6 +238,11 @@ void Genome::mutation(){
         }
         float weight = (rand() % 200 - 100)/100.0;
         weight = weight + parameters->initial_weight;
+        //exh or inh value
+        float inh = (rand() % 2);
+        if (inh == 1){
+            weight = -weight;
+        }
         createConnection(in_node, out_node, weight);
     }//else cout << " no -add connection " << endl;
 }

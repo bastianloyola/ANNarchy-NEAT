@@ -71,17 +71,10 @@ def xor(pop,Monitor,input_index,output_index):
         for i in output_index:
             output += np.size(spikes[i])
         #print("spike output: ",output)
-        #Get the average spikes of all neurons
-        average = 0
-        for i in range(np.size(pop)):
-            average += np.size(spikes[i])
-        average = average/np.size(pop)
-        #print("average spikes: ",average)
-        decode_output = -2
-        if output > average:
+
+        decode_output = 0
+        if output > 1:
             decode_output = 1
-        if output <= average:
-            decode_output = 0
 
 
         Monitor.reset()
