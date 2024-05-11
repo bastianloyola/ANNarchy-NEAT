@@ -29,3 +29,11 @@ void Species::print(){
         cout << "Genome " << genomes[i]->getId() << " fitness: " << genomes[i]->getFitness() << endl;
     }
 }   
+
+void Species::print_genomes(){
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        cout << "Genome " << genomes[i]->getId() << endl;
+        genomes[i]->printGenome();
+        cout << "---------------------------------------------"<< endl;
+    }
+}

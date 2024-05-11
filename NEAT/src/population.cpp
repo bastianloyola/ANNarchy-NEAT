@@ -23,6 +23,7 @@ Population::Population(int n_genomes, int n_inputs, int n_outputs){
     parameters = Parameters(nGenomes, nInputs, nOutputs, keep=0.5);
     innov = Innovation(nInputs, nOutputs);
     Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
+    threshold = parameters.threshold;
     Species s = Species(g, threshold);
     species.push_back(s);
     genomes.push_back(g);
@@ -51,11 +52,12 @@ int Population::findIndexGenome(int id){
 }
 
 void Population::print(){
-    for(int i = 0; i < (int)(genomes.size()); i++){
-        cout << "Genoma " << genomes[i]->getId() << endl;
-        genomes[i]->printGenome();
-        cout << "---------------------------------------------"<< endl;
-      }
+    //print genomes by species
+    for (int i = 0; i < (int)(species.size()); i++){
+        cout << "Species " << i << endl;
+        species[i].print_genomes();
+        cout << "----------------" << endl;
+    }
 }
 
 void Population::eliminate(){
@@ -131,7 +133,9 @@ void Population::speciation(){
     //Define new representative for each species
     for (int i = 0; i < (int)(species.size()); i++){
         species[i].sort_genomes();
-        species[i].genome = species[i].genomes[0];
+        //randomly select a genome from the species
+        int index = rand() % species[i].genomes.size();
+        species[i].genome = species[i].genomes[index];
     }
 
     //Clear genomes from species
@@ -316,4 +320,17 @@ void Population::evolution(int n){
         nGenomes = genomes.size();
         speciation();
     }
+}
+
+void Population::print_best(){
+    float bestFitness = 0;
+    int bestIndex = 0;
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        if (genomes[i]->getFitness() > bestFitness){
+            bestFitness = genomes[i]->getFitness();
+            bestIndex = i;
+        }
+    }
+    cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
+    genomes[bestIndex]->printGenome();
 }

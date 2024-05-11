@@ -7,7 +7,7 @@ class Parameters{
     public:
         Parameters();
         Parameters(int numberGenomes, int numberInputs, int numberOutputs, 
-            float keep=0.9, float threshold=0.4,
+            float keep=0.9, float threshold=0.01,
             float probabilityInterespecies=0.001, float probabilityNoCrossoverOff=0.25,
             float probabilityWeightMutated=0.8, 
             float probabilityAddNodeSmall=0.9, float probabilityAddLink_small=0.9,

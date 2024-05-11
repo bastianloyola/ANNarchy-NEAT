@@ -142,9 +142,12 @@ void Genome::createNode(int index){
 
 // Print genome
 void Genome::printGenome(){
-    std::cout << "IN - OUT - W - Innov - Ennable" << std::endl;
+    std::cout << "IN - OUT - W - Innov" << std::endl;
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        std::cout << connections[i].getInNode() << " " << connections[i].getOutNode() << " " << connections[i].getWeight() << " " << connections[i].getInnovation() << " " << connections[i].getEnabled() << std::endl;
+        if (connections[i].getEnabled()){
+            std::cout << connections[i].getInNode() << " " << connections[i].getOutNode() << " " << connections[i].getWeight() << " " << connections[i].getInnovation() << std::endl;
+
+        }
     }
 }
 

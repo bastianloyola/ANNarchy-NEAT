@@ -17,6 +17,7 @@ public:
     void add_genome(Genome *genome);
     void sort_genomes();
     void print();
+    void print_genomes();
 
 private:
 };

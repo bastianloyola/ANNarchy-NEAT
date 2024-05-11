@@ -26,6 +26,7 @@ class Population{
     void mutations();
     void evolution(int n);
     void print();
+    void print_best();
 
     int maxGenome;
 

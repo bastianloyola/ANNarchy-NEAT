@@ -29,7 +29,7 @@ void menu() {
     cout << "Choose an option:  a. create_connection  b. create_node "
         << "c. change weight d. print genome e. exit f. print population"
         <<" g. create snn h. evolucionar i. mutar z. crossover"
-        <<" y. print fitness" << endl;
+        <<" y. print fitness k. print best genome" << endl;
     cin >> option;
     switch (option) {
     case 'a':
@@ -158,6 +158,10 @@ void menu() {
         p.genomes.push_back(g3);
         break;
       }
+    case 'k':
+      //Print best genome
+      p.print_best();
+      break;
     }
   } while (option != 'e');
 }
