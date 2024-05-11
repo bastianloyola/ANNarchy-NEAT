@@ -8,22 +8,12 @@ using namespace std;
 
 void menu() {
      // Menu to test mutators
-  int in_node, out_node, new_weight, innovation, n_genomes, innov_c;
+  int in_node, out_node, new_weight, innovation, innov_c;
   char option;
 
-  //Ingresar la cantidad de genomes de la poblacion
-  cout << "Enter n_genomes: ";
-  cin >> n_genomes;
-
-  //Ingresar cantidad de nodos de entrada y de salida
-  int in, out;
-  cout << "Enter in_nodes: ";
-  cin >> in;
-  cout << "Enter out_nodes: ";
-  cin >> out;
-
+  Parameters param("config.cfg");
   // Crear poblacion
-  Population p(n_genomes, in, out);
+  Population p(&param);
 
   do {
     cout << "Choose an option:  a. create_connection  b. create_node "

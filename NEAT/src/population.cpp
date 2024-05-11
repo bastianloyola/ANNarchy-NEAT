@@ -15,12 +15,12 @@ using namespace std;
 std::mutex mtx;
 
 Population::Population(){}
-Population::Population(int n_genomes, int n_inputs, int n_outputs){
-    nGenomes = n_genomes;
-    nInputs = n_inputs;
-    nOutputs = n_outputs;
-    maxGenome = n_genomes;
-    parameters = Parameters(nGenomes, nInputs, nOutputs, keep=0.5);
+Population::Population(Parameters *param){
+    nGenomes = param->numberGenomes;
+    nInputs = param->numberInputs;
+    nOutputs = param->numberOutputs;
+    maxGenome = nGenomes;
+    parameters = *param;
     innov = Innovation(nInputs, nOutputs);
     Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
     threshold = parameters.threshold;

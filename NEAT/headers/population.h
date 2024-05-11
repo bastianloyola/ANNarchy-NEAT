@@ -15,7 +15,7 @@ class Population{
   public:  
     // Constructor de la clase
     Population();
-    Population(int n_genomes, int n_inputs, int n_outputs);
+    Population(Parameters *param);
 
     Parameters parameters;
     Innovation innov;
