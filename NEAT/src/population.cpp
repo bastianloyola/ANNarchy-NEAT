@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <filesystem>
+#include <iostream>
 
 using namespace std;
 
@@ -61,6 +63,7 @@ void Population::print(){
 }
 
 void Population::eliminate(){
+    string carpeta;
     for (int i = 0; i < (int)(species.size()); i++){
         int id,index;
         species[i].sort_genomes();
@@ -71,6 +74,13 @@ void Population::eliminate(){
             auto x = genomes.begin() + index;
             genomes.erase(x);
             species[i].genomes.pop_back();
+            carpeta = "annarchy/annarchy-"+to_string(id);
+            try {
+                filesystem::remove_all(carpeta);
+                //cout << "Carpeta " << carpeta << " eliminada correctamente\n";
+            } catch (const filesystem::filesystem_error& e) {
+                cerr << "Error al eliminar la carpeta " << carpeta << ": " << e.what() << '\n';
+            }
         }
     }
 }
