@@ -1,5 +1,8 @@
-NEAT/output
+NEAT/NEAT
 .vscode/settings.json
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 .vscode/settings.json
+NEAT/annarchy
+NEAT/__pycache__
+NEAT/bin
