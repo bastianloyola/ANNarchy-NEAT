@@ -26,13 +26,13 @@ Population::Population(Parameters *param){
     innov = Innovation(nInputs, nOutputs);
     Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
     threshold = parameters.threshold;
-    Species s = Species(g, threshold);
+    Species* s = new Species(g, threshold);
     species.push_back(s);
     genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
         g = new Genome(i,nInputs, nOutputs, innov, parameters);
         genomes.push_back(g);
-        species[0].add_genome(g);
+        species[0]->add_genome(g);
     }
     keep = parameters.keep;
 }
@@ -53,11 +53,22 @@ int Population::findIndexGenome(int id){
     return 0;
 }
 
+void Population::sort_species(){
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
+        for (int j = i+1; j < static_cast<int>(species.size()); j++){
+            if (species[i]->genome->getFitness() < species[j]->genome->getFitness()){
+                Species *temp = species[i];
+                species[i] = species[j];
+                species[j] = temp;
+            }
+        }
+    }
+}
 void Population::print(){
     //print genomes by species
     for (int i = 0; i < (int)(species.size()); i++){
         cout << "Species " << i << endl;
-        species[i].print_genomes();
+        species[i]->print_genomes();
         cout << "----------------" << endl;
     }
 }
@@ -65,26 +76,29 @@ void Population::print(){
 void Population::eliminate(){
     cout << "Eliminando..." << endl;
     string carpeta;
-    for (int i = 0; i < (int)(species.size()); i++){
-        int id,index;
-        species[i].sort_genomes();
-        int n = species[i].genomes.size() * (1-keep); 
+    int id,index,n;
+
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
+        species[i]->print_genomes();
+        species[i]->sort_genomes();
+        species[i]->print_genomes();
+        n = static_cast<int>(species[i]->genomes.size()) * (1-keep); 
         for (int j = 0; j < n; j++){
-            id = species[i].genomes.back()->getId();
+            id = species[i]->genomes.back()->getId();
+            
             index = findIndexGenome(id);
             auto x = genomes.begin() + index;
             genomes.erase(x);
             
-            species[i].genomes.pop_back();
+            species[i]->genomes.pop_back();
             carpeta = "annarchy/annarchy-"+to_string(id);
             
             try {
                 filesystem::remove_all(carpeta);
-                //cout << "Carpeta " << carpeta << " eliminada correctamente\n";
+                cout << "Carpeta " << carpeta << " eliminada correctamente\n";
             } catch (const filesystem::filesystem_error& e) {
                 cerr << "Error al eliminar la carpeta " << carpeta << ": " << e.what() << '\n';
             }
-            
         }
     }
     cout << "Fin Eliminación" << endl;
@@ -94,95 +108,125 @@ void Population::reproduce(){
     cout << "Reproduciendo..." << endl;
     Genome* offspring;
     Genome *g1, *g2;
-    vector<Genome*> offsprings;
-    int indexS1,indexS2,index;
+    int indexS1,indexS2,index,sSize,noCrossover;
     int n = nGenomes - static_cast<int>(genomes.size());
-    int noCrossover = n*parameters.percentageNoCrossoverOff;
-    cout << "noCrossover " << noCrossover << endl;
+
+    vector<int> speciesCrossover;
+    vector<int> speciesInterespeciesCrossover;
+    bool flagInterespecies = true; // true if there are not two or more species with more than 0 genome
+    bool flagCrossover = true; // true if there is no species with more than 1 genome
+
+     for (int i = 0; i < static_cast<int>(species.size()); i++){
+        sSize = static_cast<int>(species[i]->genomes.size());
+        if (sSize > 0){
+            speciesInterespeciesCrossover.push_back(i);
+            if (sSize > 1){
+                speciesCrossover.push_back(i);
+                flagCrossover = false;
+            }
+        }
+    }
+
+    if (static_cast<int>(speciesInterespeciesCrossover.size()) > 1){
+        flagInterespecies = false;
+    }
+    
+    if (flagCrossover && flagInterespecies){
+        noCrossover = n;
+    }else{ 
+        noCrossover = n*parameters.percentageNoCrossoverOff;
+    }
+    
+    //cout << "noCrossover " << noCrossover << endl;
     for (int i = 0; i < noCrossover; i++){
-        cout << "NC " << i << " " << endl;
+        //cout << "NC " << i << " " << endl;
         index = rand() % nGenomes;
         offspring = genomes[index];
         offspring->setId(maxGenome);
         maxGenome++;
         offspring->mutation();
-        offsprings.push_back(offspring);
+        genomes.push_back(offspring);
     }
-    cout << "Crossover " << n << " " << endl;
+
+    //cout << "Crossover " << n << " " << endl;
     for (int i = noCrossover; i < n; i++){
-        cout << "C " << i << " " << endl;
-        if (getBooleanWithProbability(parameters.probabilityInterespecies)){
-            indexS1 = rand() % species.size();
-            indexS2 = rand() % species.size();
+        //cout << "C " << i << " " << endl;
+        
+        if (getBooleanWithProbability(parameters.probabilityInterespecies) || flagCrossover){
+            indexS1 = speciesInterespeciesCrossover[ rand() % static_cast<int>(speciesInterespeciesCrossover.size())];
+            indexS2 = speciesInterespeciesCrossover[ rand() % static_cast<int>(speciesInterespeciesCrossover.size())];
             while(indexS1 == indexS2){
-                indexS2 = (indexS1 + 1) % species.size();
+                indexS2 = speciesInterespeciesCrossover[ rand() % static_cast<int>(speciesInterespeciesCrossover.size())];
             }
         }else{
-            indexS1 = rand() % species.size();
+            indexS1 = speciesCrossover[ rand() % static_cast<int>(speciesCrossover.size())];
             indexS2 = indexS1;
         }
-        g1 = species[indexS1].genomes[rand() % species[indexS1].genomes.size()];
-        g2 = species[indexS2].genomes[rand() % species[indexS2].genomes.size()];
+
+        g1 = species[indexS1]->genomes[rand() % static_cast<int>(species[indexS1]->genomes.size())];
+        g2 = species[indexS2]->genomes[rand() % static_cast<int>(species[indexS2]->genomes.size())];
+
+        while (g1->getId() == g2->getId()){
+            g2 = species[indexS2]->genomes[rand() % static_cast<int>(species[indexS2]->genomes.size())];
+        }
+        
         offspring = crossover(g1,g2);
-        offsprings.push_back(offspring);
-    }
-    
-    float bestCompatibility = 0;
-    int bestIndex = 0;
-    int aux;
-    for (int i = 0; i < (int)(offsprings.size()); i++){
-        for (int j = 0; j < (int)(species.size()); j++){
-            aux = (*offsprings[j]).compatibility(*species[j].genome);
-            if (aux > bestCompatibility){
-                bestCompatibility = aux;
-                bestIndex = j;
-            }
-        }
-        if (bestCompatibility >= species[bestIndex].threshold){
-            species[bestIndex].add_genome(offsprings[i]);
-        }else{
-            Species newSpecies = Species(offsprings[i],threshold);
-            species.push_back(newSpecies);
-        }
-        genomes.push_back(offsprings[i]);
+        genomes.push_back(offspring);
     }
     cout << "Fin Reproducción" << endl;
 }
 
 void Population::speciation(){
     cout << "Especiando..." << endl;
+    int nSpecies = static_cast<int>(species.size());
+    int nGenomes = static_cast<int>(genomes.size());
+    vector<int> idGenomeSpecies;
+    
     //Define new representative for each species
-    for (int i = 0; i < (int)(species.size()); i++){
-        species[i].sort_genomes();
+    for (int i = 0; i < nSpecies; i++){
+        //species[i].sort_genomes();
         //randomly select a genome from the species
-        int index = rand() % species[i].genomes.size();
-        species[i].genome = species[i].genomes[index];
+        int index = rand() % static_cast<int>(species[i]->genomes.size());
+        species[i]->genome = species[i]->genomes[index];
+        idGenomeSpecies.push_back(species[i]->genome->getId());
     }
 
     //Clear genomes from species
-    for (int i = 0; i < (int)(species.size()); i++){
-        species[i].genomes.clear();
+    for (int i = 0; i < nSpecies; i++){
+        species[i]->genomes.clear();
+        species[i]->genomes.push_back(species[i]->genome);
     }
 
+    int compatibility;
+    bool flag = true;
     //Add genomes to species
-    for (int i = 0; i < (int)(genomes.size()); i++){
-        float bestCompatibility = 0;
-        int bestIndex = 0;
-        int aux;
-        for (int j = 0; j < (int)(species.size()); j++){
-            aux = (*genomes[i]).compatibility(*species[j].genome);
-            if (aux > bestCompatibility){
-                bestCompatibility = aux;
-                bestIndex = j;
+    for (int i = 0; i < nGenomes; i++){
+        sort_species();
+        for (int j = 0; j < static_cast<int>(species.size()); j++){
+            compatibility = (*genomes[i]).compatibility(*species[j]->genome);
+            if (compatibility > parameters.threshold){
+                species[j]->add_genome(genomes[i]);
+                flag = false;
             }
         }
-        if (bestCompatibility >= species[bestIndex].threshold){
-            species[bestIndex].add_genome(genomes[i]);
-        }else{
-            Species newSpecies = Species(genomes[i],threshold);
+        if (flag){
+            Species* newSpecies = new Species(genomes[i], parameters.threshold);
             species.push_back(newSpecies);
         }
     }
+
+    //eliminar species con 0 genomas
+    int i;
+    while (i < static_cast<int>(species.size())) {
+        if (species[i]->genomes.size() == 0) {
+            species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
+            // No incrementar i ya que el siguiente elemento se ha movido a la posición i
+        } else {
+            // Solo incrementar i si no se elimina el elemento actual
+            i++;
+        }
+    }
+    
     cout << "Fin Especiación" << endl;
 }
 
@@ -257,49 +301,53 @@ void Population::evaluate() {
 
 // Crossover
 Genome* Population::crossover(Genome* g1, Genome* g2){
-    cout << "\nCrossover entre: " << g1->getId() << " y " << g2->getId() << endl;
-    g1->printGenome();
-    cout << "\n";
-    g2->printGenome();
-    cout << "Preciona para crear y ver offspring:";
+    //cout << "\nCrossover entre: " << g1->getId() << " y " << g2->getId() << endl;
 
-    vector<Connection> connections_a = g1->getConnections();
-    vector<Connection> connections_b = g2->getConnections();
-
-    vector<Connection> connections;
-
-    int connection_size_a = connections_a.size();
-    int connection_size_b = connections_b.size();
+    vector<Connection> connections_a, connections_b, connections;
 
     int count_a=0, count_b = 0;
     Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters);
     maxGenome++;
     vector<Node> offNodes;
+
     // select best fitness
     if (g1->getFitness() > g2->getFitness()){
         offspring->setFitness(g1->getFitness());
         offNodes = g1->getNodes();
+        connections_a = g1->getConnections();
+        connections_b = g2->getConnections();
+        //g1->printGenome();
+        //cout << "\n";
+        //g2->printGenome();
     }else{
         offspring->setFitness(g2->getFitness());
         offNodes = g2->getNodes();
+        connections_a = g2->getConnections();
+        connections_b = g1->getConnections();
+        //g2->printGenome();
+        //cout << "\n";
+        //g1->printGenome();
     }
-    cout << "Best fitness: " << offspring->getFitness() << endl;
+    int connection_size_a = connections_a.size();
+    int connection_size_b = connections_b.size();
+    
     // Add all connections based on the innovation number from both parents, if they are same add them randomly
     // if they are different, add them in order
     while (count_a < connection_size_a && count_b < connection_size_b){
         if (connections_a[count_a].getInnovation() == connections_b[count_b].getInnovation()){
-            connections.push_back(connections_a[count_a]);
+            if (rand() % 2 == 0){
+                connections.push_back(connections_a[count_a]);
+            }else{
+                connections.push_back(connections_b[count_b]);
+            }
             count_a++;
             count_b++;
         }
         else if (connections_a[count_a].getInnovation() < connections_b[count_b].getInnovation()){
-            // Disjoint
             connections.push_back(connections_a[count_a]);
             count_a++;
         }
         else{
-            // Excess
-            connections.push_back(connections_b[count_b]);
             count_b++;
         }
     }
@@ -310,15 +358,11 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
         connections.push_back(connections_a[count_a]);
         count_a++;
     }
-    while (count_b < connection_size_b)
-    {
-        connections.push_back(connections_b[count_b]);
-        count_b++;
-    }
 
     offspring->setConnections(connections);
     offspring->setNodes(offNodes);
     
+    //cout << "\n Resultado: " << endl;
     //offspring->printGenome();
     return offspring;
 
@@ -327,16 +371,16 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 void Population::mutations(){
     cout << "Mutando..." << endl;
     //mutate
-    for (int i = 0; i < (int)(species.size()); i++){
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
-        species[i].sort_genomes();
-        for (int j = 1; j < (int)(species[i].genomes.size()); j++){
-            cout << "\n -mutations_ " << species[i].genomes[j]->getId() << endl;
-            species[i].genomes[j]->printGenome();
+        species[i]->sort_genomes();
+        for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
+            //cout << "\n -mutations_ " << species[i].genomes[j]->getId() << endl;
+            //species[i].genomes[j]->printGenome();
             //cout << " precione enter para ver el genoma post mutación " << endl;
             //getchar();
-            species[i].genomes[j]->mutation();
-            species[i].genomes[j]->printGenome();
+            species[i]->genomes[j]->mutation();
+            //species[i].genomes[j]->printGenome();
         }
     }
     cout << "Fin Mutación " << endl;

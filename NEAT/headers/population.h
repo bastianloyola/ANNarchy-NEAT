@@ -20,7 +20,7 @@ class Population{
     Parameters parameters;
     Innovation innov;
     std::vector<Genome*> genomes;
-    std::vector<Species> species;
+    std::vector<Species*> species;
     float threshold;
     void evaluate();
     void mutations();
@@ -40,6 +40,7 @@ class Population{
     void eliminate();
     void reproduce();
     void speciation();
+    void sort_species();
     Genome* crossover(Genome* g1, Genome* g2);
   
   private:

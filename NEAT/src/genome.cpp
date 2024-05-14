@@ -63,6 +63,16 @@ Connection& Genome::getConnection(int in_node, int out_node){
     return null_connection;
 }
 
+bool Genome::connectionExist(int in_node, int out_node){
+    //Find connection in vector
+    for(int i = 0; i < static_cast<int>(connections.size()); i++){
+        if(connections[i].getInNode() == in_node && connections[i].getOutNode() == out_node){ 
+            return true;
+        }
+    }
+    return false;
+}
+
 Connection& Genome::getConnectionId(int innovation){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
@@ -217,7 +227,7 @@ void Genome::mutation(){
     }
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
-        cout << " mutate weight " << endl;
+        //cout << " mutate weight " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n)+1;
         Connection connection = connections[index];
@@ -233,7 +243,7 @@ void Genome::mutation(){
 
     // add node
     if (getBooleanWithProbability(add_node)){
-        cout << " add node " << endl;
+        //cout << " add node " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n);
         while (!(connections[index].getEnabled())){
@@ -244,7 +254,7 @@ void Genome::mutation(){
     // add connection
     if (getBooleanWithProbability(add_link)){
     //if (false){
-        cout << " add connection " << endl;
+        //cout << " add connection " << endl;
         int n = nodes.size();
 
         int in_node =  (int)(rand() % n);
@@ -252,6 +262,14 @@ void Genome::mutation(){
         while (in_node == out_node){
             out_node =  (int)(rand() % n);
         }
+        while (connectionExist(in_node, out_node)){
+            in_node =  (int)(rand() % n);
+            out_node =  (int)(rand() % n);
+            while (in_node == out_node){
+                out_node =  (int)(rand() % n);
+            }
+        }
+        
         float weight = (rand() % 200 - 100)/100.0;
         weight = weight + parameters->initial_weight;
         //exh or inh value
@@ -345,7 +363,7 @@ float Genome::compatibility(Genome g1){
 void Genome::sort_connections(){
     for (int i = 0; i < (int)(connections.size()); i++){
         for (int j = i+1; j < (int)(connections.size()); j++){
-            if (connections[i].getInnovation() < connections[j].getInnovation()){
+            if (connections[i].getInnovation() > connections[j].getInnovation()){
                 Connection temp = connections[i];
                 connections[i] = connections[j];
                 connections[j] = temp;
