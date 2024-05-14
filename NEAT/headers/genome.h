@@ -56,6 +56,8 @@ class Genome {
 
         float compatibility(Genome g1);
 
+        void sort_connections();
+
     private:
         int id;
         int numIn;

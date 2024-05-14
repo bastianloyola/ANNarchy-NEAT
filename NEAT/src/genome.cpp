@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 
@@ -40,7 +41,9 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     }
 }
 
-std::vector<Connection> Genome::getConnections(){ return connections;} ;      
+std::vector<Connection> Genome::getConnections(){ 
+    sort_connections();
+    return connections;} ;      
 std::vector<Node> Genome::getNodes(){ return nodes;}
 
 int Genome::getInNodes(){ return numIn;}
@@ -141,15 +144,24 @@ void Genome::createNode(int index){
 }
 
 // Print genome
-void Genome::printGenome(){
-    std::cout << "IN - OUT - W - Innov" << std::endl;
-    for(int i = 0; i < static_cast<int>(connections.size()); i++){
-        if (connections[i].getEnabled()){
-            std::cout << connections[i].getInNode() << " " << connections[i].getOutNode() << " " << connections[i].getWeight() << " " << connections[i].getInnovation() << std::endl;
+void Genome::printGenome() {
+    sort_connections();
+    cout << "Genome " << id << " Fitness: " << fitness << endl;
+    cout << std::setw(5) << "IN"
+         << std::setw(5) << "OUT"
+         << std::setw(10) << "Weight"
+         << std::setw(7) << "Innov" << endl;
 
+    for (int i = 0; i < static_cast<int>(connections.size()); i++) {
+        if (connections[i].getEnabled()) {
+            cout << std::setw(5) << connections[i].getInNode()
+                 << std::setw(5) << connections[i].getOutNode()
+                 << std::setw(10) << connections[i].getWeight()
+                 << std::setw(7) << connections[i].getInnovation() << endl;
         }
     }
 }
+
 
 float Genome::singleEvaluation(PyObject *load_module){
     //Inicializar varibles necesarias
@@ -205,7 +217,7 @@ void Genome::mutation(){
     }
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
-        //cout << " mutate weight " << endl;
+        cout << " mutate weight " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n)+1;
         Connection connection = connections[index];
@@ -221,7 +233,7 @@ void Genome::mutation(){
 
     // add node
     if (getBooleanWithProbability(add_node)){
-        //cout << " add node " << endl;
+        cout << " add node " << endl;
         int n = connections.size();
         int index =  (int)(rand() % n);
         while (!(connections[index].getEnabled())){
@@ -232,7 +244,7 @@ void Genome::mutation(){
     // add connection
     if (getBooleanWithProbability(add_link)){
     //if (false){
-        //cout << " add connection " << endl;
+        cout << " add connection " << endl;
         int n = nodes.size();
 
         int in_node =  (int)(rand() % n);
@@ -328,4 +340,16 @@ float Genome::compatibility(Genome g1){
 
     return value;
 
+}
+
+void Genome::sort_connections(){
+    for (int i = 0; i < (int)(connections.size()); i++){
+        for (int j = i+1; j < (int)(connections.size()); j++){
+            if (connections[i].getInnovation() < connections[j].getInnovation()){
+                Connection temp = connections[i];
+                connections[i] = connections[j];
+                connections[j] = temp;
+            }
+        }
+    }
 }
