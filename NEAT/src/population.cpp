@@ -207,24 +207,21 @@ void Population::speciation(){
 
     //Define new representative for each species
     for (int i = 0; i < nSpecies; i++){
-        //species[i].sort_genomes();
-        //randomly select a genome from the species
-        int index = rand() % static_cast<int>(species[i]->genomes.size());
-        species[i]->genome = species[i]->genomes[index];
-        this->genomes.push_back(auxGenomes[index]);
         
+        //randomly select a genome from the species
+        int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
+        
+        species[i]->genome = species[i]->genomes[index];
+        species[i]->genomes.clear();
+        species[i]->genomes.push_back(species[i]->genome);
+        genomes.push_back(species[i]->genome);
+
         for (int j = 0; j < static_cast<int>(auxGenomes.size()); j++){
             if (auxGenomes[j]->getId() == species[i]->genome->getId()){
                 auxGenomes.erase(auxGenomes.begin() + j);
                 break;
             }
         }
-    }
-    
-    //Clear genomes from species
-    for (int i = 0; i < nSpecies; i++){
-        species[i]->genomes.clear();
-        species[i]->genomes.push_back(species[i]->genome);
     }
 
     int compatibility;
