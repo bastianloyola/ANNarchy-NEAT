@@ -36,6 +36,7 @@ class Population{
 
     //
     Genome* findGenome(int id);
+    Genome* getBest();
     int findIndexGenome(int id);
     void eliminate();
     void reproduce();

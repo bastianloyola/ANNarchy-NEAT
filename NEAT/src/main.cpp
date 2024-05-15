@@ -12,7 +12,8 @@ int main() {
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
   
-  menu();
+  //menu();
+  run(2);
   cout << "finalized" << endl;
 
   Py_Finalize();

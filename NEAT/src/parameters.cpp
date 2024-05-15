@@ -33,6 +33,7 @@ void Parameters::loadFromCfg(const std::string& filename) {
                 else if (key == "numberGenomes") numberGenomes = std::stoi(value);
                 else if (key == "numberInputs") numberInputs = std::stoi(value);
                 else if (key == "numberOutputs") numberOutputs = std::stoi(value);
+                else if (key == "evolutions") evolutions = std::stoi(value);
             }
         }
     }

@@ -11,7 +11,7 @@ void menu() {
   int in_node, out_node, new_weight, innovation, innov_c;
   char option;
 
-  Parameters param("config.cfg");
+  Parameters param("config/config-0.cfg");
   // Crear poblacion
   Population p(&param);
 

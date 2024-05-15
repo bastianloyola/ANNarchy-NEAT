@@ -10,6 +10,7 @@
 #include "population.h"
 #include "funciones.h"
 #include "menu.h"
+#include "run.h"
 
 
 #endif

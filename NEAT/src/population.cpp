@@ -483,3 +483,16 @@ void Population::print_best(){
     cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
     genomes[bestIndex]->printGenome();
 }
+
+Genome* Population::getBest(){
+    float bestFitness = 0;
+    int bestIndex = 0;
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        if (genomes[i]->getFitness() > bestFitness){
+            bestFitness = genomes[i]->getFitness();
+            bestIndex = i;
+        }
+    }
+    
+    return genomes[bestIndex];
+}
