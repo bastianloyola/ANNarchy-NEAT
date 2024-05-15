@@ -37,6 +37,8 @@ class Genome {
         void setFitness(int new_fitness);
         void setConnections(std::vector<Connection> new_connections);
         void setNodes(std::vector<Node> new_nodes);
+        void setParameters(Parameters* new_parameters);
+        void setInnovation(Innovation* new_innov);
         // Mutators
 
         // Change weight, this depends
@@ -58,6 +60,7 @@ class Genome {
         float compatibility(Genome g1);
 
         void sort_connections();
+        void sort_nodes();
 
     private:
         int id;

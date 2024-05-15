@@ -5,6 +5,9 @@
 #include "connection.h"
 #include "genome.h"
 #include <python3.10/Python.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 //PyObject* create_numpy_array(vector<Connection> connections, int n, PyObject* numpy_array);
 //void createSNN(vector <Genome> genomes, int int_in_nodes, int int_out_nodes);
@@ -17,4 +20,7 @@ bool getBooleanWithProbability(double probability);
 bool compareFitness(Genome* a,Genome* b);
 bool compareInnovation(Connection& a,Connection& b);
 bool compareIdNode(Node& a,Node& b);
+int randomInt(int min, int max);
+void deleteDirectory(const std::string& path);
+
 #endif

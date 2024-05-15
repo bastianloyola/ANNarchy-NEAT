@@ -8,6 +8,12 @@
 #include <random>
 #include <atomic>
 #include <mutex>
+#include <cstdlib> // Para la función rand()
+#include <ctime>   // Para la función time()
+
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 using namespace std;
 /*
@@ -33,4 +39,47 @@ bool compareInnovation(Connection& a,Connection& b) {
 }
 bool compareIdNode(Node& a,Node& b) {
     return a.get_id() < b.get_id();
+}
+
+
+// Función para generar un número aleatorio en un rango específico [min, max]
+int randomInt(int min, int max) {
+    // Inicializa el generador de números aleatorios con una semilla única
+    srand(static_cast<unsigned int>(time(nullptr)));
+    
+    // Calcula el rango de los números aleatorios
+    int range = max - min;
+    
+    // Genera un número aleatorio dentro del rango y lo ajusta al mínimo
+    int randomNumber = rand() % range + min;
+    
+    return randomNumber;
+}
+
+void deleteDirectory(const std::string& path) {
+    DIR* dir = opendir(path.c_str());
+    if (dir) {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            std::string entryName = entry->d_name;
+            if (entryName != "." && entryName != "..") {
+                std::string fullPath = path + "/" + entryName;
+                struct stat entryInfo;
+                if (stat(fullPath.c_str(), &entryInfo) == 0) {
+                    if (S_ISDIR(entryInfo.st_mode)) {
+                        // Es un directorio, eliminar recursivamente
+                        deleteDirectory(fullPath);
+                    } else {
+                        // Es un archivo, eliminar
+                        unlink(fullPath.c_str());
+                    }
+                }
+            }
+        }
+        closedir(dir);
+        // Eliminar el directorio ahora que está vacío
+        rmdir(path.c_str());
+    } else {
+        std::cerr << "No se pudo abrir el directorio: " << path << std::endl;
+    }
 }

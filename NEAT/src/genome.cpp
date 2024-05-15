@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <random>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 
@@ -44,7 +45,9 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
 std::vector<Connection> Genome::getConnections(){ 
     sort_connections();
     return connections;} ;      
-std::vector<Node> Genome::getNodes(){ return nodes;}
+std::vector<Node> Genome::getNodes(){ 
+    sort_nodes();
+    return nodes;}
 
 int Genome::getInNodes(){ return numIn;}
 
@@ -108,6 +111,8 @@ void Genome::setId(int new_id){ id = new_id;}
 void Genome::setFitness(int new_fitness){ fitness = new_fitness;}
 void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
 void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
+void Genome::setParameters(Parameters* new_parameters){ parameters = new_parameters;}
+void Genome::setInnovation(Innovation* new_innov){ innov = new_innov;}
 // Mutators
 
 // Change weight, this depends
@@ -170,6 +175,7 @@ void Genome::printGenome() {
                  << std::setw(7) << connections[i].getInnovation() << endl;
         }
     }
+    cout << "---------------------" << endl;
 }
 
 
@@ -218,7 +224,7 @@ float Genome::singleEvaluation(PyObject *load_module){
 
 void Genome::mutation(){
     float add_node, add_link;
-    if ((int)(nodes.size()) < parameters->largeSize){
+    if (static_cast<int>(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
     }else{
@@ -229,11 +235,11 @@ void Genome::mutation(){
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
         //cout << " mutate weight " << endl;
         int n = connections.size();
-        int index =  (int)(rand() % n)+1;
+        int index =  randomInt(0,n);
         Connection connection = connections[index];
         
         while (!connection.getEnabled()){
-            index =  (int)(rand() % n)+1;
+            index =  randomInt(0,n);
             connection = connections[index];
         }
         //Random weight between -1 and 1
@@ -245,9 +251,9 @@ void Genome::mutation(){
     if (getBooleanWithProbability(add_node)){
         //cout << " add node " << endl;
         int n = connections.size();
-        int index =  (int)(rand() % n);
+        int index = randomInt(0,n);
         while (!(connections[index].getEnabled())){
-            index =  (int)(rand() % n);
+            index = randomInt(0,n);
         }
         createNode(index);
     }//else cout << " no -add node " << endl;
@@ -256,24 +262,23 @@ void Genome::mutation(){
     //if (false){
         //cout << " add connection " << endl;
         int n = nodes.size();
-
-        int in_node =  (int)(rand() % n);
-        int out_node =  (int)(rand() % n);
+        int in_node = randomInt(0,n);
+        int out_node = randomInt(0,n);
         while (in_node == out_node){
-            out_node =  (int)(rand() % n);
+            out_node = randomInt(0,n);;
         }
         while (connectionExist(in_node, out_node)){
-            in_node =  (int)(rand() % n);
-            out_node =  (int)(rand() % n);
+            in_node = randomInt(0,n);
+            out_node = randomInt(0,n);
             while (in_node == out_node){
-                out_node =  (int)(rand() % n);
+                out_node = randomInt(0,n);
             }
         }
         
         float weight = (rand() % 200 - 100)/100.0;
         weight = weight + parameters->initial_weight;
         //exh or inh value
-        float inh = (rand() % 2);
+        float inh = randomInt(0,2);;
         if (inh == 1){
             weight = -weight;
         }
@@ -283,30 +288,30 @@ void Genome::mutation(){
 
 float Genome::compatibility(Genome g1){
     float c1, c2, c3, e, d, n, value;
-    sort(connections.begin(), connections.end(), compareInnovation);
-    sort(g1.connections.begin(), g1.connections.end(), compareInnovation);
-    sort(nodes.begin(), nodes.end(), compareIdNode);
-    sort(g1.nodes.begin(), g1.nodes.end(), compareIdNode);
+    vector<Connection> connectionsG1 = getConnections();
+    vector<Connection> connectionsG2 = g1.getConnections();
+    vector<Node> nodesG1 = getNodes();
+    vector<Node> nodesG2 = g1.getNodes();
 
     int maxConnection, notMaxConnection;
     bool flag;
-    if (g1.connections.back().getInnovation() > connections.back().getInnovation()){
-        maxConnection = g1.connections.back().getInnovation();
-        notMaxConnection = connections.back().getInnovation();
+    if (connectionsG2.back().getInnovation() > connectionsG1.back().getInnovation()){
+        maxConnection = connectionsG2.back().getInnovation();
+        notMaxConnection = connectionsG1.back().getInnovation();
         flag = true;
     }else{
-        maxConnection = connections.back().getInnovation();
-        notMaxConnection = g1.connections.back().getInnovation();
+        maxConnection = connectionsG1.back().getInnovation();
+        notMaxConnection = connectionsG1.back().getInnovation();
         flag = false;
     }
 
-    if (g1.nodes.size() < 20 && nodes.size() < 20){
+    if (nodesG2.size() < 20 && nodesG1.size() < 20){
         n = 1;
     }else{
-        if (g1.nodes.size() > nodes.size()){
-            n = g1.nodes.size();
+        if (nodesG2.size() > nodesG1.size()){
+            n = nodesG2.size();
         }else{
-            n = nodes.size();
+            n = nodesG1.size();
         }
     }
     
@@ -320,29 +325,29 @@ float Genome::compatibility(Genome g1){
     e=0;
 
     for (int i = 0; i < notMaxConnection; i++){
-        if (g1.connections[count1].getInnovation() == i){
-            if (connections[count2].getInnovation() == i){
+        if (connectionsG2[count1].getInnovation() == i){
+            if (connectionsG1[count2].getInnovation() == i){
                 matching++;
-                weightDifference += abs(g1.connections[count1].getWeight() - connections[count2].getWeight());
+                weightDifference += abs(connectionsG2[count1].getWeight() - connectionsG1[count2].getWeight());
                 count1++;
                 count2++;
             }else{
                 d++;
                 count1++;
             }   
-        }else if (connections[count2].getInnovation() == i){
+        }else if (connectionsG1[count2].getInnovation() == i){
             d++;
             count2++;
         }
     }
     for (int i = notMaxConnection; i < maxConnection; i++){
         if (flag){
-            if (g1.connections[count1].getInnovation() == i){
+            if (connectionsG2[count1].getInnovation() == i){
                 e++;
                 count1++;
             }
         }else{
-            if (connections[count2].getInnovation() == i){
+            if (connectionsG1[count2].getInnovation() == i){
                 e++;
                 count2++;
             }
@@ -355,9 +360,7 @@ float Genome::compatibility(Genome g1){
 
     value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/n);
     
-
     return value;
-
 }
 
 void Genome::sort_connections(){
@@ -367,6 +370,18 @@ void Genome::sort_connections(){
                 Connection temp = connections[i];
                 connections[i] = connections[j];
                 connections[j] = temp;
+            }
+        }
+    }
+}
+
+void Genome::sort_nodes(){
+    for (int i = 0; i < (int)(nodes.size()); i++){
+        for (int j = i+1; j < (int)(nodes.size()); j++){
+            if (nodes[i].get_id() > nodes[j].get_id()){
+                Node temp = nodes[i];
+                nodes[i] = nodes[j];
+                nodes[j] = temp;
             }
         }
     }

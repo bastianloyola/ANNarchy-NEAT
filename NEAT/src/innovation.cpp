@@ -41,7 +41,6 @@ int Innovation::addConnection(int in, int out){
 }
 
 int Innovation::addNode(int in, int out){
-
     for (int i = 0; i < maxNode ; i++){
         if (splits[i].in == in && splits[i].out == out){
             return splits[i].id;

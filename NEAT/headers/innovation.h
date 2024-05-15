@@ -2,32 +2,30 @@
 #define INNOVATION_H
 
 #include <vector>
-
-
-struct Split{
-    int in;
-    int out;
-    int id;
-};
-struct Link{
+struct Link {
     int in;
     int out;
     int id;
 };
 
-class Innovation{
-    public:
-        Innovation();
-        Innovation(int in, int out);
-        std::vector<Split> splits;
-        std::vector<Link> links;
+struct Split {
+    int in;
+    int out;
+    int id;
+};
 
-        int addConnection(int in, int out);
-        int addNode(int in, int out);
+class Innovation {
+private:
+    int maxNode;
+    int maxConnection;
+    std::vector<Link> links;
+    std::vector<Split> splits;
 
-    private:
-        int maxNode;
-        int maxConnection;
+public:
+    Innovation();
+    Innovation(int in, int out);
+    int addConnection(int in, int out);
+    int addNode(int in, int out);
 };
 
 #endif
