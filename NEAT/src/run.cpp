@@ -16,7 +16,7 @@ std::vector<std::string> configNames(std::string directory) {
     std::string path = "config";
     DIR* dir = opendir(path.c_str());
     if (dir == nullptr) {
-        std::cerr << "No se pudo abrir el directorio." << std::endl;
+        std::cerr << "configNames: No se pudo abrir el directorio." << std::endl;
     }
 
     struct dirent* entry;
@@ -36,7 +36,7 @@ void saveRun(Population* population, int n, string filename) {
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
-        cerr << "No se pudo abrir el archivo." << filename <<endl;
+        cerr << "saveRun: No se pudo abrir el archivo." << filename <<endl;
     }
     outfile << "--Results of run:" << n << " --\n";
     outfile << "Best Genome \n";
@@ -67,7 +67,7 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
-        cerr << "No se pudo abrir el archivo." << filename <<endl;
+        cerr << "saveResults: No se pudo abrir el archivo." << filename <<endl;
     }
 
     outfile << "Summerized results: \n";
@@ -81,7 +81,7 @@ int getResultName(){
     std::string path = "results";
     DIR* dir = opendir(path.c_str());
     if (dir == nullptr) {
-        std::cerr << "No se pudo abrir el directorio." << std::endl;
+        std::cerr << "getResultName: No se pudo abrir el directorio." << std::endl;
     }
 
     struct dirent* entry;
@@ -100,7 +100,7 @@ int getResultName(){
 int run(int timesPerConfig) {
 
     int n = getResultName();
-    string filename = "resuts/results-"+to_string(n)+".txt";
+    string filename = "results/results-"+to_string(n)+".txt";
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
@@ -110,7 +110,7 @@ int run(int timesPerConfig) {
     for (int j = 0; j < nConfig; j++){
         ofstream outfile(filename, ios::app);
         if(!outfile) {
-            cerr << "No se pudo abrir el archivo." << filename <<endl;
+            cerr << "run: No se pudo abrir el archivo." << filename <<endl;
         }
         outfile << "---- Results of cofig: " << j << " ----\n";
         outfile.close();
