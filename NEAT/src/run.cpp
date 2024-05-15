@@ -31,10 +31,8 @@ std::vector<std::string> configNames(std::string directory) {
     return configNames;
 }
 
-void saveRun(Population* population, int n) {
+void saveRun(Population* population, int n, string filename) {
     Genome* best = population->getBest();
-
-    string filename = "results.txt";
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
@@ -65,8 +63,7 @@ void saveRun(Population* population, int n) {
     outfile.close();
 }
 
-void saveResults(vector<int> bestFitness, int n ){
-    string filename = "results.txt";
+void saveResults(vector<int> bestFitness, int n, string filename) {
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
@@ -80,8 +77,30 @@ void saveResults(vector<int> bestFitness, int n ){
     outfile.close();
 }
 
+int getResultName(){
+    std::string path = "results";
+    DIR* dir = opendir(path.c_str());
+    if (dir == nullptr) {
+        std::cerr << "No se pudo abrir el directorio." << std::endl;
+    }
+
+    struct dirent* entry;
+    int n = 0;
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string name = entry->d_name;
+        if (name != "." && name != "..") {
+            n++;
+        }
+    }
+
+    closedir(dir);
+    return n;
+}
+
 int run(int timesPerConfig) {
-    string filename = "results.txt";
+
+    int n = getResultName();
+    string filename = "results-"+to_string(n)+".txt";
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
@@ -102,10 +121,10 @@ int run(int timesPerConfig) {
             evolutions = parameters.evolutions;
 
             population.evolution(evolutions);
-            saveRun(&population, i);
+            saveRun(&population, i, filename);
             bestFitnes.push_back(population.getBest()->getFitness());
         }
-        saveResults(bestFitnes, timesPerConfig);
+        saveResults(bestFitnes, timesPerConfig, filename);
         bestFitnes.clear();
     }
     return 0;

@@ -9,8 +9,9 @@
 
 
 std::vector<std::string> configNames(std::string directory);
-void saveRun(Population* population, int n);
-void saveResults(std::vector<int> bestFitnes, int n);
+void saveRun(Population* population, int n, std::string filename);
+void saveResults(std::vector<int> bestFitnes, int n, std::string filename);
+int getResultName();
 int run(int timesPerConfig);
 
 #endif
