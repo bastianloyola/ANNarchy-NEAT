@@ -100,7 +100,7 @@ int getResultName(){
 int run(int timesPerConfig) {
 
     int n = getResultName();
-    string filename = "results-"+to_string(n)+".txt";
+    string filename = "resuts/results-"+to_string(n)+".txt";
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
