@@ -13,7 +13,7 @@ int main() {
   Py_Initialize();
   
   //menu();
-  run(2);
+  run(20);
   cout << "finalized" << endl;
 
   Py_Finalize();
