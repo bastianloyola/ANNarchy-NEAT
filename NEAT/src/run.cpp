@@ -97,30 +97,9 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     outfile.close();
 }
 
-int getResultName(){
-    std::string path = "results";
-    DIR* dir = opendir(path.c_str());
-    if (dir == nullptr) {
-        std::cerr << "getResultName: No se pudo abrir el directorio." << std::endl;
-    }
-
-    struct dirent* entry;
-    int n = 0;
-    while ((entry = readdir(dir)) != nullptr) {
-        std::string name = entry->d_name;
-        if (name != "." && name != "..") {
-            n++;
-        }
-    }
-
-    closedir(dir);
-    return n;
-}
-
 int run(int timesPerConfig) {
 
-    int n = getResultName();
-    string filename = "results/results-"+to_string(n)+".txt";
+    string filename = "results/results.txt";
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
