@@ -30,6 +30,18 @@ std::vector<std::string> configNames(std::string directory) {
     closedir(dir);
     return configNames;
 }
+void saveConfig(std::string filename, std::string configName) {
+    std::ifstream file(configName); // Abrir el archivo
+    std::string line;
+
+    ofstream outfile(filename, ios::app);
+    // Leer línea por línea del archivo
+    while (std::getline(file, line)) {
+        outfile << "  " << line << "\n";
+    }
+    outfile << "\n";
+    outfile.close();
+}
 
 void saveRun(Population* population, int n, string filename) {
     Genome* best = population->getBest();
@@ -60,6 +72,7 @@ void saveRun(Population* population, int n, string filename) {
                     << std::setw(7) << connections[i].getInnovation() << "\n";
         }
     }
+    outfile << "\n";
     outfile.close();
 }
 
@@ -74,6 +87,7 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     for (int i = 0; i < n; i++){
         outfile << "run: " << i << " bestFitness: " << bestFitness[i] << "\n";
     }
+    outfile << "--------------------------------------------------------------\n";
     outfile.close();
 }
 
@@ -112,8 +126,9 @@ int run(int timesPerConfig) {
         if(!outfile) {
             cerr << "run: No se pudo abrir el archivo." << filename <<endl;
         }
-        outfile << "---- Results of cofig: " << j << " ----\n";
+        outfile << "\n---- Results of cofig: " << j << " ----\n";
         outfile.close();
+        saveConfig(filename, "config/" + names[j]);
 
         Parameters parameters("config/" + names[j]);
         for (int i = 0; i < timesPerConfig; i++){
