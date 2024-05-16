@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -87,6 +88,11 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     for (int i = 0; i < n; i++){
         outfile << "run: " << i << " bestFitness: " << bestFitness[i] << "\n";
     }
+    //Percentage of max fitness
+    int max = *max_element(bestFitness.begin(), bestFitness.end());
+    int nMax = count(bestFitness.begin(), bestFitness.end(), max);
+    float percentage = (nMax * 100.0) / n;
+    outfile << "Max fitness: " << max << "\nPercentage: " << percentage << "% (" << nMax << " of " << n << ")\n";
     outfile << "--------------------------------------------------------------\n";
     outfile.close();
 }
