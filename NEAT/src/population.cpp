@@ -259,73 +259,93 @@ void Population::speciation(){
 }
 
 void Population::evaluate() {
-    cout << "Evaluando..." << endl;
-    // Importar modulo
+    std::cout << "Evaluando..." << std::endl;
+    // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
+    Py_DECREF(name);
+
     // Crear un vector para almacenar los valores de fitness de cada genoma
     std::vector<float> fitness_values(nGenomes, 0.0f);
 
+    // Obtener número máximo de procesos
+    long max_processes = sysconf(_SC_CHILD_MAX);
+    if (max_processes == -1) {
+        std::cerr << "Error al obtener el número máximo de procesos" << std::endl;
+        return;
+    }
+
+    std::cout << "Número máximo de procesos permitidos: " << max_processes << std::endl;
+
+    // Dividir los genomas entre los procesos
+    int genomes_per_process = (nGenomes + max_processes - 1) / max_processes; // Redondeo hacia arriba
+
     // Crear un vector de pipes para la comunicación con los procesos hijos
-    std::vector<int[2]> pipes(nGenomes);
+    std::vector<std::array<int, 2>> pipes(max_processes);
 
     // Crear un vector para almacenar los IDs de procesos hijos
     std::vector<pid_t> child_processes;
 
-    for (int i = 0; i < nGenomes; i++) {
+    for (int i = 0; i < max_processes; ++i) {
+        int start = i * genomes_per_process;
+        int end = std::min(start + genomes_per_process, nGenomes);
+
+        if (start >= nGenomes) {
+            break;
+        }
+
         // Crear un nuevo pipe para la comunicación con el proceso hijo
-        if (pipe(pipes[i]) == -1) {
-            // Manejo de error si pipe() falla
+        if (pipe(pipes[i].data()) == -1) {
             std::cerr << "Error al crear pipe" << std::endl;
             return;
         }
 
-        // Crear un nuevo proceso hijo
         pid_t pid = fork();
-
         if (pid == 0) {
-            // Código para el proceso hijo: llamar a singleEvaluation
-            float fitness = genomes[i]->singleEvaluation(load_module);
+            // Código para el proceso hijo
+            close(pipes[i][0]); // Cerrar el extremo de lectura del pipe en el hijo
 
-            // Escribir el valor de fitness en el pipe
-            close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
-            write(pipes[i][1], &fitness, sizeof(float));
+            std::vector<float> child_fitness_values(end - start, 0.0f);
+
+            for (int j = start; j < end; ++j) {
+                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module);
+            }
+
+            // Escribir los valores de fitness al proceso padre
+            write(pipes[i][1], child_fitness_values.data(), (end - start) * sizeof(float));
             close(pipes[i][1]); // Cerrar el extremo de escritura del pipe
 
             exit(0); // Salir del proceso hijo después de ejecutar singleEvaluation
         } else if (pid < 0) {
-            // Manejo de error si fork() falla
             std::cerr << "Error al crear proceso hijo" << std::endl;
         } else {
-            // Almacenar el ID del proceso hijo
+            close(pipes[i][1]); // Cerrar el extremo de escritura del pipe en el padre
             child_processes.push_back(pid);
         }
     }
 
     // Esperar a que todos los procesos hijos terminen y leer los valores de fitness de los pipes
-    for (int i = 0; i < nGenomes; i++) {
-        // Cerrar el extremo de escritura del pipe
-        close(pipes[i][1]);
+    for (int i = 0; i < static_cast<int>(child_processes.size()); ++i) {
+        waitpid(child_processes[i], nullptr, 0);
 
-        // Leer el valor de fitness desde el pipe
-        float fitness;
-        read(pipes[i][0], &fitness, sizeof(float));
-        fitness_values[i] = fitness;
+        int start = i * genomes_per_process;
+        int end = std::min(start + genomes_per_process, nGenomes);
 
-        // Cerrar el extremo de lectura del pipe
-        close(pipes[i][0]);
+        read(pipes[i][0], fitness_values.data() + start, (end - start) * sizeof(float));
+        close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
     }
 
     // Actualizar los valores de fitness en los genomas correspondientes
-    for (int i = 0; i < nGenomes; i++) {
-        mtx.lock(); // Bloquear el mutex antes de acceder a los datos compartidos
+    for (int i = 0; i < nGenomes; ++i) {
+        std::lock_guard<std::mutex> lock(mtx);
         genomes[i]->setFitness(fitness_values[i]);
-        mtx.unlock(); // Desbloquear el mutex después de actualizar el fitness
     }
 
-    // Decref
-    cout << "Fin Evaluación" << endl;
+    Py_DECREF(load_module);
+
+    std::cout << "Fin Evaluación" << std::endl;
 }
+
 
 // Crossover
 Genome* Population::crossover(Genome* g1, Genome* g2){
@@ -396,6 +416,7 @@ void Population::mutations(){
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
+            cout << "--Mutando genome " << species[i]->genomes[j]->getId() << endl;
             species[i]->genomes[j]->mutation();
         }
     }
