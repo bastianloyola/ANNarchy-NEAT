@@ -100,6 +100,9 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
 int run(int timesPerConfig) {
 
     string filename = "results/results.txt";
+    string folder_path_1= "annarchy"; // Ruta de la carpeta que deseas borrar
+    string folder_path_2 = "__pycache__"; // Ruta de la carpeta que deseas borrar
+    
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
@@ -123,6 +126,21 @@ int run(int timesPerConfig) {
             population.evolution(evolutions);
             saveRun(&population, i, filename);
             bestFitnes.push_back(population.getBest()->getFitness());
+
+            try {
+                // Borrar la carpeta y su contenido
+                remove(folder_path_1.c_str());
+                cout <<"La carpeta annarchy y su contenido han sido eliminados correctamente.\n";
+            } catch (const exception& e) {
+                cerr << "Error al intentar borrar la carpeta annarchy: " << e.what() << '\n';
+            }
+            try {
+                // Borrar la carpeta y su contenido
+                remove(folder_path_2.c_str());
+                cout <<"La carpeta __pycache__ y su contenido han sido eliminados correctamente.\n";
+            } catch (const exception& e) {
+                cerr << "Error al intentar borrar la carpeta annarchy: " << e.what() << '\n';
+            }
         }
         saveResults(bestFitnes, timesPerConfig, filename);
         bestFitnes.clear();
