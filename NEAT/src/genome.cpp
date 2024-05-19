@@ -55,15 +55,15 @@ int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
 float Genome::getFitness(){ return fitness;}
 
-Connection& Genome::getConnection(int in_node, int out_node){
+Connection* Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].getInNode() == in_node && connections[i].getOutNode() == out_node){ 
-            return connections[i];
+            return &connections[i];
         }
     }
     static Connection null_connection;
-    return null_connection;
+    return &null_connection;
 }
 
 bool Genome::connectionExist(int in_node, int out_node){
@@ -76,15 +76,15 @@ bool Genome::connectionExist(int in_node, int out_node){
     return false;
 }
 
-Connection& Genome::getConnectionId(int innovation){
+Connection* Genome::getConnectionId(int innovation){
     //Find connection in vector
     for(int i = 0; i < static_cast<int>(connections.size()); i++){
         if(connections[i].getInnovation() == innovation){
-            return connections[i];
+            return &connections[i];
         }
     }
     static Connection null_connection;
-    return null_connection;
+    return &null_connection;
 }
 
 int Genome::getIndexConnection(int innovation){
@@ -223,7 +223,9 @@ float Genome::singleEvaluation(PyObject *load_module){
 }
 
 void Genome::mutation(){
+    std::cout << "Dento de genome.mutation..." << std::endl;
     float add_node, add_link;
+
     if (static_cast<int>(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
@@ -231,12 +233,14 @@ void Genome::mutation(){
         add_node = parameters->probabilityAddNodeSmall;
         add_link = parameters->probabilityAddLinkSmall;
     }
+
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
+        std::cout << "Dento de genome.mutation.weight..." << std::endl;
         int n = connections.size();
         int index =  randomInt(0,n);
         Connection connection = connections[index];
-        
+
         while (!connection.getEnabled()){
             index =  randomInt(0,n);
             connection = connections[index];
@@ -244,42 +248,56 @@ void Genome::mutation(){
         //Random weight between -1 and 1
         float weight = (rand() % 200 - 100)/100.0;
         changeWeight(index,weight);
+        std::cout << "Fin de genome.mutation.weight..." << std::endl;
     }
 
     // add node
     if (getBooleanWithProbability(add_node)){
+        std::cout << "Dento de genome.mutation.addNode..." << std::endl;
         int n = connections.size();
         int index = randomInt(0,n);
+
         while (!(connections[index].getEnabled())){
             index = randomInt(0,n);
         }
         createNode(index);
+        std::cout << "Fin de genome.mutation.addNode..." << std::endl;
     }
-    // add connection
-    if (getBooleanWithProbability(add_link)){
-        int n = nodes.size();
-        int in_node = randomInt(0,n);
-        int out_node = randomInt(0,n);
-        while (in_node == out_node){
-            out_node = randomInt(0,n);;
-        }
-        while (connectionExist(in_node, out_node)){
-            in_node = randomInt(0,n);
-            out_node = randomInt(0,n);
-            while (in_node == out_node){
-                out_node = randomInt(0,n);
-            }
-        }
-        
-        float weight = (rand() % 200 - 100)/100.0;
-        weight = weight + parameters->initial_weight;
 
-        float inh = randomInt(0,2);;
-        if (inh == 1){
-            weight = -weight;
+    // add connection
+    //if (getBooleanWithProbability(add_link)){
+    if (true){
+        std::cout << "Dento de genome.mutation.addConnection..." << std::endl;
+        int n = nodes.size();
+        std::cout << "n: " << n << std::endl;
+        int in_node = randomInt(0,n);
+        std::cout << "in_node: " << in_node << std::endl;
+        int out_node = randomInt(0,n);
+        std::cout << "out_node: " << out_node << std::endl;
+
+        while (in_node == out_node){
+            out_node = randomInt(0,n);
+            std::cout << "*out_node: " << out_node << std::endl;
         }
-        createConnection(in_node, out_node, weight);
+        if (connectionExist(in_node, out_node)){
+            Connection* conn = getConnection(in_node, out_node);
+            if (!conn->getEnabled()){
+                conn->setEnabled(true);
+            }
+        }else{
+            float weight = (rand() % 200 - 100)/100.0;
+            weight = weight + parameters->initial_weight;
+
+            float inh = randomInt(0,2);            
+            if (inh == 1){
+                weight = -weight;
+            }
+            createConnection(in_node, out_node, weight);
+        }
+        std::cout << "Fin de genome.mutation.addConnection..." << std::endl;
     }
+
+    std::cout << "Fin de genome.mutation..." << std::endl;
 }
 
 float Genome::compatibility(Genome g1){

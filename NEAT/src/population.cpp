@@ -278,7 +278,11 @@ void Population::evaluate() {
     std::cout << "Número máximo de procesos permitidos: " << max_processes << std::endl;
 
     // Dividir los genomas entre los procesos
-    int genomes_per_process = (nGenomes + max_processes - 1) / max_processes; // Redondeo hacia arriba
+    int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
+    if (genomes_per_process == 0){
+        genomes_per_process = 1;
+    }
+    
 
     // Crear un vector de pipes para la comunicación con los procesos hijos
     std::vector<std::array<int, 2>> pipes(max_processes);
@@ -293,7 +297,7 @@ void Population::evaluate() {
         if (start >= nGenomes) {
             break;
         }
-
+        
         // Crear un nuevo pipe para la comunicación con el proceso hijo
         if (pipe(pipes[i].data()) == -1) {
             std::cerr << "Error al crear pipe" << std::endl;
@@ -416,7 +420,6 @@ void Population::mutations(){
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
-            cout << "--Mutando genome " << species[i]->genomes[j]->getId() << endl;
             species[i]->genomes[j]->mutation();
         }
     }

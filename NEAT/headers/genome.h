@@ -25,9 +25,9 @@ class Genome {
         float getFitness();
         int getId();
 
-        Connection& getConnection(int in_node, int out_node);
+        Connection* getConnection(int in_node, int out_node);
         bool connectionExist(int in_node, int out_node);
-        Connection& getConnectionId(int innovation);
+        Connection* getConnectionId(int innovation);
 
         int getIndexConnection(int innovation);
 

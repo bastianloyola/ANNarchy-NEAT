@@ -44,16 +44,13 @@ bool compareIdNode(Node& a,Node& b) {
 
 // Función para generar un número aleatorio en un rango específico [min, max]
 int randomInt(int min, int max) {
-    // Inicializa el generador de números aleatorios con una semilla única
-    srand(static_cast<unsigned int>(time(nullptr)));
-    
-    // Calcula el rango de los números aleatorios
-    int range = max - min;
-    
-    // Genera un número aleatorio dentro del rango y lo ajusta al mínimo
-    int randomNumber = rand() % range + min;
-    
-    return randomNumber;
+    // Generador de números aleatorios
+    std::random_device rd;  // Semilla aleatoria
+    std::mt19937 gen(rd()); // Generador Mersenne Twister
+    std::uniform_int_distribution<> distrib(min, max-1);
+
+    // Genera un número aleatorio dentro del rango
+    return distrib(gen);
 }
 
 void deleteDirectory(const std::string& path) {
