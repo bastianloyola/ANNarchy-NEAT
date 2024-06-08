@@ -2,6 +2,8 @@ from ANNarchy import *
 import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
+import scipy.sparse
+
 
 LIF = Neuron(
     parameters = """
@@ -26,16 +28,18 @@ def snn(n_entrada, n_salida, n, i, matrix):
         proj = Projection(pre=pop, post=pop, target='exc')
         #print(matrix,"\n")
         #Matrix to numpy array
-        matrix = np.array(matrix)
+        
+        #lil_matrix scipy nxn with values of matrix
+        lil_matrix = scipy.sparse.lil_matrix((int(n), int(n)))
+        n_rows = matrix.shape[0]
+        n_cols = matrix.shape[1]
+        lil_matrix[:n_rows, :n_cols] = matrix
 
-        #Reemplazar los valores 0 por None
-        #matrix[matrix == 0] = None
-
-        proj.connect_from_matrix(matrix)
+        proj.connect_from_sparse(lil_matrix)
         #print('nombre')
         nombre = 'annarchy/annarchy-'+str(int(i))
         #print(nombre)
-        compile(directory=nombre)
+        compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike'])
         input_index = []
         output_index = []
@@ -137,3 +141,5 @@ def exampleIzhikevich():
     plt.tight_layout()
     plt.show()
     return 0
+
+

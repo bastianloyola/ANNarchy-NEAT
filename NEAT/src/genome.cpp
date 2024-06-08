@@ -12,13 +12,14 @@ using namespace std;
 
 // Constructors
 Genome::Genome(){}
-Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E){
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E, int idAnnarchy){
     id = new_id;
     numIn = num_in;
     numOut = num_out;
     fitness = 0;
     innov = &innov_E;
     parameters = &parameters_E;  
+    id_annarchy = idAnnarchy;
     for (int i = 0; i < numIn; i++){
         Node n(i+1, 0);
         nodes.push_back(n);
@@ -54,6 +55,7 @@ int Genome::getInNodes(){ return numIn;}
 int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
 float Genome::getFitness(){ return fitness;}
+int Genome::getIdAnnarchy(){ return id_annarchy;}
 
 Connection* Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
@@ -113,6 +115,7 @@ void Genome::setConnections(std::vector<Connection> new_connections){ connection
 void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 void Genome::setParameters(Parameters* new_parameters){ parameters = new_parameters;}
 void Genome::setInnovation(Innovation* new_innov){ innov = new_innov;}
+void Genome::setIdAnnarchy(int new_id_annarchy){ id_annarchy = new_id_annarchy;}
 // Mutators
 
 // Change weight, this depends
@@ -182,12 +185,12 @@ void Genome::printGenome() {
 float Genome::singleEvaluation(PyObject *load_module){
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
+    int n_max = parameters->n_max; 
     int numConnections = static_cast<int>(connections.size());
-
     //Obtener npArray
     double data[n*n];
-    for (int i = 0; i < n * n; ++i) {
-        data[i] = 0.0;
+    for (int i = 0; i < n*n; i++){
+        data[i] = 0;
     }
     for (int i = 0; i < numConnections; i++) {
         int in_node = connections[i].getInNode();
@@ -198,6 +201,7 @@ float Genome::singleEvaluation(PyObject *load_module){
             data[index] = weight;
         }
     }
+
     _import_array();
     npy_intp dims[2] = {n, n};
     PyObject* numpy_array = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, data);
@@ -205,7 +209,7 @@ float Genome::singleEvaluation(PyObject *load_module){
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
 
-    PyObject* args = PyTuple_Pack(5, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n)), PyFloat_FromDouble(double(id)), numpy_array);
+    PyObject* args = PyTuple_Pack(5, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array);
 
     PyObject* callfunc = PyObject_CallObject(func, args);
 
@@ -223,7 +227,6 @@ float Genome::singleEvaluation(PyObject *load_module){
 }
 
 void Genome::mutation(){
-    std::cout << "Dento de genome.mutation..." << std::endl;
     float add_node, add_link;
 
     if (static_cast<int>(nodes.size()) < parameters->largeSize){
@@ -236,7 +239,6 @@ void Genome::mutation(){
 
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
-        std::cout << "Dento de genome.mutation.weight..." << std::endl;
         int n = connections.size();
         int index =  randomInt(0,n);
         Connection connection = connections[index];
@@ -248,12 +250,11 @@ void Genome::mutation(){
         //Random weight between -1 and 1
         float weight = (rand() % 200 - 100)/100.0;
         changeWeight(index,weight);
-        std::cout << "Fin de genome.mutation.weight..." << std::endl;
     }
 
-    // add node
-    if (getBooleanWithProbability(add_node)){
-        std::cout << "Dento de genome.mutation.addNode..." << std::endl;
+    // add nodeç
+    int n_max = parameters->n_max;
+    if (getBooleanWithProbability(add_node) && n_max >  (int)(nodes.size())){
         int n = connections.size();
         int index = randomInt(0,n);
 
@@ -261,23 +262,16 @@ void Genome::mutation(){
             index = randomInt(0,n);
         }
         createNode(index);
-        std::cout << "Fin de genome.mutation.addNode..." << std::endl;
     }
 
     // add connection
-    //if (getBooleanWithProbability(add_link)){
-    if (true){
-        std::cout << "Dento de genome.mutation.addConnection..." << std::endl;
+    if (getBooleanWithProbability(add_link)){
         int n = nodes.size();
-        std::cout << "n: " << n << std::endl;
         int in_node = randomInt(0,n);
-        std::cout << "in_node: " << in_node << std::endl;
         int out_node = randomInt(0,n);
-        std::cout << "out_node: " << out_node << std::endl;
 
         while (in_node == out_node){
             out_node = randomInt(0,n);
-            std::cout << "*out_node: " << out_node << std::endl;
         }
         if (connectionExist(in_node, out_node)){
             Connection* conn = getConnection(in_node, out_node);
@@ -294,10 +288,7 @@ void Genome::mutation(){
             }
             createConnection(in_node, out_node, weight);
         }
-        std::cout << "Fin de genome.mutation.addConnection..." << std::endl;
     }
-
-    std::cout << "Fin de genome.mutation..." << std::endl;
 }
 
 float Genome::compatibility(Genome g1){

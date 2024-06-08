@@ -34,6 +34,8 @@ public:
     float c3;
     float initial_weight;
     int evolutions;
+    int process_max;
+    int n_max;
 
 private:
     // Función para cargar los parámetros desde el archivo cfg

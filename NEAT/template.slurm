@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=dicyt-t1
-#SBATCH --output=/home/XI/gfernandez/neat-tests/tests/NEAT-1/output.txt
-#SBATCH --error=/home/XI/gfernandez/neat-tests/tests/NEAT-1/error.txt
+#SBATCH --output=/home/XI/bloyola/neat-tests/tests/NEAT-1/output.txt
+#SBATCH --error=/home/XI/bloyola/neat-tests/tests/NEAT-1/error.txt
 #SBATCH --partition=batch
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 
 # Ir al directorio que contiene el ejecutable NEAT
-cd /home/XI/gfernandez/neat-tests/tests/NEAT-1
+cd /home/XI/bloyola/neat-tests/tests/NEAT-1
 mkdir results
 
 # Ejecutar el ejecutable NEAT

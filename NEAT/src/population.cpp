@@ -24,13 +24,13 @@ Population::Population(Parameters *param){
     maxGenome = nGenomes;
     parameters = *param;
     innov = Innovation(nInputs, nOutputs);
-    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters);
+    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters, 1);
     threshold = parameters.threshold;
     Species* s = new Species(g, threshold);
     species.push_back(s);
     genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
-        g = new Genome(i,nInputs, nOutputs, innov, parameters);
+        g = new Genome(i,nInputs, nOutputs, innov, parameters, i+1);
         genomes.push_back(g);
         species[0]->add_genome(g);
     }
@@ -90,8 +90,8 @@ void Population::eliminate(){
             
             species[i]->genomes.pop_back();
             
-            carpeta = "annarchy/annarchy-"+to_string(id);
-            deleteDirectory(carpeta);
+            //carpeta = "annarchy/annarchy-"+to_string(id);
+            //deleteDirectory(carpeta);
             
         }
     }
@@ -111,7 +111,7 @@ void Population::reproduce(){
     bool flagInterespecies = true; // true if there are not two or more species with more than 0 genome
     bool flagCrossover = true; // true if there is no species with more than 1 genome
 
-     for (int i = 0; i < static_cast<int>(species.size()); i++){
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
         sSize = static_cast<int>(species[i]->genomes.size());
         if (sSize > 0){
             speciesInterespeciesCrossover.push_back(i);
@@ -131,7 +131,7 @@ void Population::reproduce(){
     }else{ 
         noCrossover = n*parameters.percentageNoCrossoverOff;
     }
-
+    
     for (int i = 0; i < noCrossover; i++){
         if (static_cast<int>(genomes.size()) == nGenomes){
             break;
@@ -168,13 +168,15 @@ void Population::reproduce(){
         }
         
         if (getBooleanWithProbability(parameters.probabilityInterespecies) || flagCrossover){
-            indexS1 = speciesInterespeciesCrossover[ randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
-            indexS2 = speciesInterespeciesCrossover[ randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
+            indexS1 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
+            indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
             while(indexS1 == indexS2){
-                indexS2 = speciesInterespeciesCrossover[ randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
+                std::cout << "indexS1 == indexS2" << std::endl;
+                std::cout << "speciesInterespeciesCrossover.size(): " << speciesInterespeciesCrossover.size() << std::endl;
+                indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
             }
         }else{
-            indexS1 = speciesCrossover[ randomInt(0,static_cast<int>(speciesCrossover.size()))];
+            indexS1 = speciesCrossover[randomInt(0,static_cast<int>(speciesCrossover.size()))];
             indexS2 = indexS1;
         }
 
@@ -182,6 +184,8 @@ void Population::reproduce(){
         g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
 
         while (g1->getId() == g2->getId()){
+            std::cout << "g1->getId() == g2->getId()" << std::endl;
+            std::cout << "species[indexS2]->genomes.size(): " << species[indexS2]->genomes.size() << std::endl;
             g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
         }
         
@@ -275,8 +279,6 @@ void Population::evaluate() {
         return;
     }
 
-    std::cout << "Número máximo de procesos permitidos: " << max_processes << std::endl;
-
     // Dividir los genomas entre los procesos
     int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
     if (genomes_per_process == 0){
@@ -357,7 +359,7 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
     vector<Connection> connections_a, connections_b, connections;
 
     int count_a=0, count_b = 0;
-    Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters);
+    Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters, get_annarchy_id());
     maxGenome++;
     vector<Node> offNodes;
 
@@ -431,15 +433,10 @@ void Population::evolution(int n){
     for (int i = 0; i < n; i++){
         cout << " generación: " << i << endl; 
         evaluate();
-        cout << "---" << "nGenomes: " << nGenomes << " genomesSize: " << genomes.size() << " speciesSize: " << species.size() << "---" << endl;
         eliminate();
-        cout << "---" << "nGenomes: " << nGenomes << " genomesSize: " << genomes.size() << " speciesSize: " << species.size() << "---" << endl;
         mutations();
-        cout << "---" << "nGenomes: " << nGenomes << " genomesSize: " << genomes.size() << " speciesSize: " << species.size() << "---" << endl;
         reproduce();
-        cout << "---" << "nGenomes: " << nGenomes << " genomesSize: " << genomes.size() << " speciesSize: " << species.size() << "---" << endl;
         speciation();
-        cout << "---" << "nGenomes: " << nGenomes << " genomesSize: " << genomes.size() << " speciesSize: " << species.size() << "---" << endl;
     }
 }
 
@@ -467,4 +464,32 @@ Genome* Population::getBest(){
     }
     
     return genomes[bestIndex];
+}
+
+int Population::get_annarchy_id(){
+    int n_genomes_max = parameters.numberGenomes;
+    //Vector con los id_annarchy de los genomas
+    vector<int> ids;
+    for (int i = 0; i < n_genomes_max; i++){
+        ids.push_back(genomes[i]->getIdAnnarchy());
+    }
+    //Encontrar algun id_annarchy disponible para un genoma que no esté en el vector y quue vaya entre 1 a n_genomes_max
+    //Si no hay ninguno disponible, se devuelve 0
+    bool disponible = false;
+    int id = 1;
+    while (id <= n_genomes_max){
+        disponible = true;
+        for (int i = 0; i < n_genomes_max; i++){
+            if (ids[i] == id){
+                disponible = false;
+                break;
+            }
+        }
+        if (disponible){
+            return id;
+        }
+        id++;
+    }
+    return 0;
+    
 }

@@ -127,20 +127,6 @@ int run(int timesPerConfig) {
             saveRun(&population, i, filename);
             bestFitnes.push_back(population.getBest()->getFitness());
 
-            try {
-                // Borrar la carpeta y su contenido
-                remove(folder_path_1.c_str());
-                cout <<"La carpeta annarchy y su contenido han sido eliminados correctamente.\n";
-            } catch (const exception& e) {
-                cerr << "Error al intentar borrar la carpeta annarchy: " << e.what() << '\n';
-            }
-            try {
-                // Borrar la carpeta y su contenido
-                remove(folder_path_2.c_str());
-                cout <<"La carpeta __pycache__ y su contenido han sido eliminados correctamente.\n";
-            } catch (const exception& e) {
-                cerr << "Error al intentar borrar la carpeta annarchy: " << e.what() << '\n';
-            }
         }
         saveResults(bestFitnes, timesPerConfig, filename);
         bestFitnes.clear();

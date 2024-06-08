@@ -15,7 +15,7 @@ class Genome {
     
     public:  
         Genome();
-        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters);
+        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters, int new_id_annarchy);
 
         std::vector<Connection> getConnections();
         std::vector<Node> getNodes();
@@ -24,6 +24,7 @@ class Genome {
         int getOutNodes();
         float getFitness();
         int getId();
+        int getIdAnnarchy();
 
         Connection* getConnection(int in_node, int out_node);
         bool connectionExist(int in_node, int out_node);
@@ -39,6 +40,7 @@ class Genome {
         void setNodes(std::vector<Node> new_nodes);
         void setParameters(Parameters* new_parameters);
         void setInnovation(Innovation* new_innov);
+        void setIdAnnarchy(int new_id_annarchy);
         // Mutators
 
         // Change weight, this depends
@@ -71,6 +73,7 @@ class Genome {
         std::vector<Connection> connections;
         Innovation* innov;
         Parameters* parameters;
+        int id_annarchy;
 };
 
 #endif
