@@ -97,8 +97,8 @@ void menu() {
       break;
     case 'g':
       //create snn 
-      cout << "Creando " << endl;
-      p.evaluate();
+      cout << "*Creando " << endl;
+      //p.evaluate();
       cout << "---------------------------------------------"<< endl;
       break;
     case 'h':

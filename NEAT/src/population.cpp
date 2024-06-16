@@ -262,7 +262,7 @@ void Population::speciation(){
     cout << "Fin Especiación" << endl;
 }
 
-void Population::evaluate() {
+void Population::evaluate(std::vector<std::array<int, 2>> pipes, std::vector<pid_t> child_processes ) {
     std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
@@ -272,27 +272,13 @@ void Population::evaluate() {
     // Crear un vector para almacenar los valores de fitness de cada genoma
     std::vector<float> fitness_values(nGenomes, 0.0f);
 
-    // Obtener número máximo de procesos
-    long max_processes = sysconf(_SC_CHILD_MAX);
-    if (max_processes == -1) {
-        std::cerr << "Error al obtener el número máximo de procesos" << std::endl;
-        return;
-    }
-
     // Dividir los genomas entre los procesos
-    int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
+    int genomes_per_process = nGenomes / parameters.process_max; // Redondeo hacia arriba
     if (genomes_per_process == 0){
         genomes_per_process = 1;
     }
-    
 
-    // Crear un vector de pipes para la comunicación con los procesos hijos
-    std::vector<std::array<int, 2>> pipes(max_processes);
-
-    // Crear un vector para almacenar los IDs de procesos hijos
-    std::vector<pid_t> child_processes;
-
-    for (int i = 0; i < max_processes; ++i) {
+    for (int i = 0; i < parameters.process_max; ++i) {
         int start = i * genomes_per_process;
         int end = std::min(start + genomes_per_process, nGenomes);
 
@@ -300,45 +286,23 @@ void Population::evaluate() {
             break;
         }
         
-        // Crear un nuevo pipe para la comunicación con el proceso hijo
-        if (pipe(pipes[i].data()) == -1) {
-            std::cerr << "Error al crear pipe" << std::endl;
-            return;
-        }
-
-        pid_t pid = fork();
-        if (pid == 0) {
+        if (child_processes[i] == 0) {
             // Código para el proceso hijo
-            close(pipes[i][0]); // Cerrar el extremo de lectura del pipe en el hijo
-
-            std::vector<float> child_fitness_values(end - start, 0.0f);
 
             for (int j = start; j < end; ++j) {
-                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module);
+                genomes[j]->singleEvaluation(load_module);
             }
-
-            // Escribir los valores de fitness al proceso padre
-            write(pipes[i][1], child_fitness_values.data(), (end - start) * sizeof(float));
-            close(pipes[i][1]); // Cerrar el extremo de escritura del pipe
-
             exit(0); // Salir del proceso hijo después de ejecutar singleEvaluation
-        } else if (pid < 0) {
+        } else if (child_processes[i] < 0) {
             std::cerr << "Error al crear proceso hijo" << std::endl;
         } else {
             close(pipes[i][1]); // Cerrar el extremo de escritura del pipe en el padre
-            child_processes.push_back(pid);
         }
     }
 
     // Esperar a que todos los procesos hijos terminen y leer los valores de fitness de los pipes
     for (int i = 0; i < static_cast<int>(child_processes.size()); ++i) {
         waitpid(child_processes[i], nullptr, 0);
-
-        int start = i * genomes_per_process;
-        int end = std::min(start + genomes_per_process, nGenomes);
-
-        read(pipes[i][0], fitness_values.data() + start, (end - start) * sizeof(float));
-        close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
     }
 
     // Actualizar los valores de fitness en los genomas correspondientes
@@ -416,23 +380,44 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
+    int number;
     cout << "Mutando..." << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
+        cout << "Mutando especie: " << i << endl;
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i]->sort_genomes();
+        number = (int)(species[i]->genomes.size());
+        cout << "  1" << endl;
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
+            cout << "   a mutar: " << j << " de " << number << endl;
             species[i]->genomes[j]->mutation();
+            cout << "   fin de mutar: " << j << " de " << number << endl;
         }
+        cout << "  2" << endl;
     }
     cout << "Fin Mutación " << endl;
 }
 
 void Population::evolution(int n){
+    // Crear un vector de pipes para la comunicación con los procesos hijos
+    std::vector<std::array<int, 2>> pipes(parameters.process_max);
 
+    // Crear un vector para almacenar los IDs de procesos hijos
+    std::vector<pid_t> child_processes;
+
+    for (int i = 0; i < parameters.process_max; ++i) {
+        // Crear un nuevo pipe para la comunicación con el proceso hijo
+        if (pipe(pipes[i].data()) == -1) {
+            std::cerr << "Error al crear pipe" << std::endl;
+            exit(1);
+        }
+        pid_t pid = fork();
+        child_processes.push_back(pid);
+    }
     for (int i = 0; i < n; i++){
         cout << " generación: " << i << endl; 
-        evaluate();
+        evaluate(pipes, child_processes);
         eliminate();
         mutations();
         reproduce();

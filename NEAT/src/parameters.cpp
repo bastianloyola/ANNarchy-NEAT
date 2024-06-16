@@ -34,8 +34,8 @@ void Parameters::loadFromCfg(const std::string& filename) {
                 else if (key == "numberInputs") numberInputs = std::stoi(value);
                 else if (key == "numberOutputs") numberOutputs = std::stoi(value);
                 else if (key == "evolutions") evolutions = std::stoi(value);
-                else if (key == "process_max") process_max = std::stoi(value);
                 else if (key == "n_max") n_max = std::stoi(value);
+                else if (key == "process_max") process_max = std::stoi(value);
 
             }
         }

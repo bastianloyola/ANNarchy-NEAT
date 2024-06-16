@@ -2,6 +2,7 @@
 #define POPULATION_H
 
 #include <vector>
+#include <array>
 
 #include "genome.h"
 #include "innovation.h"
@@ -22,7 +23,7 @@ class Population{
     std::vector<Genome*> genomes;
     std::vector<Species*> species;
     float threshold;
-    void evaluate();
+    void evaluate(std::vector<std::array<int, 2>> pipes, std::vector<pid_t> child_processes);
     void mutations();
     void evolution(int n);
     void print();
