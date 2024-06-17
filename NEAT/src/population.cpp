@@ -108,8 +108,8 @@ void Population::reproduce(){
 
     vector<int> speciesCrossover;
     vector<int> speciesInterespeciesCrossover;
-    bool flagInterespecies = true; // true if there are not two or more species with more than 0 genome
-    bool flagCrossover = true; // true if there is no species with more than 1 genome
+    bool flagInterespecies = false; // true if there are two or more species with more than 0 genome
+    bool flagCrossover = false; // true if there is species with more than 1 genome
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         sSize = static_cast<int>(species[i]->genomes.size());
@@ -117,16 +117,16 @@ void Population::reproduce(){
             speciesInterespeciesCrossover.push_back(i);
             if (sSize > 1){
                 speciesCrossover.push_back(i);
-                flagCrossover = false;
+                flagCrossover = true;
             }
         }
     }
 
     if (static_cast<int>(speciesInterespeciesCrossover.size()) > 1){
-        flagInterespecies = false;
+        flagInterespecies = true;
     }
     
-    if (flagCrossover && flagInterespecies){
+    if (!flagCrossover && !flagInterespecies){
         noCrossover = n;
     }else{ 
         noCrossover = n*parameters.percentageNoCrossoverOff;
@@ -167,12 +167,10 @@ void Population::reproduce(){
             break;
         }
         
-        if (getBooleanWithProbability(parameters.probabilityInterespecies) || flagCrossover){
+        if ((getBooleanWithProbability(parameters.probabilityInterespecies) || !flagCrossover) && flagInterespecies){
             indexS1 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
             indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
             while(indexS1 == indexS2){
-                std::cout << "indexS1 == indexS2" << std::endl;
-                std::cout << "speciesInterespeciesCrossover.size(): " << speciesInterespeciesCrossover.size() << std::endl;
                 indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
             }
         }else{
@@ -184,9 +182,11 @@ void Population::reproduce(){
         g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
 
         while (g1->getId() == g2->getId()){
-            std::cout << "g1->getId() == g2->getId()" << std::endl;
-            std::cout << "species[indexS2]->genomes.size(): " << species[indexS2]->genomes.size() << std::endl;
             g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
+            if (species[indexS1]->genomes.size() > 1) {
+                std::cout << "ERROR g1 == g2" << std::endl;
+                break;
+            }
         }
         
         Genome* offspring = crossover(g1,g2);
