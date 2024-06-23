@@ -3,6 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
 import scipy.sparse
+import gymnasium as gym
+
+
+def get_function():
+    #open config file and get the parameter "function"
+    with open('config.txt') as f:
+        lines = f.readlines()
+        for line in lines:
+            if "function" in line:
+                return line.split('=')[1].strip()
+    return None
+
 
 
 LIF = Neuron(
@@ -21,10 +33,28 @@ LIF = Neuron(
     refractory = 3.0
 )
 
+
+IZHIKEVICH = Neuron(
+    parameters="""
+        a = 0.02 : population
+        b = 0.2 : population
+        c = -65.0 : population
+        d = 8.0 : population
+        I = 0.0
+    """,
+    equations="""
+        dv/dt = 0.04*v*v + 5*v + 140 - u + I : init=-65.0
+        du/dt = a*(b*v - u) : init=-14.0
+    """,
+    spike="v >= 30.0",
+    reset="v = c; u += d",
+    refractory=5.0
+)
+
 def snn(n_entrada, n_salida, n, i, matrix):
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
         #print(matrix,"\n")
         #Matrix to numpy array
@@ -34,7 +64,7 @@ def snn(n_entrada, n_salida, n, i, matrix):
         n_rows = matrix.shape[0]
         n_cols = matrix.shape[1]
         lil_matrix[:n_rows, :n_cols] = matrix
-
+        #print(lil_matrix)
         proj.connect_from_sparse(lil_matrix)
         #print('nombre')
         nombre = 'annarchy/annarchy-'+str(int(i))
@@ -49,15 +79,32 @@ def snn(n_entrada, n_salida, n, i, matrix):
             input_index.append(i)
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
-        fit = fitness(pop,M,input_index,output_index,xor)
+        fit = fitness(pop,M,input_index,output_index, get_function())
         return fit
     except Exception as e:
         # Capturar y manejar excepciones
         print("Error:", e)
-def fitness(pop,Monitor,input_index,output_index,funcion):
-    fit = 0
-    fit = funcion(pop,Monitor,input_index,output_index)
-    return fit
+
+def fitness(pop, Monitor, input_index, output_index, funcion):
+    if funcion == "xor":
+        return xor(pop, Monitor, input_index, output_index)
+    elif funcion == "cartpole":
+        return cartpole(pop, Monitor, input_index, output_index)
+    elif funcion == "lunar_lander":
+        return lunar_lander(pop, Monitor, input_index, output_index)
+    else:
+        raise ValueError(f"Unknown function: {funcion}")
+
+
+def get_function():
+    # Open config file and get the parameter "function"
+    config_path = 'config/config.cfg'
+    with open(config_path) as f:
+        lines = f.readlines()
+        for line in lines:
+            if "function" in line:
+                return line.split('=')[1].strip()
+    return None
      
 
 def xor(pop,Monitor,input_index,output_index):
@@ -89,6 +136,70 @@ def xor(pop,Monitor,input_index,output_index):
         if entrada[0] ^ entrada[1] == decode_output:
             fitness += 1
     return fitness
+
+
+
+def cartpole(pop,Monitor,input_index,output_index):
+    env = gym.make("CartPole-v1")
+    observation, info = env.reset(seed=42)
+    returns = []
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    actions_done = []
+    j = 0
+    while j < max_steps and not terminated and not truncated:
+        #encode observation
+        for i, val in zip(input_index, observation):
+            pop[int(i)].I = val
+        simulate(10000.0)
+        spikes = Monitor.get('spike')
+        #Output from 2 neurons, one for each action
+        output1 = np.size(spikes[output_index[0]])
+        output2 = np.size(spikes[output_index[1]])
+        #Choose the action with the most spikes
+        action = env.action_space.sample()
+        if output1 > output2:
+            action = 0
+        elif output1 < output2:
+            action = 1
+        observation, reward, terminated, truncated, info = env.step(action)
+        returns.append(reward)
+        actions_done.append(action)
+        Monitor.reset()
+    env.close()
+    #print("Returns: ",returns)
+    #print("Actions: ",actions_done)
+    return np.sum(returns)
+
+
+def lunar_lander(pop, Monitor, input_index, output_index):
+    env = gym.make("LunarLander-v2")
+    observation, info = env.reset(seed=42)
+    returns = []
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    actions_done = []
+    j = 0
+    while j < max_steps and not terminated and not truncated:
+        # Encode observation
+        for i, val in zip(input_index, observation):
+            pop[int(i)].I = val
+        simulate(10000.0)
+        spikes = Monitor.get('spike')
+        # Output from 4 neurons, one for each action
+        outputs = [np.size(spikes[output_index[k]]) for k in range(4)]
+        # Choose the action with the most spikes
+        action = np.argmax(outputs)
+        observation, reward, terminated, truncated, info = env.step(action)
+        returns.append(reward)
+        actions_done.append(action)
+        Monitor.reset()
+        j += 1
+    env.close()
+    return np.sum(returns)
+
         
 def exampleIzhikevich(): 
     pop = Population(geometry=1000, neuron=Izhikevich)
@@ -141,5 +252,4 @@ def exampleIzhikevich():
     plt.tight_layout()
     plt.show()
     return 0
-
 

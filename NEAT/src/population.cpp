@@ -74,7 +74,7 @@ void Population::print(){
 }
 
 void Population::eliminate(){
-    cout << "Eliminando..." << endl;
+    //cout << "Eliminando..." << endl;
     string carpeta;
     int id,index,n;
 
@@ -95,11 +95,11 @@ void Population::eliminate(){
             
         }
     }
-    cout << "Fin Eliminación" << endl;
+    //cout << "Fin Eliminación" << endl;
 }
 
 void Population::reproduce(){
-    cout << "Reproduciendo..." << endl;
+    //cout << "Reproduciendo..." << endl;
     Genome *g1, *g2;
     int indexS1,indexS2,index,sSize,noCrossover;
     int genomesSize = static_cast<int>(genomes.size());
@@ -192,11 +192,11 @@ void Population::reproduce(){
         Genome* offspring = crossover(g1,g2);
         genomes.push_back(offspring);
     }
-    cout << "Fin Reproducción" << endl;
+    //cout << "Fin Reproducción" << endl;
 }
 
 void Population::speciation(){
-    cout << "Especiando..." << endl;
+    //cout << "Especiando..." << endl;
     cout << "--nSpecies: " << (int)(species.size()) << "  --nGenomes: " << (int)(genomes.size()) << endl;
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
@@ -259,11 +259,11 @@ void Population::speciation(){
             i++;
         }
     }
-    cout << "Fin Especiación" << endl;
+    //cout << "Fin Especiación" << endl;
 }
 
 void Population::evaluate() {
-    std::cout << "Evaluando..." << std::endl;
+    //std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
@@ -349,7 +349,7 @@ void Population::evaluate() {
 
     Py_DECREF(load_module);
 
-    std::cout << "Fin Evaluación" << std::endl;
+    //std::cout << "Fin Evaluación" << std::endl;
 }
 
 
@@ -416,7 +416,7 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
-    cout << "Mutando..." << endl;
+    //cout << "Mutando..." << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
@@ -425,7 +425,7 @@ void Population::mutations(){
             species[i]->genomes[j]->mutation();
         }
     }
-    cout << "Fin Mutación " << endl;
+    //cout << "Fin Mutación " << endl;
 }
 
 void Population::evolution(int n){
