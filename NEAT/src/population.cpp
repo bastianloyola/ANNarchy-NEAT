@@ -233,7 +233,7 @@ void Population::speciation(){
         for (int j = 0; j < static_cast<int>(species.size()); j++){
 
             compatibility = (*genomes[i]).compatibility(*species[j]->genome);
-            if (compatibility > parameters.threshold){                    
+            if (compatibility < parameters.threshold){                    
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 
@@ -492,4 +492,40 @@ int Population::get_annarchy_id(){
     }
     return 0;
     
+}
+
+vector<int> Population::eliminatedPerSpecies(){
+    vector<int> offstringsAlloted;
+    float n;
+    float totalAverageFitness = 0;
+
+    calculateAdjustedFitness();
+    for (int i = 0; i < (int)(species.size()); i++){
+        species[i]->calculateAverageFitness();
+        totalAverageFitness += species[i]->averageFitness;
+    }
+
+    for (int i = 0; i < (int)(species.size()); i++){
+        n = (species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes;
+        offstringsAlloted.push_back(n);
+    }
+    return offstringsAlloted;
+}
+
+void Population::calculateAdjustedFitness(){
+    float sumDistance,compatibility,adjustedFitness;
+
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        sumDistance = 0;
+        for (int j = 0; j < (int)(genomes.size()); j++){
+            if (i != j){
+                compatibility = genomes[i]->compatibility(*genomes[j]);
+                if (compatibility <= threshold) {
+                    sumDistance += 1;
+                }
+            }
+        }
+        adjustedFitness = (genomes[i]->getFitness()) / sumDistance;
+        genomes[i]->setAdjustedFitness(adjustedFitness);
+    }
 }

@@ -25,6 +25,7 @@ class Genome {
         float getFitness();
         int getId();
         int getIdAnnarchy();
+        float getAdjustedFitness();
 
         Connection* getConnection(int in_node, int out_node);
         bool connectionExist(int in_node, int out_node);
@@ -41,6 +42,7 @@ class Genome {
         void setParameters(Parameters* new_parameters);
         void setInnovation(Innovation* new_innov);
         void setIdAnnarchy(int new_id_annarchy);
+        void setAdjustedFitness(float new_adjustedFitness);
         // Mutators
 
         // Change weight, this depends
@@ -74,6 +76,7 @@ class Genome {
         Innovation* innov;
         Parameters* parameters;
         int id_annarchy;
+        float adjustedFitness;
 };
 
 #endif

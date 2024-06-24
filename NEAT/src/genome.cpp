@@ -20,6 +20,7 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     innov = &innov_E;
     parameters = &parameters_E;  
     id_annarchy = idAnnarchy;
+    adjustedFitness = 0;
     for (int i = 0; i < numIn; i++){
         Node n(i+1, 0);
         nodes.push_back(n);
@@ -56,6 +57,7 @@ int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
 float Genome::getFitness(){ return fitness;}
 int Genome::getIdAnnarchy(){ return id_annarchy;}
+float Genome::getAdjustedFitness(){ return adjustedFitness;}
 
 Connection* Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
@@ -116,6 +118,7 @@ void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 void Genome::setParameters(Parameters* new_parameters){ parameters = new_parameters;}
 void Genome::setInnovation(Innovation* new_innov){ innov = new_innov;}
 void Genome::setIdAnnarchy(int new_id_annarchy){ id_annarchy = new_id_annarchy;}
+void Genome::setAdjustedFitness(float new_adjustedFitness){ adjustedFitness = new_adjustedFitness;};
 // Mutators
 
 // Change weight, this depends

@@ -44,6 +44,8 @@ class Population{
     void sort_species();
     Genome* crossover(Genome* g1, Genome* g2);
     int get_annarchy_id();
+    vector<int> eliminatedPerSpecies();
+    void calculateAdjustedFitness();
   
   private:
     int nGenomes;
