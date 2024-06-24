@@ -233,7 +233,7 @@ void Population::speciation(){
         for (int j = 0; j < static_cast<int>(species.size()); j++){
 
             compatibility = (*genomes[i]).compatibility(*species[j]->genome);
-            if (compatibility > parameters.threshold){                    
+            if (compatibility <= parameters.threshold){                    
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 
