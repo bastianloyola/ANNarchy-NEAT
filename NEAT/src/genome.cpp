@@ -37,7 +37,12 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
             if (inh == 0){
                 inh = -1;
             }
-            Connection c(i+1, j+1, inh*parameters->initial_weight, true, cInnov);
+            float minWeight = parameters->weightsRange[0];
+            float maxWeight = parameters->weightsRange[1];
+
+            float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
+            
+            Connection c(i+1, j+1, inh*weight, true, cInnov);
             connections.push_back(c);
         }
     }
@@ -247,8 +252,8 @@ void Genome::mutation(){
             index =  randomInt(0,n);
             connection = connections[index];
         }
-        //Random weight between -1 and 1
-        float weight = (rand() % 200 - 100)/100.0;
+        //Random delta weight between -1 and 1
+        float weight = ((rand() % 200 - 100)/100.0)*parameters->learningRate; 
         changeWeight(index,weight);
     }
 

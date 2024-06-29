@@ -36,7 +36,25 @@ void Parameters::loadFromCfg(const std::string& filename) {
                 else if (key == "evolutions") evolutions = std::stoi(value);
                 else if (key == "process_max") process_max = std::stoi(value);
                 else if (key == "n_max") n_max = std::stoi(value);
-
+                else if (key == "learningRate") learningRate = std::stof(value);
+                else if (key == "vectorWeights") { 
+                    std::istringstream weightsStream(value);
+                    std::string weight;
+                    while (std::getline(weightsStream, weight, ';')) {
+                        inputWeights.push_back(std::stof(weight));
+                    }
+                }
+                else if (key == "weightsRange") {
+                    std::istringstream rangeStream(value);
+                    std::string rangePart;
+                    float minWeight, maxWeight;
+                    std::getline(rangeStream, rangePart, ';');
+                    minWeight = std::stof(rangePart);
+                    std::getline(rangeStream, rangePart, ';');
+                    maxWeight = std::stof(rangePart);
+                    weightsRange[0] = minWeight;
+                    weightsRange[1] = maxWeight;
+                }
             }
         }
     }

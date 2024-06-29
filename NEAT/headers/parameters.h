@@ -36,6 +36,9 @@ public:
     int evolutions;
     int process_max;
     int n_max;
+    float learningRate;
+    std::vector<float> inputWeights;
+    std::vector<float> weightsRange;
 
 private:
     // Función para cargar los parámetros desde el archivo cfg
