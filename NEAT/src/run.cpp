@@ -75,6 +75,22 @@ void saveRun(Population* population, int n, string filename) {
     }
     outfile << "\n";
     outfile.close();
+
+
+    ofstream outfile2("results/best" + to_string(n) + ".txt", ios::app);
+
+    if(!outfile2) {
+        cerr << "saveRun: No se pudo abrir el archivo outfile2." <<endl;
+    }
+
+    for (int i = 0; i < nConnections; i++) {
+        if (connections[i].getEnabled()) {
+            outfile2 << connections[i].getInNode() << ";"
+                     << connections[i].getOutNode() << ";"
+                     << connections[i].getWeight() << "\n";
+        }
+    }
+    outfile2.close();
 }
 
 void saveResults(vector<int> bestFitness, int n, string filename) {
