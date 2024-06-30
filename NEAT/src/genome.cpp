@@ -219,7 +219,7 @@ float Genome::singleEvaluation(PyObject *load_module){
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
 
-    PyObject* args = PyTuple_Pack(6, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights);
+    PyObject* args = PyTuple_Pack(6, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights);
 
     PyObject* callfunc = PyObject_CallObject(func, args);
     

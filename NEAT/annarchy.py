@@ -142,63 +142,125 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
 def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
-    returns = []
     max_steps = 1000
     terminated = False
     truncated = False
-    actions_done = []
-    j = 0
-    while j < max_steps and not terminated and not truncated:
-        #encode observation
-        for i, val in zip(input_index, observation):
-            pop[int(i)].I = val*inputWeights[i]
-        simulate(10000.0)
-        spikes = Monitor.get('spike')
-        #Output from 2 neurons, one for each action
-        output1 = np.size(spikes[output_index[0]])
-        output2 = np.size(spikes[output_index[1]])
-        #Choose the action with the most spikes
-        action = env.action_space.sample()
-        if output1 > output2:
-            action = 0
-        elif output1 < output2:
-            action = 1
-        observation, reward, terminated, truncated, info = env.step(action)
-        returns.append(reward)
-        actions_done.append(action)
-        Monitor.reset()
+    maxInput = inputWeights[1]
+    minInput = inputWeights[0]
+    #Generar 4 input weights para cada input
+    inputWeights = np.random.uniform(minInput,maxInput,4)
+    #Number of episodes
+    episodes = 100
+    h=0
+    #Final fitness 
+    final_fitness = 0
+    while h < episodes:
+        j=0
+        returns = []
+        actions_done = []
+        while j < max_steps and not terminated and not truncated:
+            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation:
+                if val < 0:
+                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                i += 2
+                k += 1
+            simulate(10000.0)
+            spikes = Monitor.get('spike')
+            #Output from 2 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2:
+                action = 0
+            elif output1 < output2:
+                action = 1
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness/episodes
     env.close()
     #print("Returns: ",returns)
     #print("Actions: ",actions_done)
-    return np.sum(returns)
+    return final_fitness
 
 
 def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
+    #funcion similar a cartpole, solo que con el entorno de lunar lander 16 entradas y 4 salidas
     env = gym.make("LunarLander-v2")
     observation, info = env.reset(seed=42)
-    returns = []
     max_steps = 1000
     terminated = False
     truncated = False
-    actions_done = []
-    j = 0
-    while j < max_steps and not terminated and not truncated:
-        # Encode observation
-        for i, val in zip(input_index, observation):
-            pop[int(i)].I = val*inputWeights[i]
-        simulate(10000.0)
-        spikes = Monitor.get('spike')
-        # Output from 4 neurons, one for each action
-        outputs = [np.size(spikes[output_index[k]]) for k in range(4)]
-        # Choose the action with the most spikes
-        action = np.argmax(outputs)
-        observation, reward, terminated, truncated, info = env.step(action)
-        returns.append(reward)
-        actions_done.append(action)
-        Monitor.reset()
-        j += 1
+    maxInput = inputWeights[1]
+    minInput = inputWeights[0]
+    #Generar 8 input weights para cada input
+    inputWeights = np.random.uniform(minInput,maxInput,8)
+    #Number of episodes
+    episodes = 100
+    h=0
+    #Final fitness
+    final_fitness = 0
+    while h < episodes:
+        j=0
+        returns = []
+        actions_done = []
+        while j < max_steps and not terminated and not truncated:
+            #encode observation, 8 values split in 16 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation:
+                if val < 0:
+                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                i += 2
+                k += 1
+            simulate(10000.0)
+            spikes = Monitor.get('spike')
+            #Output from 4 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            output4 = np.size(spikes[output_index[3]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3 and output1 > output4:
+                action = 0
+            elif output2 > output1 and output2 > output3 and output2 > output4:
+                action = 1
+            elif output3 > output1 and output3 > output2 and output3 > output4:
+                action = 2
+            elif output4 > output1 and output4 > output2 and output4 > output3:
+                action = 3
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness/episodes
     env.close()
-    return np.sum(returns)
+    #print("Returns: ",returns)
+    #print("Actions: ",actions_done)
+    return final_fitness
+
 
         
 def exampleIzhikevich(): 
