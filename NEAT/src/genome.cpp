@@ -211,13 +211,18 @@ float Genome::singleEvaluation(PyObject *load_module){
     npy_intp dims[2] = {n, n};
     PyObject* numpy_array = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, data);
 
+    // Convertir el vector inputWeights a un array de NumPy
+    std::vector<float>& inputWeights = parameters->inputWeights;
+    npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights.size()) };
+    PyObject* numpy_inputWeights = PyArray_SimpleNewFromData(1, inputWeights_dims, NPY_FLOAT, inputWeights.data());
+
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
 
-    PyObject* args = PyTuple_Pack(5, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array);
+    PyObject* args = PyTuple_Pack(6, PyFloat_FromDouble(double(numIn)), PyFloat_FromDouble(double(numOut)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights);
 
     PyObject* callfunc = PyObject_CallObject(func, args);
-
+    
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
     std::cout << "Fitness " << id << ": "<< value << std::endl;

@@ -78,7 +78,6 @@ void saveRun(Population* population, int n, string filename) {
 
 
     ofstream outfile2("results/best" + to_string(n) + ".txt", ios::app);
-
     if(!outfile2) {
         cerr << "saveRun: No se pudo abrir el archivo outfile2." <<endl;
     }
@@ -118,7 +117,7 @@ int run(int timesPerConfig) {
     string filename = "results/results.txt";
     string folder_path_1= "annarchy"; // Ruta de la carpeta que deseas borrar
     string folder_path_2 = "__pycache__"; // Ruta de la carpeta que deseas borrar
-    
+    printf("---- Running ----\n");
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
@@ -126,6 +125,7 @@ int run(int timesPerConfig) {
     vector <int> bestFitnes;
     // Run Cofigs
     for (int j = 0; j < nConfig; j++){
+        printf("---- Config: %s ----\n", names[j].c_str());
         ofstream outfile(filename, ios::app);
         if(!outfile) {
             cerr << "run: No se pudo abrir el archivo." << filename <<endl;
@@ -133,9 +133,12 @@ int run(int timesPerConfig) {
         outfile << "\n---- Results of cofig: " << j << " ----\n";
         outfile.close();
         saveConfig(filename, "config/" + names[j]);
-
+        
+        printf("---- Loading Config: %s ----\n", names[j].c_str());
         Parameters parameters("config/" + names[j]);
+        printf("---- Loaded Config: %s ----\n", names[j].c_str());
         for (int i = 0; i < timesPerConfig; i++){
+            printf("---- Run: %d ----\n", i);
             Population population(&parameters);
             evolutions = parameters.evolutions;
 

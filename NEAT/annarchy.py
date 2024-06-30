@@ -51,7 +51,7 @@ IZHIKEVICH = Neuron(
     refractory=5.0
 )
 
-def snn(n_entrada, n_salida, n, i, matrix):
+def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
     try:
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)

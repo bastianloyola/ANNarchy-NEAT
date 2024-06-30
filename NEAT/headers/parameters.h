@@ -38,7 +38,7 @@ public:
     int n_max;
     float learningRate;
     std::vector<float> inputWeights;
-    std::vector<float> weightsRange;
+    float weightsRange[2] = {0.0f, 0.0f};
 
 private:
     // Función para cargar los parámetros desde el archivo cfg
