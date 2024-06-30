@@ -79,19 +79,19 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
             input_index.append(i)
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
-        fit = fitness(pop,M,input_index,output_index, get_function())
+        fit = fitness(pop,M,input_index,output_index, get_function(), inputWeights)
         return fit
     except Exception as e:
         # Capturar y manejar excepciones
         print("Error:", e)
 
-def fitness(pop, Monitor, input_index, output_index, funcion):
+def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
     if funcion == "xor":
-        return xor(pop, Monitor, input_index, output_index)
+        return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
-        return cartpole(pop, Monitor, input_index, output_index)
+        return cartpole(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "lunar_lander":
-        return lunar_lander(pop, Monitor, input_index, output_index)
+        return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -107,14 +107,14 @@ def get_function():
     return None
      
 
-def xor(pop,Monitor,input_index,output_index):
+def xor(pop,Monitor,input_index,output_index,inputWeights):
     Monitor.reset()
     entradas = [(0, 0), (0, 1), (1, 0), (1, 1)]
     fitness = 0
     for entrada in entradas:
         for i, val in zip(input_index, entrada):
             if val == 1:
-                pop[int(i)].I = 15.1
+                pop[int(i)].I = 15.1*inputWeights[i]
             else:
                 pop[int(i)].I = 0
         simulate(10000.0)
@@ -139,7 +139,7 @@ def xor(pop,Monitor,input_index,output_index):
 
 
 
-def cartpole(pop,Monitor,input_index,output_index):
+def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
     returns = []
@@ -151,7 +151,7 @@ def cartpole(pop,Monitor,input_index,output_index):
     while j < max_steps and not terminated and not truncated:
         #encode observation
         for i, val in zip(input_index, observation):
-            pop[int(i)].I = val
+            pop[int(i)].I = val*inputWeights[i]
         simulate(10000.0)
         spikes = Monitor.get('spike')
         #Output from 2 neurons, one for each action
@@ -173,7 +173,7 @@ def cartpole(pop,Monitor,input_index,output_index):
     return np.sum(returns)
 
 
-def lunar_lander(pop, Monitor, input_index, output_index):
+def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
     env = gym.make("LunarLander-v2")
     observation, info = env.reset(seed=42)
     returns = []
@@ -185,7 +185,7 @@ def lunar_lander(pop, Monitor, input_index, output_index):
     while j < max_steps and not terminated and not truncated:
         # Encode observation
         for i, val in zip(input_index, observation):
-            pop[int(i)].I = val
+            pop[int(i)].I = val*inputWeights[i]
         simulate(10000.0)
         spikes = Monitor.get('spike')
         # Output from 4 neurons, one for each action
