@@ -117,7 +117,7 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
                 pop[int(i)].I = 15.1*inputWeights[i]
             else:
                 pop[int(i)].I = 0
-        simulate(10000.0)
+        simulate(10.0)
         spikes = Monitor.get('spike')
         #print("spikes: ",spikes) 
         #Get the output
@@ -171,7 +171,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
                 k += 1
-            simulate(10000.0)
+            simulate(100.0)
             spikes = Monitor.get('spike')
             #Output from 2 neurons, one for each action
             output1 = np.size(spikes[output_index[0]])
@@ -230,7 +230,7 @@ def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
                 k += 1
-            simulate(10000.0)
+            simulate(100.0)
             spikes = Monitor.get('spike')
             #Output from 4 neurons, one for each action
             output1 = np.size(spikes[output_index[0]])
