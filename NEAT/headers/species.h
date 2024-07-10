@@ -13,6 +13,7 @@ public:
     Genome *genome;
     float threshold;
     float averageFitness;
+    int allocatedOffsprings;
 
     // Method to add a genome to the species
     void add_genome(Genome *genome);
@@ -20,6 +21,7 @@ public:
     void print();
     void print_genomes();
     void calculateAverageFitness();
+    void calculateAdjustedFitness();
 
 
 private:

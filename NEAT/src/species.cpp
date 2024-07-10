@@ -40,10 +40,27 @@ void Species::print_genomes(){
 
 void Species::calculateAverageFitness(){
     float sumAdjustedFitness = 0;
-    float sumDistance,compatibility,adjustedFitness;
 
     for (int i = 0; i < (int)(genomes.size()); i++){
         sumAdjustedFitness += genomes[i]->getAdjustedFitness();
     }
     averageFitness = sumAdjustedFitness / genomes.size();
 }   
+
+void Species::calculateAdjustedFitness(){
+    float sumDistance,compatibility,adjustedFitness;
+
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        sumDistance = 0;
+        for (int j = 0; j < (int)(genomes.size()); j++){
+            if (i != j){
+                compatibility = genomes[i]->compatibility(*genomes[j]);
+                if (compatibility <= threshold) {
+                    sumDistance += 1;
+                }
+            }
+        }
+        adjustedFitness = (genomes[i]->getFitness()) / sumDistance;
+        genomes[i]->setAdjustedFitness(adjustedFitness);
+    }
+}
