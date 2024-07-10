@@ -92,6 +92,8 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
         return cartpole(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "lunar_lander":
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
+    elif funcion == "cartpole2":
+        return cartpole2(pop, Monitor, input_index, output_index, inputWeights)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -194,6 +196,61 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env.close()
     #print("Returns: ",returns)
     #print("Actions: ",actions_done)
+    return final_fitness
+
+
+def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
+    env = gym.make("CartPole-v1")
+    observation, info = env.reset(seed=42)
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+    
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        while j < max_steps and not terminated and not truncated:
+            # Codificar observación
+            num_neuronas_por_variable = 20
+            mean = 0
+            std_dev = 1
+            for i, obs in enumerate(observation):
+                indices = np.linspace(-3*std_dev, 3*std_dev, num_neuronas_por_variable)
+                gauss_distribution = np.exp(-(indices - obs)**2 / (2 * std_dev**2))
+                valores_codificados = gauss_distribution / np.sum(gauss_distribution)
+                start_idx = i * num_neuronas_por_variable
+                for j, valor in enumerate(valores_codificados):
+                    pop[input_index[start_idx + j]].I = valor
+            
+            simulate(100.0)
+            spikes = Monitor.get('spike')
+            
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
+            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
+            
+            if left_spikes > right_spikes:
+                action = 0  # Mover a la izquierda
+            else:
+                action = 1  # Mover a la derecha
+            
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
     return final_fitness
 
 

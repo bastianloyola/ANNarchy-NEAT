@@ -112,7 +112,7 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     outfile.close();
 }
 
-int run(int timesPerConfig) {
+float run(int timesPerConfig) {
 
     string filename = "results/results.txt";
     string folder_path_1= "annarchy"; // Ruta de la carpeta que deseas borrar
@@ -121,7 +121,7 @@ int run(int timesPerConfig) {
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
     int evolutions;
-
+    float finalFitness = 0;
     vector <int> bestFitnes;
     // Run Cofigs
     for (int j = 0; j < nConfig; j++){
@@ -145,10 +145,12 @@ int run(int timesPerConfig) {
             population.evolution(evolutions);
             saveRun(&population, i, filename);
             bestFitnes.push_back(population.getBest()->getFitness());
+            finalFitness += population.getBest()->getFitness();
 
         }
         saveResults(bestFitnes, timesPerConfig, filename);
         bestFitnes.clear();
     }
-    return 0;
+    finalFitness = finalFitness / (nConfig*timesPerConfig);
+    return finalFitness;
 }

@@ -12,6 +12,6 @@ std::vector<std::string> configNames(std::string directory);
 void saveConfig(std::string filename, std::string configName);
 void saveRun(Population* population, int n, std::string filename);
 void saveResults(std::vector<int> bestFitnes, int n, std::string filename);
-int run(int timesPerConfig);
+float run(int timesPerConfig);
 
 #endif
