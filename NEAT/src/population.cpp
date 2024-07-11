@@ -147,6 +147,11 @@ void Population::reproduce(){
             offspring->setConnections(genomes[index]->getConnections());
             offspring->setNodes(genomes[index]->getNodes());
             offspring->mutation();
+            for (int i = 0; i < static_cast<int>(genomes[index]->inputWeights.size()); i++){
+                offspring->inputWeights.push_back(genomes[index]->inputWeights[i]);
+            }
+            // Verificar el tamaño de inputWeights
+            //std::cout << "Tamaño de inputWeights en el offspring: " << offspring->inputWeights.size() << std::endl;
             genomes.push_back(offspring);
             } else {
             cout << "index < 0 || index >= gneomesSize || !genomes[index]" << endl;

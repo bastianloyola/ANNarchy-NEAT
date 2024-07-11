@@ -58,6 +58,9 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
         proj = Projection(pre=pop, post=pop, target='exc')
         #print(matrix,"\n")
         #Matrix to numpy array
+         # Verificar el tamaño de la matrix
+        if matrix.size == 0:
+            raise ValueError("matrix is empty")
         
         #lil_matrix scipy nxn with values of matrix
         lil_matrix = scipy.sparse.lil_matrix((int(n), int(n)))
@@ -79,6 +82,11 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
             input_index.append(i)
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
+        
+        # Verificar el tamaño de inputWeights
+        if inputWeights.size == 0:
+            raise ValueError("inputWeights is empty")
+        
         fit = fitness(pop,M,input_index,output_index, get_function(), inputWeights)
         return fit
     except Exception as e:

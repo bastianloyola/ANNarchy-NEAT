@@ -46,6 +46,12 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
             connections.push_back(c);
         }
     }
+    for (int i = 0; i < static_cast<int>(parameters->inputWeights.size()); i++){
+        inputWeights.push_back(parameters->inputWeights[i]);
+        //printf("Input weight %d: %f\n", i, inputWeights[i]);
+    }
+    // Verificar el tamaño de inputWeights
+    //std::cout << "Tamaño de inputWeights en el constructor: " << inputWeights.size() << std::endl;
 }
 
 std::vector<Connection> Genome::getConnections(){ 
@@ -212,9 +218,18 @@ float Genome::singleEvaluation(PyObject *load_module){
     PyObject* numpy_array = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, data);
 
     // Convertir el vector inputWeights a un array de NumPy
-    std::vector<float>& inputWeights = parameters->inputWeights;
-    npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights.size()) };
+    if (inputWeights.empty()) {
+        std::cerr << "Error: inputWeights está vacío en singleEvaluation." << std::endl;
+        return -1;
+    }
+
+
+    // Convertir el vector inputWeights a un array de NumPy
+    std::vector<float>& inputWeights2 = inputWeights;
+    npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights2.size()) };
     PyObject* numpy_inputWeights = PyArray_SimpleNewFromData(1, inputWeights_dims, NPY_FLOAT, inputWeights.data());
+
+    
 
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
@@ -298,6 +313,16 @@ void Genome::mutation(){
             }
             createConnection(in_node, out_node, weight);
         }
+    }
+
+    if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
+        cout << "Mutate input weight ";
+        int index = randomInt(0,inputWeights.size());
+        cout << inputWeights[index] << "   ->   ";
+        //Random delta weight between -1 and 1
+        float weight = ((rand() % 200 - 100)/100.0)*parameters->learningRate;
+        inputWeights[index] = inputWeights[index] + weight;
+        cout << inputWeights[index] << endl;
     }
 }
 

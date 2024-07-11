@@ -64,6 +64,8 @@ class Genome {
         void sort_connections();
         void sort_nodes();
 
+        std::vector<float> inputWeights;
+
     private:
         int id;
         int numIn;
@@ -73,7 +75,7 @@ class Genome {
         std::vector<Connection> connections;
         Innovation* innov;
         Parameters* parameters;
-        int id_annarchy;
+        int id_annarchy;    
 };
 
 #endif
