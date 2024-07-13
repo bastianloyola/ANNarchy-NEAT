@@ -15,7 +15,7 @@ public:
         float probabilityAddNodeSmall=0.9, float probabilityAddLinkSmall=0.9,
         float probabilityAddNodeLarge=0.9, float probabilityAddLinkLarge=0.9,
         float probabilityInputWeightMutated=0.05, int largeSize=20,
-        float c1=1.0, float c2=1.0, float c3=0.4, float initial_weight=110.0);
+        float c1=1.0, float c2=1.0, float c3=0.4);
     int numberGenomes;
     int numberInputs;
     int numberOutputs;
@@ -33,7 +33,6 @@ public:
     float c1;
     float c2;
     float c3;
-    float initial_weight;
     int evolutions;
     int process_max;
     int n_max;

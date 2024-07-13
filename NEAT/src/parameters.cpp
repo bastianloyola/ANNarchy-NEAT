@@ -32,7 +32,6 @@ void Parameters::loadFromCfg(const std::string& filename) {
                     else if (key == "c1") c1 = std::stof(value);
                     else if (key == "c2") c2 = std::stof(value);
                     else if (key == "c3") c3 = std::stof(value);
-                    else if (key == "initial_weight") initial_weight = std::stof(value);
                     else if (key == "numberGenomes") numberGenomes = std::stoi(value);
                     else if (key == "numberInputs") numberInputs = std::stoi(value);
                     else if (key == "numberOutputs") numberOutputs = std::stoi(value);
@@ -84,10 +83,10 @@ Parameters::Parameters() {}
 Parameters::Parameters(int numberGenomes, int numberInputs, int numberOutputs, float keep, float threshold,
             float probabilityInterespecies, float percentageNoCrossoverOff, float probabilityWeightMutated, 
             float probabilityAddNodeSmall, float probabilityAddLinkSmall, float probabilityAddNodeLarge, float probabilityAddLinkLarge,
-            float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3, float initial_weight)
+            float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3)
     :numberGenomes(numberGenomes),numberInputs(numberInputs),numberOutputs(numberOutputs),keep(keep),threshold(threshold),
     probabilityInterespecies(probabilityInterespecies),percentageNoCrossoverOff(percentageNoCrossoverOff),
     probabilityWeightMutated(probabilityWeightMutated),probabilityAddNodeSmall(probabilityAddNodeSmall),
     probabilityAddLinkSmall(probabilityAddLinkSmall),probabilityAddNodeLarge(probabilityAddNodeLarge),
     probabilityAddLinkLarge(probabilityAddLinkLarge), probabilityInputWeightMutated(probabilityInputWeightMutated),
-    largeSize(largeSize),c1(c1),c2(c2),c3(c3),initial_weight(initial_weight){}
+    largeSize(largeSize),c1(c1),c2(c2),c3(c3){}
