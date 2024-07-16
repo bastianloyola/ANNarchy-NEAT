@@ -44,6 +44,13 @@ bool compareIdNode(Node& a,Node& b) {
 
 // Función para generar un número aleatorio en un rango específico [min, max]
 int randomInt(int min, int max) {
+    if (min>max){
+        std::cout << "Error: min > max" << std::endl;
+        return min;
+    }else if (min==max){
+        std::cout << "Error: min == max" << std::endl;
+    }
+    
     // Generador de números aleatorios
     std::random_device rd;  // Semilla aleatoria
     std::mt19937 gen(rd()); // Generador Mersenne Twister

@@ -165,7 +165,11 @@ void Genome::createNode(int index){
     if (inh == 0){
         inh = -1;
     }
-    Connection c1(in_node, new_id, inh*parameters->initial_weight, 1, new_innovation1);
+    float minWeight = parameters->weightsRange[0];
+    float maxWeight = parameters->weightsRange[1];
+
+    float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
+    Connection c1(in_node, new_id, inh*weight, 1, new_innovation1);
     Connection c2(new_id, out_node, new_weight, 1, new_innovation2);
     
     connections.push_back(c1);
@@ -304,8 +308,12 @@ void Genome::mutation(){
                 conn->setEnabled(true);
             }
         }else{
+            float minWeight = parameters->weightsRange[0];
+            float maxWeight = parameters->weightsRange[1];
+
+            float initial_weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
             float weight = (rand() % 200 - 100)/100.0;
-            weight = weight + parameters->initial_weight;
+            weight = weight + initial_weight;
 
             float inh = randomInt(0,2);            
             if (inh == 1){
@@ -316,13 +324,15 @@ void Genome::mutation(){
     }
 
     if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
-        cout << "Mutate input weight ";
-        int index = randomInt(0,inputWeights.size());
-        cout << inputWeights[index] << "   ->   ";
+        cout << "Mutate input weight " << endl;
+        int n = inputWeights.size();
+        int index = randomInt(0,n);
         //Random delta weight between -1 and 1
         float weight = ((rand() % 200 - 100)/100.0)*parameters->learningRate;
-        inputWeights[index] = inputWeights[index] + weight;
-        cout << inputWeights[index] << endl;
+        float new_inputWeights = inputWeights[index] + weight;
+
+        inputWeights.at(index) = new_inputWeights;
+        cout << inputWeights[index] << endl;   
     }
 }
 
