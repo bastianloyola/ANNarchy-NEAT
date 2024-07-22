@@ -48,18 +48,14 @@ void Species::calculateAverageFitness(){
 }   
 
 void Species::calculateAdjustedFitness(){
-    float sumDistance,compatibility,adjustedFitness;
-
+    double sumDistance,compatibility,adjustedFitness;
+    if (genomes.size() == 1){
+        adjustedFitness = genomes[0]->getFitness();
+        genomes[0]->setAdjustedFitness(adjustedFitness);
+        return;
+    }
     for (int i = 0; i < (int)(genomes.size()); i++){
-        sumDistance = 0;
-        for (int j = 0; j < (int)(genomes.size()); j++){
-            if (i != j){
-                compatibility = genomes[i]->compatibility(*genomes[j]);
-                if (compatibility <= threshold) {
-                    sumDistance += 1;
-                }
-            }
-        }
+        sumDistance = static_cast<int>(genomes.size()) - 1;
         adjustedFitness = (genomes[i]->getFitness()) / sumDistance;
         genomes[i]->setAdjustedFitness(adjustedFitness);
     }

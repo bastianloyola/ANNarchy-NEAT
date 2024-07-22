@@ -13,7 +13,8 @@ int main() {
   Py_Initialize();
   
   //menu();
-  run(20);
+  std::cout << "starting" << endl;
+  run(1);
   cout << "finalized" << endl;
 
   Py_Finalize();

@@ -67,22 +67,22 @@ void Population::sort_species(){
 void Population::print(){
     //print genomes by species
     for (int i = 0; i < (int)(species.size()); i++){
-        cout << "Species " << i << endl;
+        std::cout << "Species " << i << endl;
         species[i]->print_genomes();
-        cout << "----------------" << endl;
+        std::cout << "----------------" << endl;
     }
 }
 
 void Population::eliminate(){
-    string carpeta;
-    int id,index,n;
-
-    offspringsPerSpecies();
+    //std::cout << "Eliminando..." << endl;
+    
+    int id,index,n,size;
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
+        size = static_cast<int>(species[i]->genomes.size());
         species[i]->sort_genomes();
-        n = species[i]->allocatedOffsprings;
-
+        n = static_cast<int>(ceil(size * (1-keep)));
+        if (n == size) n -= 1;
         for (int j = 0; j < n; j++){
             id = species[i]->genomes.back()->getId();
             index = findIndexGenome(id);
@@ -94,27 +94,32 @@ void Population::eliminate(){
 }
 
 void Population::reproduce(){
+    std::cout << "Reproduciendo..." << endl;
     Genome *g1, *g2;
     float interspeciesRate;
-    int reproduceInterspecies, reproduceNoninterspecies, reproduceNoninterspeciesNonCross, indexS1, indexS2, index;
+    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index, difference;
+    bool flagInterspecies, flagNoninterspecies;
+    offspringsPerSpecies();
 
     if (species.size() > 1){
         interspeciesRate = parameters.interspeciesRate;
+        flagInterspecies = true;
     }else{
         interspeciesRate = 0;
+        flagInterspecies = false;
     }
-    
     for (int i = 0; i < static_cast<int>(species.size()); i++){
-        reproduceInterspecies = species[i]->allocatedOffsprings * interspeciesRate;
+
+        reproduceMutations = 0;
+        reproduceInterspecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interspeciesRate);
 
         if (species[i]->genomes.size() > 1){
-            reproduceNoninterspeciesNonCross = (species[i]->allocatedOffsprings - reproduceInterspecies) *0.25;
-            reproduceNoninterspecies = species[i]->allocatedOffsprings - (reproduceInterspecies + reproduceNoninterspeciesNonCross);
+            reproduceNoninterspecies = species[i]->allocatedOffsprings - reproduceInterspecies;
         }else{
-            reproduceNoninterspeciesNonCross = species[i]->allocatedOffsprings - reproduceInterspecies;
             reproduceNoninterspecies = 0;
+            reproduceMutations = species[i]->allocatedOffsprings;
         }
-        
+        difference = reproduceInterspecies + reproduceNoninterspecies + reproduceMutations - species[i]->allocatedOffsprings;
 
         for (int j = 0; j < reproduceInterspecies; j++){
             indexS1 = i;
@@ -134,7 +139,7 @@ void Population::reproduce(){
             g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             
             while (g1->getId() == g2->getId()){
-                g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
+                g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
                 if (species[i]->genomes.size() <= 1) {
                     std::cout << "ERROR g1 == g2  species[i]->genomes.size() <= 1" << std::endl;
                 }
@@ -144,38 +149,24 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
-        for (int j = 0; j < reproduceNoninterspeciesNonCross; j++){
-            index = randomInt(0, static_cast<int>(species[i]->genomes.size()));
-            if (index >= 0 && index < static_cast<int>(species[i]->genomes.size())) {
-                Genome* offspring = new Genome();
-                offspring->setParameters(&parameters);
-                offspring->setInnovation(&innov);
-                offspring->setId(maxGenome);
-                maxGenome++;
-                offspring->setFitness(genomes[index]->getFitness());
-                offspring->setConnections(genomes[index]->getConnections());
-                offspring->setNodes(genomes[index]->getNodes());
-                offspring->mutation();
-                genomes.push_back(offspring);
-                } else {
-                cout << "index < 0 || index >= gneomesSize || !genomes[index]" << endl;
-                if (index < 0){
-                    cout << "index < 0" << endl;
-                }
-                if (index >= nGenomes){
-                    cout << "index >= nGenomes" << endl;
-                }
-                if (!genomes[index]){
-                    cout << "!genomes[index]" << endl;
-                }
-            }
-        } 
+        for (int j = 0; j < reproduceMutations; j++){
+            Genome* offspring = new Genome();
+            offspring->setParameters(&parameters);
+            offspring->setInnovation(&innov);
+            offspring->setId(maxGenome);
+            maxGenome++;
+            offspring->setFitness(species[i]->genomes[0]->getFitness());
+            offspring->setConnections(species[i]->genomes[0]->getConnections());
+            offspring->setNodes(species[i]->genomes[0]->getNodes());
+
+            offspring->mutation();
+            genomes.push_back(offspring);
+        }
     }
 }
 
 void Population::speciation(){
-    //cout << "Especiando..." << endl;
-    cout << "--nSpecies: " << (int)(species.size()) << "  --nGenomes: " << (int)(genomes.size()) << endl;
+    cout << "Especiando..." << endl;
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
     vector<Genome> genomesSpeciation;
@@ -186,7 +177,6 @@ void Population::speciation(){
 
     //Define new representative for each species
     for (int i = 0; i < nSpecies; i++){
-        
         //randomly select a genome from the species
         int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
         
@@ -208,13 +198,13 @@ void Population::speciation(){
     //Add genomes to species
     for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
         sort_species();
+        flag = true;
         for (int j = 0; j < static_cast<int>(species.size()); j++){
 
             compatibility = (*genomes[i]).compatibility(*species[j]->genome);
             if (compatibility < parameters.threshold){                    
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
-                
                 flag = false;
                 break;
             }
@@ -237,11 +227,10 @@ void Population::speciation(){
             i++;
         }
     }
-    //cout << "Fin Especiación" << endl;
 }
 
 void Population::evaluate() {
-    //std::cout << "Evaluando..." << std::endl;
+    std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
@@ -326,8 +315,6 @@ void Population::evaluate() {
     }
 
     Py_DECREF(load_module);
-
-    //std::cout << "Fin Evaluación" << std::endl;
 }
 
 
@@ -394,22 +381,20 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
-    //cout << "Mutando..." << endl;
+    cout << "Mutando..." << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
-        //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
             species[i]->genomes[j]->mutation();
         }
     }
-    //cout << "Fin Mutación " << endl;
 }
 
 void Population::evolution(int n){
 
     for (int i = 0; i < n; i++){
-        cout << " generación: " << i << endl; 
+        std::cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
         mutations();
@@ -427,7 +412,7 @@ void Population::print_best(){
             bestIndex = i;
         }
     }
-    cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
+    std::cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
     genomes[bestIndex]->printGenome();
 }
 
@@ -472,20 +457,41 @@ int Population::get_annarchy_id(){
     
 }
 
-void Population::offspringsPerSpecies(){
-    vector<int> offspringsAlloted;
-    float n;
+void Population::offspringsPerSpecies() {
+    vector<int> offspringsAlloted(species.size(), 0);
     float totalAverageFitness = 0;
+    int sum = 0;
+    int genomesSize = static_cast<int>(genomes.size());
+    int speciesSize = static_cast<int>(species.size());
 
-    for (int i = 0; i < (int)(species.size()); i++){
+    for (int i = 0; i < speciesSize; ++i) {
         species[i]->calculateAdjustedFitness();
         species[i]->calculateAverageFitness();
         totalAverageFitness += species[i]->averageFitness;
     }
 
-    for (int i = 0; i < (int)(species.size()); i++){
-        n = (species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes;
-        offspringsAlloted.push_back(n);
-        species[i]->allocatedOffsprings = n;
+    // Asignar descendientes proporcionalmente al fitness promedio ajustado
+    for (int i = 0; i < speciesSize; ++i) {
+        offspringsAlloted[i] = round((species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes);
+        sum += offspringsAlloted[i];
+    }
+
+    // Ajustar para asegurar que el número total de descendientes es exactamente igual a parameters.numberGenomes
+    int difference = (parameters.numberGenomes - genomesSize) - sum;
+    while (difference != 0) {
+        for (int i = 0; i < speciesSize; ++i) {
+            if (difference > 0) {
+                offspringsAlloted[i]++;
+                difference--;
+            } else if (difference < 0 && offspringsAlloted[i] > 0) {
+                offspringsAlloted[i]--;
+                difference++;
+            }
+            if (difference == 0) break;
+        }
+    }
+
+    for (int i = 0; i < speciesSize; ++i) {
+        species[i]->allocatedOffsprings = offspringsAlloted[i];
     }
 }

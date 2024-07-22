@@ -25,7 +25,7 @@ class Genome {
         float getFitness();
         int getId();
         int getIdAnnarchy();
-        float getAdjustedFitness();
+        double getAdjustedFitness();
 
         Connection* getConnection(int in_node, int out_node);
         bool connectionExist(int in_node, int out_node);
@@ -76,7 +76,7 @@ class Genome {
         Innovation* innov;
         Parameters* parameters;
         int id_annarchy;
-        float adjustedFitness;
+        double adjustedFitness;
 };
 
 #endif

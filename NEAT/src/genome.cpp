@@ -57,7 +57,7 @@ int Genome::getOutNodes(){ return numOut;}
 int Genome::getId(){ return id;}
 float Genome::getFitness(){ return fitness;}
 int Genome::getIdAnnarchy(){ return id_annarchy;}
-float Genome::getAdjustedFitness(){ return adjustedFitness;}
+double Genome::getAdjustedFitness(){ return adjustedFitness;}
 
 Connection* Genome::getConnection(int in_node, int out_node){
     //Find connection in vector
