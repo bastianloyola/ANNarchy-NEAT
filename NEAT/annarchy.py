@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import random as rd
 import scipy.sparse
 import gymnasium as gym
+from scipy.special import erf
 
 
 def get_function():
@@ -28,9 +29,9 @@ LIF = Neuron(
     tau_I * dg_exc/dt = -g_exc
     tau_I * dg_inh/dt = -g_inh
     """,
-    spike = "v >= 15.0",
-    reset = "v = 0",
-    refractory = 3.0
+    spike = "v >= -40.0",
+    reset = "v = -65",
+    refractory = 5.0
 )
 
 
@@ -219,26 +220,40 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
     # Final fitness 
     final_fitness = 0
     
+    # Definir límites para cada variable de observación
+    limites = [
+        (-2.4, 2.4),  # Posición del carro
+        (-3.0, 3.0),  # Velocidad del carro (estimado)
+        (-0.209, 0.209),  # Ángulo del poste en radianes
+        (-3.0, 3.0)  # Velocidad angular del poste (estimado)
+    ]
+    
+    num_neuronas_por_variable = 20
+    intervals = []
+
+    for low, high in limites:
+        # Generar valores centrados en 0 siguiendo una distribución normal
+        values = np.random.normal(loc=0, scale=1, size=1000)
+        z = np.linspace(low, high, num_neuronas_por_variable + 1)
+        interval_limits = np.percentile(values, (0.5 * (1 + erf(z / np.sqrt(2)))) * 100)
+        # Dividir los valores en intervalos
+        intervals = [values[(values >= interval_limits[i]) & (values < interval_limits[i+1])] for i in range(num_neuronas_por_variable)]
+        intervals[-1] = np.append(intervals[-1], values[-1])  # Asegurar que el último intervalo incluye el valor máximo
+
+    
     while h < episodes:
         j = 0
         returns = []
         actions_done = []
         while j < max_steps and not terminated and not truncated:
             # Codificar observación
-            num_neuronas_por_variable = 20
-            mean = 0
-            std_dev = 1
-            for i, obs in enumerate(observation):
-                indices = np.linspace(-3*std_dev, 3*std_dev, num_neuronas_por_variable)
-                gauss_distribution = np.exp(-(indices - obs)**2 / (2 * std_dev**2))
-                valores_codificados = gauss_distribution / np.sum(gauss_distribution)
-                start_idx = i * num_neuronas_por_variable
-                for j, valor in enumerate(valores_codificados):
-                    pop[input_index[start_idx + j]].I = valor
-            
+            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
+                for j in range(num_neuronas_por_variable):
+                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 30 # Activa la neurona correspondiente
+                        break
             simulate(100.0)
             spikes = Monitor.get('spike')
-            
             # Decodificar la acción basada en el número de picos en las neuronas de salida
             left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
             right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
@@ -380,3 +395,6 @@ def exampleIzhikevich():
     plt.show()
     return 0
 
+
+
+print(snn(80, 40, 200, 2, np.random.rand(200, 200), np.random.rand(80)))
