@@ -13,7 +13,7 @@ int main() {
   Py_Initialize();
   
   //menu();
-  float fitness = run(20);
+  float fitness = run(1);
   cout << "finalized" << endl;
 
 

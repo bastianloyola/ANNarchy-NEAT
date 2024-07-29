@@ -169,6 +169,8 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
         j=0
         returns = []
         actions_done = []
+        terminated = False
+        truncated = False
         while j < max_steps and not terminated and not truncated:
             #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
@@ -198,6 +200,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
             actions_done.append(action)
             Monitor.reset()
             j += 1
+        env.reset()
         final_fitness += np.sum(returns)
         h += 1
 
@@ -245,12 +248,14 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
         j = 0
         returns = []
         actions_done = []
+        terminated = False
+        truncated = False
         while j < max_steps and not terminated and not truncated:
             # Codificar observación
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 30 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 1 # Activa la neurona correspondiente
                         break
             simulate(100.0)
             spikes = Monitor.get('spike')
@@ -268,7 +273,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             actions_done.append(action)
             Monitor.reset()
             j += 1
-        
+        env.reset()
         final_fitness += np.sum(returns)
         h += 1
 

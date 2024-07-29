@@ -2,6 +2,7 @@ import optuna
 import sys
 import logging
 import subprocess
+import numpy as np
 
 from optuna.visualization import plot_contour
 from optuna.visualization import plot_edf
@@ -18,30 +19,33 @@ def objective(trial):
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
-    keep = trial.suggest_float('keep', 0.0, 1.0)
-    threshold = trial.suggest_float('threshold', 0.0, 10.0)
-    probabilityInterespecies = trial.suggest_float('probabilityInterespecies', 0.0, 0.01)
-    probabilityNoCrossoverOff = trial.suggest_float('probabilityNoCrossoverOff', 0.0, 1.0)
-    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.0, 1.0)
-    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.0, 0.1)
-    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.0, 0.1)
-    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.0, 0.1)
-    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.0, 1.0)
-    largeSize = trial.suggest_int('largeSize', 1, 100)  
-    c1 = trial.suggest_float('c1', 0.0, 10.0)
-    c2 = trial.suggest_float('c2', 0.0, 10.0)
-    c3 = trial.suggest_float('c3', 0.0, 1.0)
-    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(probabilityInterespecies), str(probabilityNoCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), str(largeSize), str(c1), str(c2), str(c3)],
+    keep = trial.suggest_float('keep', 0.1, 0.7)
+    threshold = trial.suggest_float('threshold', 2.0, 5.0)
+    probabilityInterespecies = trial.suggest_float('probabilityInterespecies', 0.01, 0.5)
+    probabilityNoCrossoverOff = trial.suggest_float('probabilityNoCrossoverOff', 0.2, 0.6)
+    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.4, 0.9)
+    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.01, 0.1)
+    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.1)
+    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.01, 0.1)
+    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.1, 0.4)
+    c1 = trial.suggest_float('c1', 0.1, 3.0)
+    c2 = trial.suggest_float('c2', 0.1, 3.0)
+    c3 = trial.suggest_float('c3', 0.1, 3.0)
+    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(probabilityInterespecies), str(probabilityNoCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), str(c1), str(c2), str(c3)],
                         stderr=subprocess.PIPE, 
                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    FuncValue = p.stdout.readlines()
+
+
+    p.wait()
+    FuncValue = p.returncode
+
     #get final line of output
-    FuncValue = FuncValue[-1]
-    #convert to float
-    FuncValue = float(FuncValue)
+    if FuncValue != None:
+        FuncValue = float(FuncValue)
+    else:
+        FuncValue = -np.inf
 
     return FuncValue
-
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 
@@ -52,8 +56,22 @@ study = optuna.create_study(study_name='Test-study',
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=100, timeout=60) #timeout in seconds
+study.optimize(objective, n_trials=100, timeout=18000) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')
 
+# Get the best parameter
+found_params = study.best_params
+found_value  = study.best_value
+found_trial  = study.best_trial
+
+# Visualization options 
+fig = optuna.visualization.plot_optimization_history(study)
+fig = optuna.visualization.plot_parallel_coordinate(study)
+fig = optuna.visualization.plot_slice(study)
+fig = optuna.visualization.plot_param_importances(study)
+fig = optuna.visualization.plot_edf(study)
+fig.show()
+
+#https://adambaskerville.github.io/posts/PythonSubprocess
