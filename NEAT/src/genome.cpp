@@ -218,7 +218,7 @@ float Genome::singleEvaluation(PyObject *load_module){
 
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    std::cout << "Fitness " << id << ": "<< value << std::endl;
+    //std::cout << "Fitness " << id << ": "<< value << std::endl;
     setFitness(value);
 
 

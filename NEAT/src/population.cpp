@@ -74,8 +74,7 @@ void Population::print(){
 }
 
 void Population::eliminate(){
-    //std::cout << "Eliminando..." << endl;
-    
+    std::cout << "Eliminando..." << " Genomes size: " << genomes.size() << endl;
     int id,index,n,size;
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
@@ -90,16 +89,22 @@ void Population::eliminate(){
             genomes.erase(x);
             species[i]->genomes.pop_back();
         }
+        //std::cout << "Species " << i << " eliminados: " << n << endl;
     }
+
+    std::cout << "Eliminados..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::reproduce(){
-    std::cout << "Reproduciendo..." << endl;
+    std::cout << "Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
     Genome *g1, *g2;
     float interspeciesRate;
     int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index, difference;
     bool flagInterspecies, flagNoninterspecies;
+
+    std::cout << "-- Offsprings per species --" << endl;
     offspringsPerSpecies();
+    std::cout << "-- Done Offsprings per species --" << endl;
 
     if (species.size() > 1){
         interspeciesRate = parameters.interspeciesRate;
@@ -109,6 +114,8 @@ void Population::reproduce(){
         flagInterspecies = false;
     }
     for (int i = 0; i < static_cast<int>(species.size()); i++){
+
+        //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
 
         reproduceMutations = 0;
         reproduceInterspecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interspeciesRate);
@@ -121,12 +128,17 @@ void Population::reproduce(){
         }
         difference = reproduceInterspecies + reproduceNoninterspecies + reproduceMutations - species[i]->allocatedOffsprings;
 
+        //std::cout << "   reproduceInterspecies: " << reproduceInterspecies << endl;
+        //std::cout << "   reproduceNoninterspecies: " << reproduceNoninterspecies << endl;
+        //std::cout << "   reproduceMutations: " << reproduceMutations << endl;
+        //std::cout << "   diference: " << difference << endl;
+
         for (int j = 0; j < reproduceInterspecies; j++){
             indexS1 = i;
             indexS2 = randomInt(0,static_cast<int>(species.size()));
             while(indexS1 == indexS2){
                 indexS2 = randomInt(0,static_cast<int>(species.size()));
-            }
+            } // Revisar
             g1 = species[indexS1]->genomes[randomInt(0,static_cast<int>(species[indexS1]->genomes.size()))];
             g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
 
@@ -142,7 +154,7 @@ void Population::reproduce(){
                 g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
                 if (species[i]->genomes.size() <= 1) {
                     std::cout << "ERROR g1 == g2  species[i]->genomes.size() <= 1" << std::endl;
-                }
+                } //Revisar
             }
 
             Genome* offspring = crossover(g1,g2);
@@ -158,11 +170,12 @@ void Population::reproduce(){
             offspring->setFitness(species[i]->genomes[0]->getFitness());
             offspring->setConnections(species[i]->genomes[0]->getConnections());
             offspring->setNodes(species[i]->genomes[0]->getNodes());
-
             offspring->mutation();
             genomes.push_back(offspring);
         }
     }
+
+    std::cout << "Fin Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::speciation(){
@@ -464,26 +477,35 @@ void Population::offspringsPerSpecies() {
     int genomesSize = static_cast<int>(genomes.size());
     int speciesSize = static_cast<int>(species.size());
 
+    std::cout << "-->for 1: ";
     for (int i = 0; i < speciesSize; ++i) {
+        //std::cout << i << "; ";
         species[i]->calculateAdjustedFitness();
         species[i]->calculateAverageFitness();
         totalAverageFitness += species[i]->averageFitness;
     }
 
+    std::cout << "\n-->for 2: ";
     // Asignar descendientes proporcionalmente al fitness promedio ajustado
     for (int i = 0; i < speciesSize; ++i) {
+        std::cout << i << ":";
         offspringsAlloted[i] = round((species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes);
+        if (offspringsAlloted[i] < 0) offspringsAlloted[i] = 0;
         sum += offspringsAlloted[i];
+        std::cout << offspringsAlloted[i] << "; ";
     }
 
+    std::cout << "\n-->while: " << endl;
     // Ajustar para asegurar que el número total de descendientes es exactamente igual a parameters.numberGenomes
     int difference = (parameters.numberGenomes - genomesSize) - sum;
     while (difference != 0) {
+        std::cout << " \n----> Difference: " << difference << "; for:";
         for (int i = 0; i < speciesSize; ++i) {
+            std::cout << i << "; ";
             if (difference > 0) {
                 offspringsAlloted[i]++;
                 difference--;
-            } else if (difference < 0 && offspringsAlloted[i] > 0) {
+            }else if (difference < 0 && offspringsAlloted[i] > 0) {
                 offspringsAlloted[i]--;
                 difference++;
             }
@@ -491,7 +513,9 @@ void Population::offspringsPerSpecies() {
         }
     }
 
+    std::cout << "\n-->for 3: ";
     for (int i = 0; i < speciesSize; ++i) {
+        //std::cout << i << "; ";
         species[i]->allocatedOffsprings = offspringsAlloted[i];
     }
 }
