@@ -337,8 +337,6 @@ def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
 
     final_fitness = final_fitness/episodes
     env.close()
-    #print("Returns: ",returns)
-    #print("Actions: ",actions_done)
     return final_fitness
 
 
