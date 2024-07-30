@@ -29,17 +29,18 @@ int main(int argc, char *argv[]) {
   float c3=std::atof(argv[12]);
 
   // Parametros constantes
-  int numberGenomes=50;
-  int numberInputs=8;
-  int numberOutputs=2;
-  int evolutions=50;
+  float initial_weights=110.0;
+  int numberGenomes=10;
+  int numberInputs=2;
+  int numberOutputs=1;
+  int evolutions=10;
   float learningRate=10.0;
-  float inputWeights_min=0.0;
+  float inputWeights_min=110.0;
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
   int process_max=2;
-  string function="cartpole";
+  string function="xor";
 
   // Escribir en el archivo config.cfg
   ofstream config_file("config/config.cfg", ofstream::trunc);
@@ -49,8 +50,8 @@ int main(int argc, char *argv[]) {
   }
   config_file << "keep=" << keep << "\n";
   config_file << "threshold=" << threshold << "\n";
-  config_file << "probabilityInterespecies=" << probabilityInterespecies << "\n";
-  config_file << "probabilityNoCrossoverOff=" << probabilityNoCrossoverOff << "\n";
+  config_file << "interespeciesRate=" << probabilityInterespecies << "\n";
+  config_file << "noCrossoverOff=" << probabilityNoCrossoverOff << "\n";
   config_file << "probabilityWeightMutated=" << probabilityWeightMutated << "\n";
   config_file << "probabilityAddNodeSmall=" << probabilityAddNodeSmall << "\n";
   config_file << "probabilityAddLink_small=" << probabilityAddLink_small << "\n";
@@ -60,7 +61,7 @@ int main(int argc, char *argv[]) {
   config_file << "c1=" << c1 << "\n";
   config_file << "c2=" << c2 << "\n";
   config_file << "c3=" << c3 << "\n";
-  config_file << "initial_weight=30.0\n";
+  config_file << "initial_weight=" << initial_weights << "\n";
   config_file << "numberGenomes=" << numberGenomes << "\n";
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
