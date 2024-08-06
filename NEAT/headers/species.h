@@ -12,12 +12,17 @@ public:
     std::vector<Genome*> genomes;
     Genome *genome;
     float threshold;
+    double averageFitness;
+    int allocatedOffsprings;
 
     // Method to add a genome to the species
     void add_genome(Genome *genome);
     void sort_genomes();
     void print();
     void print_genomes();
+    void calculateAverageFitness();
+    void calculateAdjustedFitness();
+
 
 private:
 };

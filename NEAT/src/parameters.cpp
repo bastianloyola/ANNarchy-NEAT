@@ -21,6 +21,8 @@ void Parameters::loadFromCfg(const std::string& filename) {
                     if (key == "keep") keep = std::stof(value);
                     else if (key == "threshold") threshold = std::stof(value);
                     else if (key == "probabilityInterespecies") probabilityInterespecies = std::stof(value);
+                    else if (key == "interspeciesRate") interspeciesRate = std::stof(value);
+                    else if (key == "noCrossoverOff") noCrossoverOff = std::stof(value);
                     else if (key == "probabilityNoCrossoverOff") percentageNoCrossoverOff = std::stof(value);
                     else if (key == "probabilityWeightMutated") probabilityWeightMutated = std::stof(value);
                     else if (key == "probabilityAddNodeSmall") probabilityAddNodeSmall = std::stof(value);
@@ -81,11 +83,11 @@ Parameters::Parameters() {}
 
 // Constructor con parámetros
 Parameters::Parameters(int numberGenomes, int numberInputs, int numberOutputs, float keep, float threshold,
-            float probabilityInterespecies, float percentageNoCrossoverOff, float probabilityWeightMutated, 
+            float interspeciesRate, float noCrossoverOff, float probabilityWeightMutated, 
             float probabilityAddNodeSmall, float probabilityAddLinkSmall, float probabilityAddNodeLarge, float probabilityAddLinkLarge,
             float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3)
     :numberGenomes(numberGenomes),numberInputs(numberInputs),numberOutputs(numberOutputs),keep(keep),threshold(threshold),
-    probabilityInterespecies(probabilityInterespecies),percentageNoCrossoverOff(percentageNoCrossoverOff),
+    interspeciesRate(interspeciesRate),noCrossoverOff(noCrossoverOff),
     probabilityWeightMutated(probabilityWeightMutated),probabilityAddNodeSmall(probabilityAddNodeSmall),
     probabilityAddLinkSmall(probabilityAddLinkSmall),probabilityAddNodeLarge(probabilityAddNodeLarge),
     probabilityAddLinkLarge(probabilityAddLinkLarge), probabilityInputWeightMutated(probabilityInputWeightMutated),

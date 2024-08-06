@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
-#include<string>
-#include <fstream>  // Asegúrate de incluir este encabezado
+#include <string>
+#include <fstream>  // Asegúrate de incluir este encabezado 
 #include <cstdlib>  // para std::atof
+
 
 #define PY_SSIZE_T_CLEAN
 #include <python3.10/Python.h>
@@ -10,7 +11,7 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
+float main(int argc, char *argv[]) {
 
   // Recibir parametros de la interfaz de usuario
   float keep=std::atof(argv[1]);
@@ -28,15 +29,16 @@ int main(int argc, char *argv[]) {
   float c3=std::atof(argv[12]);
 
   // Parametros constantes
-  int numberGenomes=100;
+  float initial_weights=110.0;
+  int numberGenomes=10;
   int numberInputs=2;
   int numberOutputs=1;
-  int evolutions=50;
+  int evolutions=10;
   float learningRate=10.0;
-  float inputWeights_min=0.0;
+  float inputWeights_min=110.0;
   float inputWeights_max=150.0;
-  float weightsRange_min=110.0;
-  float weightsRange_max=110.0;
+  float weightsRange_min=-20.0;
+  float weightsRange_max=80.0;
   int process_max=2;
   string function="xor";
 
@@ -48,8 +50,8 @@ int main(int argc, char *argv[]) {
   }
   config_file << "keep=" << keep << "\n";
   config_file << "threshold=" << threshold << "\n";
-  config_file << "probabilityInterespecies=" << probabilityInterespecies << "\n";
-  config_file << "probabilityNoCrossoverOff=" << probabilityNoCrossoverOff << "\n";
+  config_file << "interespeciesRate=" << probabilityInterespecies << "\n";
+  config_file << "noCrossoverOff=" << probabilityNoCrossoverOff << "\n";
   config_file << "probabilityWeightMutated=" << probabilityWeightMutated << "\n";
   config_file << "probabilityAddNodeSmall=" << probabilityAddNodeSmall << "\n";
   config_file << "probabilityAddLink_small=" << probabilityAddLink_small << "\n";
@@ -59,6 +61,7 @@ int main(int argc, char *argv[]) {
   config_file << "c1=" << c1 << "\n";
   config_file << "c2=" << c2 << "\n";
   config_file << "c3=" << c3 << "\n";
+  config_file << "initial_weight=" << initial_weights << "\n";
   config_file << "numberGenomes=" << numberGenomes << "\n";
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
@@ -71,10 +74,12 @@ int main(int argc, char *argv[]) {
   config_file << "function=" << function << "\n";
   config_file.close();
 
+ 
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
   
   //menu();
+  std::cout << "starting" << endl;
   float fitness = run(1);
   cout << "finalized" << endl;
 

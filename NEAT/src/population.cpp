@@ -67,77 +67,101 @@ void Population::sort_species(){
 void Population::print(){
     //print genomes by species
     for (int i = 0; i < (int)(species.size()); i++){
-        cout << "Species " << i << endl;
+        std::cout << "Species " << i << endl;
         species[i]->print_genomes();
-        cout << "----------------" << endl;
+        std::cout << "----------------" << endl;
     }
 }
 
 void Population::eliminate(){
-    //cout << "Eliminando..." << endl;
-    string carpeta;
-    int id,index,n;
+    std::cout << "Eliminando..." << " Genomes size: " << genomes.size() << endl;
+    int id,index,n,size;
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
+        size = static_cast<int>(species[i]->genomes.size());
         species[i]->sort_genomes();
-        n = static_cast<int>(species[i]->genomes.size()) * (1-keep); 
+        n = static_cast<int>(ceil(size * (1-keep)));
+        if (n == size) n -= 1;
         for (int j = 0; j < n; j++){
             id = species[i]->genomes.back()->getId();
-            
             index = findIndexGenome(id);
             auto x = genomes.begin() + index;
             genomes.erase(x);
-            
             species[i]->genomes.pop_back();
-            
-            //carpeta = "annarchy/annarchy-"+to_string(id);
-            //deleteDirectory(carpeta);
-            
         }
+        //std::cout << "Species " << i << " eliminados: " << n << endl;
     }
-    //cout << "Fin Eliminación" << endl;
+
+    std::cout << "Eliminados..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::reproduce(){
-    //cout << "Reproduciendo..." << endl;
+    std::cout << "Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
     Genome *g1, *g2;
-    int indexS1,indexS2,index,sSize,noCrossover;
-    int genomesSize = static_cast<int>(genomes.size());
-    int n = nGenomes - genomesSize;
-    cout << "n: " << n << " genomesSize: " << genomesSize << flush << endl;
+    float interspeciesRate;
+    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index, difference;
+    bool flagInterspecies, flagNoninterspecies;
 
-    vector<int> speciesCrossover;
-    vector<int> speciesInterespeciesCrossover;
-    bool flagInterespecies = false; // true if there are two or more species with more than 0 genome
-    bool flagCrossover = false; // true if there is species with more than 1 genome
+    std::cout << "-- Offsprings per species --" << endl;
+    offspringsPerSpecies();
+    std::cout << "-- Done Offsprings per species --" << endl;
 
+    if (species.size() > 1){
+        interspeciesRate = parameters.interspeciesRate;
+        flagInterspecies = true;
+    }else{
+        interspeciesRate = 0;
+        flagInterspecies = false;
+    }
     for (int i = 0; i < static_cast<int>(species.size()); i++){
-        sSize = static_cast<int>(species[i]->genomes.size());
-        if (sSize > 0){
-            speciesInterespeciesCrossover.push_back(i);
-            if (sSize > 1){
-                speciesCrossover.push_back(i);
-                flagCrossover = true;
-            }
-        }
-    }
 
-    if (static_cast<int>(speciesInterespeciesCrossover.size()) > 1){
-        flagInterespecies = true;
-    }
-    
-    if (!flagCrossover && !flagInterespecies){
-        noCrossover = n;
-    }else{ 
-        noCrossover = n*parameters.percentageNoCrossoverOff;
-    }
-    
-    for (int i = 0; i < noCrossover; i++){
-        if (static_cast<int>(genomes.size()) == nGenomes){
-            break;
+        //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
+
+        reproduceMutations = 0;
+        reproduceInterspecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interspeciesRate);
+
+        if (species[i]->genomes.size() > 1){
+            reproduceNoninterspecies = species[i]->allocatedOffsprings - reproduceInterspecies;
+        }else{
+            reproduceNoninterspecies = 0;
+            reproduceMutations = species[i]->allocatedOffsprings;
         }
-        index = randomInt(0,genomesSize);
-        if (index >= 0 && index < genomesSize && genomes[index]) {
+        difference = reproduceInterspecies + reproduceNoninterspecies + reproduceMutations - species[i]->allocatedOffsprings;
+
+        //std::cout << "   reproduceInterspecies: " << reproduceInterspecies << endl;
+        //std::cout << "   reproduceNoninterspecies: " << reproduceNoninterspecies << endl;
+        //std::cout << "   reproduceMutations: " << reproduceMutations << endl;
+        //std::cout << "   diference: " << difference << endl;
+
+        for (int j = 0; j < reproduceInterspecies; j++){
+            indexS1 = i;
+            indexS2 = randomInt(0,static_cast<int>(species.size()));
+            while(indexS1 == indexS2){
+                indexS2 = randomInt(0,static_cast<int>(species.size()));
+            } // Revisar
+            g1 = species[indexS1]->genomes[randomInt(0,static_cast<int>(species[indexS1]->genomes.size()))];
+            g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
+
+            Genome* offspring = crossover(g1,g2);
+            genomes.push_back(offspring);
+        }
+
+        for (int j = 0; j < reproduceNoninterspecies; j++){
+            g1 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
+            g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
+            
+            while (g1->getId() == g2->getId()){
+                g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
+                if (species[i]->genomes.size() <= 1) {
+                    std::cout << "ERROR g1 == g2  species[i]->genomes.size() <= 1" << std::endl;
+                } //Revisar
+            }
+
+            Genome* offspring = crossover(g1,g2);
+            genomes.push_back(offspring);
+        }
+
+        for (int j = 0; j < reproduceMutations; j++){
             Genome* offspring = new Genome();
             offspring->setParameters(&parameters);
             offspring->setInnovation(&innov);
@@ -155,56 +179,14 @@ void Population::reproduce(){
             // Verificar el tamaño de inputWeights
             //std::cout << "Tamaño de inputWeights en el offspring: " << offspring->inputWeights.size() << std::endl;
             genomes.push_back(offspring);
-            } else {
-            cout << "index < 0 || index >= gneomesSize || !genomes[index]" << endl;
-            if (index < 0){
-                cout << "index < 0" << endl;
-            }
-            if (index >= nGenomes){
-                cout << "index >= nGenomes" << endl;
-            }
-            if (!genomes[index]){
-                cout << "!genomes[index]" << endl;
-            }
         }
     }
 
-    for (int i = noCrossover; i < n; i++){
-        if (static_cast<int>(genomes.size()) == nGenomes){
-            break;
-        }
-        
-        if ((getBooleanWithProbability(parameters.probabilityInterespecies) || !flagCrossover) && flagInterespecies){
-            indexS1 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
-            indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
-            while(indexS1 == indexS2){
-                indexS2 = speciesInterespeciesCrossover[randomInt(0,static_cast<int>(speciesInterespeciesCrossover.size()))];
-            }
-        }else{
-            indexS1 = speciesCrossover[randomInt(0,static_cast<int>(speciesCrossover.size()))];
-            indexS2 = indexS1;
-        }
-
-        g1 = species[indexS1]->genomes[randomInt(0,static_cast<int>(species[indexS1]->genomes.size()))];
-        g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
-
-        while (g1->getId() == g2->getId()){
-            g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
-            if (species[indexS1]->genomes.size() > 1) {
-                std::cout << "ERROR g1 == g2" << std::endl;
-                break;
-            }
-        }
-        
-        Genome* offspring = crossover(g1,g2);
-        genomes.push_back(offspring);
-    }
-    //cout << "Fin Reproducción" << endl;
+    std::cout << "Fin Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::speciation(){
-    //cout << "Especiando..." << endl;
-    cout << "--nSpecies: " << (int)(species.size()) << "  --nGenomes: " << (int)(genomes.size()) << endl;
+    cout << "Especiando..." << endl;
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
     vector<Genome> genomesSpeciation;
@@ -215,7 +197,6 @@ void Population::speciation(){
 
     //Define new representative for each species
     for (int i = 0; i < nSpecies; i++){
-        
         //randomly select a genome from the species
         int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
         
@@ -237,13 +218,13 @@ void Population::speciation(){
     //Add genomes to species
     for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
         sort_species();
+        flag = true;
         for (int j = 0; j < static_cast<int>(species.size()); j++){
 
             compatibility = (*genomes[i]).compatibility(*species[j]->genome);
-            if (compatibility <= parameters.threshold){                    
+            if (compatibility < parameters.threshold){                    
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
-                
                 flag = false;
                 break;
             }
@@ -266,11 +247,10 @@ void Population::speciation(){
             i++;
         }
     }
-    //cout << "Fin Especiación" << endl;
 }
 
 void Population::evaluate() {
-    //std::cout << "Evaluando..." << std::endl;
+    std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
@@ -355,8 +335,6 @@ void Population::evaluate() {
     }
 
     Py_DECREF(load_module);
-
-    //std::cout << "Fin Evaluación" << std::endl;
 }
 
 
@@ -423,22 +401,20 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
-    //cout << "Mutando..." << endl;
+    cout << "Mutando..." << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
-        //sort(species[i].genomes.begin(), species[i].genomes.end(), compareFitness);
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
             species[i]->genomes[j]->mutation();
         }
     }
-    //cout << "Fin Mutación " << endl;
 }
 
 void Population::evolution(int n){
 
     for (int i = 0; i < n; i++){
-        cout << " generación: " << i << endl; 
+        std::cout << " generación: " << i << endl; 
         evaluate();
         eliminate();
         mutations();
@@ -456,7 +432,7 @@ void Population::print_best(){
             bestIndex = i;
         }
     }
-    cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
+    std::cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
     genomes[bestIndex]->printGenome();
 }
 
@@ -499,4 +475,54 @@ int Population::get_annarchy_id(){
     }
     return 0;
     
+}
+
+void Population::offspringsPerSpecies() {
+    vector<int> offspringsAlloted(species.size(), 0);
+    float totalAverageFitness = 0;
+    int sum = 0;
+    int genomesSize = static_cast<int>(genomes.size());
+    int speciesSize = static_cast<int>(species.size());
+
+    std::cout << "-->for 1: ";
+    for (int i = 0; i < speciesSize; ++i) {
+        //std::cout << i << "; ";
+        species[i]->calculateAdjustedFitness();
+        species[i]->calculateAverageFitness();
+        totalAverageFitness += species[i]->averageFitness;
+    }
+
+    std::cout << "\n-->for 2: ";
+    // Asignar descendientes proporcionalmente al fitness promedio ajustado
+    for (int i = 0; i < speciesSize; ++i) {
+        std::cout << i << ":";
+        offspringsAlloted[i] = round((species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes);
+        if (offspringsAlloted[i] < 0) offspringsAlloted[i] = 0;
+        sum += offspringsAlloted[i];
+        std::cout << offspringsAlloted[i] << "; ";
+    }
+
+    std::cout << "\n-->while: " << endl;
+    // Ajustar para asegurar que el número total de descendientes es exactamente igual a parameters.numberGenomes
+    int difference = (parameters.numberGenomes - genomesSize) - sum;
+    while (difference != 0) {
+        std::cout << " \n----> Difference: " << difference << "; for:";
+        for (int i = 0; i < speciesSize; ++i) {
+            std::cout << i << "; ";
+            if (difference > 0) {
+                offspringsAlloted[i]++;
+                difference--;
+            }else if (difference < 0 && offspringsAlloted[i] > 0) {
+                offspringsAlloted[i]--;
+                difference++;
+            }
+            if (difference == 0) break;
+        }
+    }
+
+    std::cout << "\n-->for 3: ";
+    for (int i = 0; i < speciesSize; ++i) {
+        //std::cout << i << "; ";
+        species[i]->allocatedOffsprings = offspringsAlloted[i];
+    }
 }

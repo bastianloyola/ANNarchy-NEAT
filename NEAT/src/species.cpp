@@ -37,3 +37,26 @@ void Species::print_genomes(){
         cout << "---------------------------------------------"<< endl;
     }
 }
+
+void Species::calculateAverageFitness(){
+    float sumAdjustedFitness = 0;
+
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        sumAdjustedFitness += genomes[i]->getAdjustedFitness();
+    }
+    averageFitness = sumAdjustedFitness / genomes.size();
+}   
+
+void Species::calculateAdjustedFitness(){
+    double sumDistance,compatibility,adjustedFitness;
+    if (genomes.size() == 1){
+        adjustedFitness = genomes[0]->getFitness();
+        genomes[0]->setAdjustedFitness(adjustedFitness);
+        return;
+    }
+    for (int i = 0; i < (int)(genomes.size()); i++){
+        sumDistance = static_cast<int>(genomes.size()) - 1;
+        adjustedFitness = (genomes[i]->getFitness()) / sumDistance;
+        genomes[i]->setAdjustedFitness(adjustedFitness);
+    }
+}

@@ -21,8 +21,8 @@ def objective(trial):
     # Definir los hiperparámetros que Optuna debe optimizar
     keep = trial.suggest_float('keep', 0.1, 0.7)
     threshold = trial.suggest_float('threshold', 2.0, 5.0)
-    probabilityInterespecies = trial.suggest_float('probabilityInterespecies', 0.01, 0.5)
-    probabilityNoCrossoverOff = trial.suggest_float('probabilityNoCrossoverOff', 0.2, 0.6)
+    interespeciesRate = trial.suggest_float('interespeciesRate', 0.01, 0.5)
+    noCrossoverOff = trial.suggest_float('noCrossoverOff', 0.2, 0.6)
     probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.4, 0.9)
     probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.01, 0.1)
     probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.1)
@@ -31,7 +31,7 @@ def objective(trial):
     c1 = trial.suggest_float('c1', 0.1, 3.0)
     c2 = trial.suggest_float('c2', 0.1, 3.0)
     c3 = trial.suggest_float('c3', 0.1, 3.0)
-    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(probabilityInterespecies), str(probabilityNoCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), str(c1), str(c2), str(c3)],
+    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate), str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), str(c1), str(c2), str(c3)],
                         stderr=subprocess.PIPE, 
                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
