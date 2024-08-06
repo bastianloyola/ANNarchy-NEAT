@@ -11,7 +11,7 @@
 
 using namespace std;
 
-float main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 
   // Recibir parametros de la interfaz de usuario
   float keep=std::atof(argv[1]);
@@ -30,17 +30,17 @@ float main(int argc, char *argv[]) {
 
   // Parametros constantes
   float initial_weights=110.0;
-  int numberGenomes=10;
-  int numberInputs=2;
-  int numberOutputs=1;
-  int evolutions=10;
+  int numberGenomes=50;
+  int numberInputs=8;
+  int numberOutputs=2;
+  int evolutions=50;
   float learningRate=10.0;
-  float inputWeights_min=110.0;
+  float inputWeights_min=0.0;
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
   int process_max=2;
-  string function="xor";
+  string function="cartpole";
 
   // Escribir en el archivo config.cfg
   ofstream config_file("config/config.cfg", ofstream::trunc);
@@ -80,7 +80,7 @@ float main(int argc, char *argv[]) {
   
   //menu();
   std::cout << "starting" << endl;
-  float fitness = run(1);
+  int fitness = run(1);
   cout << "finalized" << endl;
 
 

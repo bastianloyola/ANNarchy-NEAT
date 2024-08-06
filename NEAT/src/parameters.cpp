@@ -20,10 +20,6 @@ void Parameters::loadFromCfg(const std::string& filename) {
                     // Asignar valor al parámetro correspondiente
                     if (key == "keep") keep = std::stof(value);
                     else if (key == "threshold") threshold = std::stof(value);
-                    else if (key == "probabilityInterespecies") probabilityInterespecies = std::stof(value);
-                    else if (key == "interspeciesRate") interspeciesRate = std::stof(value);
-                    else if (key == "noCrossoverOff") noCrossoverOff = std::stof(value);
-                    else if (key == "probabilityNoCrossoverOff") percentageNoCrossoverOff = std::stof(value);
                     else if (key == "probabilityWeightMutated") probabilityWeightMutated = std::stof(value);
                     else if (key == "probabilityAddNodeSmall") probabilityAddNodeSmall = std::stof(value);
                     else if (key == "probabilityAddLink_small") probabilityAddLinkSmall = std::stof(value);
