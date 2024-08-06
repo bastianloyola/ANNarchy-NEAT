@@ -255,7 +255,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 1 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].v = 30 # Activa la neurona correspondiente
                         break
             simulate(100.0)
             spikes = Monitor.get('spike')
@@ -399,5 +399,3 @@ def exampleIzhikevich():
     return 0
 
 
-
-print(snn(80, 40, 200, 2, np.random.rand(200, 200), np.random.rand(80)))

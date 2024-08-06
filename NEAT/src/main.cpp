@@ -28,17 +28,17 @@ int main(int argc, char *argv[]) {
   float c3=std::atof(argv[12]);
 
   // Parametros constantes
-  int numberGenomes=50;
-  int numberInputs=8;
-  int numberOutputs=2;
+  int numberGenomes=100;
+  int numberInputs=2;
+  int numberOutputs=1;
   int evolutions=50;
   float learningRate=10.0;
   float inputWeights_min=0.0;
   float inputWeights_max=150.0;
-  float weightsRange_min=-20.0;
-  float weightsRange_max=80.0;
+  float weightsRange_min=110.0;
+  float weightsRange_max=110.0;
   int process_max=2;
-  string function="cartpole";
+  string function="xor";
 
   // Escribir en el archivo config.cfg
   ofstream config_file("config/config.cfg", ofstream::trunc);
