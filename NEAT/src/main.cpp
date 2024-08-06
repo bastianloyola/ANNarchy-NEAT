@@ -59,7 +59,6 @@ int main(int argc, char *argv[]) {
   config_file << "c1=" << c1 << "\n";
   config_file << "c2=" << c2 << "\n";
   config_file << "c3=" << c3 << "\n";
-  config_file << "initial_weight=30.0\n";
   config_file << "numberGenomes=" << numberGenomes << "\n";
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
