@@ -49,14 +49,18 @@ def objective(trial):
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 
+study_name = "example-study"  # Unique identifier of the study.
+storage_name = "sqlite:///{}.db".format(study_name)
+
 # Create the study object (an optimization session = set of trials)
-study = optuna.create_study(study_name='Test-study',
+study = optuna.create_study(study_name=study_name,
+                            storage=storage_name,
                             direction='maximize', 
                             sampler=optuna.samplers.TPESampler(),
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=100, timeout=18000) #timeout in seconds
+study.optimize(objective, n_trials=100) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')
