@@ -43,7 +43,7 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
 
             float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
             
-            Connection c(i+1, j+1, inh*weight, true, cInnov);
+            Connection c(i+1, j+1, weight, true, cInnov);
             connections.push_back(c);
         }
     }
