@@ -42,9 +42,12 @@ IZHIKEVICH = Neuron(
         c = -65.0 : population
         d = 8.0 : population
         I = 0.0
+        tau_I = 10.0 : population
     """,
     equations="""
-        dv/dt = 0.04*v*v + 5*v + 140 - u + I : init=-65.0
+        dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65.0
+        tau_I * dg_exc/dt = -g_exc
+        tau_I * dg_inh/dt = -g_inh
         du/dt = a*(b*v - u) : init=-14.0
     """,
     spike="v >= 30.0",
@@ -55,7 +58,7 @@ IZHIKEVICH = Neuron(
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
     try:
         clear()
-        pop = Population(geometry=n, neuron=IZHIKEVICH)
+        pop = Population(geometry=n, neuron=LIF)
         proj = Projection(pre=pop, post=pop, target='exc')
         #print(matrix,"\n")
         #Matrix to numpy array
@@ -225,10 +228,10 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
     
     # Definir límites para cada variable de observación
     limites = [
-        (-2.4, 2.4),  # Posición del carro
-        (-3.0, 3.0),  # Velocidad del carro (estimado)
-        (-0.209, 0.209),  # Ángulo del poste en radianes
-        (-3.0, 3.0)  # Velocidad angular del poste (estimado)
+        (-4.8, 4.8),  # Posición del carro
+        (-10.0, 10.0),  # Velocidad del carro (estimado)
+        (-0.418, 0.418),  # Ángulo del poste en radianes
+        (-10.0, 10.0)  # Velocidad angular del poste (estimado)
     ]
     
     num_neuronas_por_variable = 20

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
-  int process_max=2;
+  int process_max=6;
   string function="cartpole";
 
   // Escribir en el archivo config.cfg
