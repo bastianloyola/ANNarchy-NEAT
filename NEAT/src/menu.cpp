@@ -98,7 +98,7 @@ void menu() {
     case 'g':
       //create snn 
       cout << "Creando " << endl;
-      p.evaluate();
+      p.evaluate("");
       cout << "---------------------------------------------"<< endl;
       break;
     case 'h':
@@ -107,7 +107,7 @@ void menu() {
       cout << "Enter number of evolutions: ";
       cin >> n;
       cout << "Evolucionando " << endl;
-      p.evolution(n);
+      p.evolution(n,"");
       cout << "---------------------------------------------"<< endl;
       break;
     case 'i':

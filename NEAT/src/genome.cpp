@@ -200,7 +200,7 @@ void Genome::printGenome() {
 }
 
 
-float Genome::singleEvaluation(PyObject *load_module){
+float Genome::singleEvaluation(PyObject *load_module, string folder){
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int n_max = parameters->n_max; 
@@ -241,7 +241,7 @@ float Genome::singleEvaluation(PyObject *load_module){
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
 
-    PyObject* args = PyTuple_Pack(6, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights);
+    PyObject* args = PyTuple_Pack(7, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyUnicode_FromString(folder.c_str()));
 
     PyObject* callfunc = PyObject_CallObject(func, args);
     

@@ -44,7 +44,7 @@ void saveConfig(std::string filename, std::string configName) {
     outfile.close();
 }
 
-void saveRun(Population* population, int n, string filename) {
+void saveRun(Population* population, int n, string filename, string folder) {
     Genome* best = population->getBest();
     ofstream outfile(filename, ios::app);
 
@@ -77,7 +77,7 @@ void saveRun(Population* population, int n, string filename) {
     outfile.close();
 
 
-    ofstream outfile2("results/best" + to_string(n) + ".txt", ios::app);
+    ofstream outfile2(folder +"results/best" + to_string(n) + ".txt", ios::app);
     if(!outfile2) {
         cerr << "saveRun: No se pudo abrir el archivo outfile2." <<endl;
     }
@@ -142,8 +142,8 @@ float run(int timesPerConfig) {
             Population population(&parameters);
             evolutions = parameters.evolutions;
 
-            population.evolution(evolutions);
-            saveRun(&population, i, filename);
+            population.evolution(evolutions, "");
+            saveRun(&population, i, filename, "");
             bestFitnes.push_back(population.getBest()->getFitness());
             finalFitness += population.getBest()->getFitness();
 
@@ -152,5 +152,42 @@ float run(int timesPerConfig) {
         bestFitnes.clear();
     }
     finalFitness = finalFitness / (nConfig*timesPerConfig);
+    return finalFitness;
+}
+
+float run2(string folder) {
+
+    string filename = folder + "/results.txt";
+
+    printf("---- Running ----\n");
+    
+    int evolutions;
+    float finalFitness;
+    vector <int> bestFitnes;
+
+    ofstream outfile(filename, ios::app);
+    if(!outfile) {
+        cerr << "run: No se pudo abrir el archivo." << filename <<endl;
+    }
+
+    outfile << "\n---- Results of cofig: ----\n";
+    outfile.close();
+    saveConfig(filename, folder + "/config");
+    
+    printf("---- Loading Config ----\n");
+    Parameters parameters(folder + "config.cfg");
+    printf("---- Loaded Config ----\n");
+
+    printf("---- Running NEAT ----\n");
+    Population population(&parameters);
+    evolutions = parameters.evolutions;
+    population.evolution(evolutions, folder);
+
+    saveRun(&population, 0, filename, folder);
+    bestFitnes.push_back(population.getBest()->getFitness());
+    finalFitness = population.getBest()->getFitness();
+
+    saveResults(bestFitnes, 1, filename);
+
     return finalFitness;
 }

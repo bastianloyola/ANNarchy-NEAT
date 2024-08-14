@@ -55,7 +55,7 @@ IZHIKEVICH = Neuron(
     refractory=5.0
 )
 
-def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
+def snn(n_entrada, n_salida, n, i, matrix, inputWeights, folder):
     try:
         clear()
         pop = Population(geometry=n, neuron=LIF)
@@ -74,7 +74,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
         #print(lil_matrix)
         proj.connect_from_sparse(lil_matrix)
         #print('nombre')
-        nombre = 'annarchy/annarchy-'+str(int(i))
+        nombre = folder + 'annarchy/annarchy-'+str(int(i))
         #print(nombre)
         compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike'])
@@ -110,9 +110,9 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
         raise ValueError(f"Unknown function: {funcion}")
 
 
-def get_function():
+def get_function(folder):
     # Open config file and get the parameter "function"
-    config_path = 'config/config.cfg'
+    config_path = folder + 'config.cfg'
     with open(config_path) as f:
         lines = f.readlines()
         for line in lines:

@@ -249,7 +249,7 @@ void Population::speciation(){
     }
 }
 
-void Population::evaluate() {
+void Population::evaluate(std::string folder) {
     std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
@@ -301,7 +301,7 @@ void Population::evaluate() {
             std::vector<float> child_fitness_values(end - start, 0.0f);
 
             for (int j = start; j < end; ++j) {
-                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module);
+                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module, folder);
             }
 
             // Escribir los valores de fitness al proceso padre
@@ -411,11 +411,11 @@ void Population::mutations(){
     }
 }
 
-void Population::evolution(int n){
+void Population::evolution(int n, std::string folder){
 
     for (int i = 0; i < n; i++){
         std::cout << " generación: " << i << endl; 
-        evaluate();
+        evaluate(folder);
         eliminate();
         mutations();
         reproduce();
