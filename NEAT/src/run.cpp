@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <iomanip>
+#include <filesystem>
 #include <algorithm>
 
 using namespace std;
@@ -175,7 +176,7 @@ float run2(string folder) {
     saveConfig(filename, folder + "/config");
     
     printf("---- Loading Config ----\n");
-    Parameters parameters(folder + "config.cfg");
+    Parameters parameters(folder + "/config.cfg");
     printf("---- Loaded Config ----\n");
 
     printf("---- Running NEAT ----\n");
@@ -188,6 +189,10 @@ float run2(string folder) {
     finalFitness = population.getBest()->getFitness();
 
     saveResults(bestFitnes, 1, filename);
+
+    // Eliminar la carpeta y todo su contenido
+    std::error_code ec;  // Para capturar posibles errores
+    std::filesystem::remove_all(folder + "/annarchy", ec);
 
     return finalFitness;
 }

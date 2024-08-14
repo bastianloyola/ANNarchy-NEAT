@@ -41,12 +41,12 @@ int main(int argc, char *argv[]) {
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
-  int process_max=1;
+  int process_max=8;
   string function="xor";
 
   // Escribir en el archivo config.cfg
-  string folder = "trial-" + std::to_string(trialNumber) + "/";
-  string filename = folder + "config.cfg";
+  string folder = "results/trial-" + std::to_string(trialNumber);
+  string filename = folder + "/config.cfg";
   // Crear la carpeta
   std::filesystem::create_directories(folder);
   // Crear y abrir el archivo en modo truncado

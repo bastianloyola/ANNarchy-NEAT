@@ -27,5 +27,6 @@ clean:
 	rm -fr $(BINDIR)
 	rm -rf __pycache__
 	rm -rf annarchy
+	rm -rf results
 Aclean:
 	rm -rf annarchy

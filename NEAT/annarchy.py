@@ -74,7 +74,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, folder):
         #print(lil_matrix)
         proj.connect_from_sparse(lil_matrix)
         #print('nombre')
-        nombre = folder + 'annarchy/annarchy-'+str(int(i))
+        nombre = folder + '/annarchy/annarchy-'+str(int(i))
         #print(nombre)
         compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike'])
