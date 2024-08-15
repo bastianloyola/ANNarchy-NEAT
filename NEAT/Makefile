@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -g
+CXXFLAGS = -Wall -std=c++11 -g
 LIBS = -lpython3.10
 
 SRCDIR = src

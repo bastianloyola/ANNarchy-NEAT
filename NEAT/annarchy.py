@@ -91,7 +91,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
         
-        fit = fitness(pop,M,input_index,output_index, get_function(trial), inputWeights)
+        fit = fitness(pop,M,input_index,output_index, get_function('results/trial-'+ str(int(trial))), inputWeights)
         #return fit
         return 2
     except Exception as e:
@@ -114,7 +114,7 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
 
 def get_function(folder):
     # Open config file and get the parameter "function"
-    config_path = folder + 'config.cfg'
+    config_path = folder + '/config.cfg'
     with open(config_path) as f:
         lines = f.readlines()
         for line in lines:

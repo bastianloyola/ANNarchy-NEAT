@@ -33,15 +33,17 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     for (int i = 0; i < numIn; i++){
         for (int j = numIn; j < numIn+numOut; j++){
             cInnov = innov->addConnection(i+1,j+1);
+            
+            float minWeight = parameters->weightsRange[0];
+            float maxWeight = parameters->weightsRange[1];
+
             //exh or inh value (1 or -1)
             float inh = (rand() % 2);
             if (inh == 0){
                 inh = -1;
             }
-            float minWeight = parameters->weightsRange[0];
-            float maxWeight = parameters->weightsRange[1];
-
-            float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
+            float weight = maxWeight*inh;
+            //float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
             
             Connection c(i+1, j+1, weight, true, cInnov);
             connections.push_back(c);
@@ -201,6 +203,7 @@ void Genome::printGenome() {
 
 
 float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
+    std::cout << "Evaluating... id: " << id << " id_annarchy: " << id_annarchy << endl;
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int n_max = parameters->n_max; 

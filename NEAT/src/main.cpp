@@ -13,7 +13,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-
+//int main() {
   // Recibir parametros de la interfaz de usuario
   float keep=std::atof(argv[1]);
   float threshold=std::atof(argv[2]);
@@ -29,27 +29,43 @@ int main(int argc, char *argv[]) {
   float c2=std::atof(argv[11]);
   float c3=std::atof(argv[12]);
   int trialNumber=std::atoi(argv[13]);
+  /*
+  float keep = 0.5;
+  float threshold = 3.0;
+  float probabilityInterespecies = 0.001;
+  float probabilityNoCrossoverOff = 0.75;
+  float probabilityWeightMutated = 0.8;
+  float probabilityAddNodeSmall = 0.03;
+  float probabilityAddLink_small = 0.05;
+  float probabilityAddNodeLarge = 0.03;
+  float probabilityAddLink_Large = 0.3;
+  int largeSize = 20;
+  float c1 = 1.0;
+  float c2 = 1.0;
+  float c3 = 0.4;
+  int trialNumber = 0;
+  */  
 
   // Parametros constantes
   float initial_weights=110.0;
-  int numberGenomes=5;
+  int numberGenomes=10;
   int numberInputs=2;
   int numberOutputs=1;
-  int evolutions=2;
+  int evolutions=10;
   float learningRate=10.0;
   float inputWeights_min=1.0;
   float inputWeights_max=1.0;
   float weightsRange_min=110.0;
   float weightsRange_max=110.0;
-  int n_max=10;
-  int process_max=8;
+  int n_max=100;
+  int process_max=2;
   string function="xor";
 
   // Escribir en el archivo config.cfg
   string folder = "results/trial-" + std::to_string(trialNumber);
   string filename = folder + "/config.cfg";
   // Crear la carpeta
-  std::filesystem::create_directories(folder);
+  //std::filesystem::create_directories(folder);
   // Crear y abrir el archivo en modo truncado
   ofstream config_file(filename, ofstream::trunc);
   if (!config_file.is_open()) {

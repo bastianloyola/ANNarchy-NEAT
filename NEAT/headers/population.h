@@ -21,6 +21,7 @@ class Population{
     Innovation innov;
     std::vector<Genome*> genomes;
     std::vector<Species*> species;
+    std::vector<int> idForGenomes;
     float threshold;
     void evaluate(std::string folder, int trial);
     void mutations();
