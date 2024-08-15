@@ -22,9 +22,9 @@ class Population{
     std::vector<Genome*> genomes;
     std::vector<Species*> species;
     float threshold;
-    void evaluate(std::string folder);
+    void evaluate(std::string folder, int trial);
     void mutations();
-    void evolution(int n, std::string folder);
+    void evolution(int n, std::string folder, int trial);
     void print();
     void print_best();
 

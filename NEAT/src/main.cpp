@@ -37,10 +37,11 @@ int main(int argc, char *argv[]) {
   int numberOutputs=1;
   int evolutions=2;
   float learningRate=10.0;
-  float inputWeights_min=0.0;
-  float inputWeights_max=150.0;
-  float weightsRange_min=-20.0;
-  float weightsRange_max=80.0;
+  float inputWeights_min=1.0;
+  float inputWeights_max=1.0;
+  float weightsRange_min=110.0;
+  float weightsRange_max=110.0;
+  int n_max=10;
   int process_max=8;
   string function="xor";
 
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
   config_file << "evolutions=" << evolutions << "\n";
-  config_file << "n_max=200\n";
+  config_file << "n_max=" << n_max << "\n";
   config_file << "learningRate=" << learningRate << "\n";
   config_file << "inputWeights=" << inputWeights_min << "," << inputWeights_max << "\n";
   config_file << "weightsRange=" << weightsRange_min << "," << weightsRange_max << "\n";
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
   //menu();
   std::cout << "starting" << endl;
   //float fitness = run(1);
-  float fitness = run2(folder);
+  float fitness = run2(folder, trialNumber);
   cout << "finalized" << endl;
 
 

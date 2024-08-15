@@ -7,9 +7,9 @@ import gymnasium as gym
 from scipy.special import erf
 
 
-def get_function():
+def get_function(trial):
     #open config file and get the parameter "function"
-    with open('config.txt') as f:
+    with open('results/trial-' + str(int(trial)) + '/config.txt') as f:
         lines = f.readlines()
         for line in lines:
             if "function" in line:
@@ -55,12 +55,13 @@ IZHIKEVICH = Neuron(
     refractory=5.0
 )
 
-def snn(n_entrada, n_salida, n, i, matrix, inputWeights, folder):
+def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
+    print("entre a snn")
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
-        #print(matrix,"\n")
+        print(matrix,"\n")
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -71,11 +72,10 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, folder):
         n_rows = matrix.shape[0]
         n_cols = matrix.shape[1]
         lil_matrix[:n_rows, :n_cols] = matrix
-        #print(lil_matrix)
+        print('lil_matrix:\n',lil_matrix)
         proj.connect_from_sparse(lil_matrix)
-        #print('nombre')
-        nombre = folder + '/annarchy/annarchy-'+str(int(i))
-        #print(nombre)
+        nombre = 'annarchy/annarchy-'+str(int(trial))+'/annarchy-'+str(int(i))
+        print(nombre)
         compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike'])
         input_index = []
@@ -91,13 +91,15 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, folder):
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
         
-        fit = fitness(pop,M,input_index,output_index, get_function(), inputWeights)
-        return fit
+        fit = fitness(pop,M,input_index,output_index, get_function(trial), inputWeights)
+        #return fit
+        return 2
     except Exception as e:
         # Capturar y manejar excepciones
         print("Error:", e)
 
 def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
+    print("Funcion: ",funcion)
     if funcion == "xor":
         return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":

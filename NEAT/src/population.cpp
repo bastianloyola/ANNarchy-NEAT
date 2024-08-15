@@ -249,7 +249,7 @@ void Population::speciation(){
     }
 }
 
-void Population::evaluate(std::string folder) {
+void Population::evaluate(std::string folder,int trial) {
     std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
@@ -260,11 +260,12 @@ void Population::evaluate(std::string folder) {
     std::vector<float> fitness_values(nGenomes, 0.0f);
 
     // Obtener número máximo de procesos
-    long max_processes = sysconf(_SC_CHILD_MAX);
+    long max_processes = parameters.process_max;
+    /*long max_processes = sysconf(_SC_CHILD_MAX);
     if (max_processes == -1) {
         std::cerr << "Error al obtener el número máximo de procesos" << std::endl;
         return;
-    }
+    }*/
 
     // Dividir los genomas entre los procesos
     int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
@@ -301,7 +302,7 @@ void Population::evaluate(std::string folder) {
             std::vector<float> child_fitness_values(end - start, 0.0f);
 
             for (int j = start; j < end; ++j) {
-                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module, folder);
+                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module, folder, trial);
             }
 
             // Escribir los valores de fitness al proceso padre
@@ -332,6 +333,8 @@ void Population::evaluate(std::string folder) {
     for (int i = 0; i < nGenomes; ++i) {
         std::lock_guard<std::mutex> lock(mtx);
         genomes[i]->setFitness(fitness_values[i]);
+        std::cout << "Genome " << i << " fitness: " << fitness_values[i] << std::endl;
+        genomes[i]->printGenome();
     }
 
     Py_DECREF(load_module);
@@ -411,11 +414,11 @@ void Population::mutations(){
     }
 }
 
-void Population::evolution(int n, std::string folder){
+void Population::evolution(int n, std::string folder, int trial){
 
     for (int i = 0; i < n; i++){
         std::cout << " generación: " << i << endl; 
-        evaluate(folder);
+        evaluate(folder, trial);
         eliminate();
         mutations();
         reproduce();

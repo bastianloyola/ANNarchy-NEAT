@@ -77,10 +77,10 @@ void saveRun(Population* population, int n, string filename, string folder) {
     outfile << "\n";
     outfile.close();
 
-
-    ofstream outfile2(folder +"results/best" + to_string(n) + ".txt", ios::app);
+    string file2 = folder + "/best" + to_string(n) + ".txt";
+    ofstream outfile2(file2, ios::app);
     if(!outfile2) {
-        cerr << "saveRun: No se pudo abrir el archivo outfile2." <<endl;
+        cerr << "saveRun: No se pudo abrir el archivo outfile2: " << file2 << endl;
     }
 
     for (int i = 0; i < nConnections; i++) {
@@ -143,7 +143,7 @@ float run(int timesPerConfig) {
             Population population(&parameters);
             evolutions = parameters.evolutions;
 
-            population.evolution(evolutions, "");
+            population.evolution(evolutions, "",0);
             saveRun(&population, i, filename, "");
             bestFitnes.push_back(population.getBest()->getFitness());
             finalFitness += population.getBest()->getFitness();
@@ -156,7 +156,7 @@ float run(int timesPerConfig) {
     return finalFitness;
 }
 
-float run2(string folder) {
+float run2(string folder, int trial) {
 
     string filename = folder + "/results.txt";
 
@@ -182,7 +182,7 @@ float run2(string folder) {
     printf("---- Running NEAT ----\n");
     Population population(&parameters);
     evolutions = parameters.evolutions;
-    population.evolution(evolutions, folder);
+    population.evolution(evolutions, folder, trial);
 
     saveRun(&population, 0, filename, folder);
     bestFitnes.push_back(population.getBest()->getFitness());
@@ -191,8 +191,8 @@ float run2(string folder) {
     saveResults(bestFitnes, 1, filename);
 
     // Eliminar la carpeta y todo su contenido
-    std::error_code ec;  // Para capturar posibles errores
-    std::filesystem::remove_all(folder + "/annarchy", ec);
+    //std::error_code ec;  // Para capturar posibles errores
+    //std::filesystem::remove_all(folder + "/annarchy", ec);
 
     return finalFitness;
 }

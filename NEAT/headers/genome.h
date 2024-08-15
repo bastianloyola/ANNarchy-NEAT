@@ -57,7 +57,7 @@ class Genome {
         // Print genome
         void printGenome();
 
-        float singleEvaluation(PyObject *load_module, std::string folder);
+        float singleEvaluation(PyObject *load_module, std::string folder, int trial);
 
         void mutation();
 
