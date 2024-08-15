@@ -58,7 +58,8 @@ IZHIKEVICH = Neuron(
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights):
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
         #print(matrix,"\n")
         #Matrix to numpy array
@@ -211,7 +212,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env.close()
     #print("Returns: ",returns)
     #print("Actions: ",actions_done)
-    return final_fitness
+    return final_fitness # Fitness promedio de los 100 episodios
 
 
 def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
@@ -237,7 +238,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
     num_neuronas_por_variable = 20
     intervals = []
 
-    for low, high in limites:
+    for low, high in limites: # Aquí se generan los intervalos para cada variable de observación
         # Generar valores centrados en 0 siguiendo una distribución normal
         values = np.random.normal(loc=0, scale=1, size=1000)
         z = np.linspace(low, high, num_neuronas_por_variable + 1)
@@ -258,7 +259,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].v = 30 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(100.0)
             spikes = Monitor.get('spike')
@@ -282,7 +283,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
 
     final_fitness = final_fitness / episodes
     env.close()
-    return final_fitness
+    return final_fitness # Regresar el fitness promedio de los 100 episodios
 
 
 def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
@@ -402,3 +403,43 @@ def exampleIzhikevich():
     return 0
 
 
+
+config = open('config.cfg', 'r') 
+#Para cambiar de función objetivo, cambiar el valor de la variable "function", opciones: xor, cartpole, cartpole2.
+#Cada uno requiere un número diferente de entradas y salidas, por lo que se debe cambiar el valor de "numberInputs" y "numberOutputs" en el archivo de configuración.
+#Xor requiere 2 entradas y 1 salida, cartpole requiere 8 entradas y 2 salidas, cartpole2 requiere 80 entradas y 40 salidas.
+#InputWeights es un arreglo con los valores de los pesos de las entradas, se puede utilizar o no, dependiendo de la función objetivo.
+#WeightsRange es un arreglo con los valores mínimos y máximos de los pesos de las conexiones, de aqui se genera la matrix de conexiones.
+
+
+lines = config.readlines()
+config.close()
+n_entrada = 0
+n_salida = 0
+inputWeights = []
+weightsRange = []
+
+for line in lines:
+    if "numberInputs" in line:
+        n_entrada = line.split('=')[1].strip()
+    if "numberOutputs" in line:
+        n_salida = line.split('=')[1].strip()
+    if "inputWeights" in line:
+        inputWeights = line.split('=')[1].strip()
+        inputWeights = inputWeights.split(',')
+        inputWeights = np.array(inputWeights)
+    if "weightsRange" in line:
+        weightsRange = line.split('=')[1].strip()
+        weightsRange = weightsRange.split(',')
+        weightsRange = np.array(weightsRange)
+
+n_entrada = int(n_entrada)
+n_salida = int(n_salida)
+n = n_entrada + n_salida
+i = 0
+matrix = np.zeros((n,n))
+inputWeights = inputWeights.astype(float)
+matrix[:n_entrada,n_salida:] = rd.uniform(float(weightsRange[0]),float(weightsRange[1]))
+print("Matrix: ",matrix)
+fitness = snn(n_entrada, n_salida, n, i, matrix, inputWeights)
+print("Fitness: ",fitness)
