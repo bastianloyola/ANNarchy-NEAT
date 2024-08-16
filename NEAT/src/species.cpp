@@ -48,7 +48,7 @@ void Species::calculateAverageFitness(){
 }   
 
 void Species::calculateAdjustedFitness(){
-    double sumDistance,compatibility,adjustedFitness;
+    double sumDistance,adjustedFitness;
     if (genomes.size() == 1){
         adjustedFitness = genomes[0]->getFitness();
         genomes[0]->setAdjustedFitness(adjustedFitness);

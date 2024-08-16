@@ -101,18 +101,12 @@ void Population::reproduce(){
     std::cout << "Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
     Genome *g1, *g2;
     float interspeciesRate;
-    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index, difference;
-    bool flagInterspecies, flagNoninterspecies;
+    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index;
 
     offspringsPerSpecies();
 
-    if (species.size() > 1){
-        interspeciesRate = parameters.interspeciesRate;
-        flagInterspecies = true;
-    }else{
-        interspeciesRate = 0;
-        flagInterspecies = false;
-    }
+    interspeciesRate = (species.size() > 1) ? parameters.interspeciesRate : 0;
+    
     for (int i = 0; i < static_cast<int>(species.size()); i++){
 
         //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
@@ -126,8 +120,6 @@ void Population::reproduce(){
             reproduceNoninterspecies = 0;
             reproduceMutations = species[i]->allocatedOffsprings;
         }
-        difference = reproduceInterspecies + reproduceNoninterspecies + reproduceMutations - species[i]->allocatedOffsprings;
-
 
         for (int j = 0; j < reproduceInterspecies; j++){
             indexS1 = i;
@@ -163,6 +155,9 @@ void Population::reproduce(){
             offspring->setInnovation(&innov);
             offspring->setId(maxGenome);
             maxGenome++;
+            
+            index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
+
             offspring->setFitness(genomes[index]->getFitness());
             offspring->setConnections(genomes[index]->getConnections());
             offspring->setNodes(genomes[index]->getNodes());

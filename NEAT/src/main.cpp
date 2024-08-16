@@ -47,18 +47,17 @@ int main(int argc, char *argv[]) {
   */  
 
   // Parametros constantes
-  float initial_weights=110.0;
-  int numberGenomes=10;
+  int numberGenomes=50;
   int numberInputs=2;
   int numberOutputs=1;
-  int evolutions=10;
+  int evolutions=50;
   float learningRate=10.0;
   float inputWeights_min=1.0;
   float inputWeights_max=1.0;
-  float weightsRange_min=110.0;
+  float weightsRange_min=-20.0;
   float weightsRange_max=110.0;
-  int n_max=100;
-  int process_max=2;
+  int n_max=1000;
+  int process_max=4;
   string function="xor";
 
   // Escribir en el archivo config.cfg
@@ -85,7 +84,6 @@ int main(int argc, char *argv[]) {
   config_file << "c1=" << c1 << "\n";
   config_file << "c2=" << c2 << "\n";
   config_file << "c3=" << c3 << "\n";
-  config_file << "initial_weight=" << initial_weights << "\n";
   config_file << "numberGenomes=" << numberGenomes << "\n";
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
