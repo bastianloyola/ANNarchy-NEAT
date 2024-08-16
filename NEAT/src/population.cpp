@@ -24,13 +24,13 @@ Population::Population(Parameters *param){
     maxGenome = nGenomes;
     parameters = *param;
     innov = Innovation(nInputs, nOutputs);
-    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters, 1);
+    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters, 0);
     threshold = parameters.threshold;
     Species* s = new Species(g, threshold);
     species.push_back(s);
     genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
-        g = new Genome(i,nInputs, nOutputs, innov, parameters, i+1);
+        g = new Genome(i,nInputs, nOutputs, innov, parameters, i);
         genomes.push_back(g);
         species[0]->add_genome(g);
     }
@@ -75,7 +75,7 @@ void Population::print(){
 
 void Population::eliminate(){
     std::cout << "Eliminando..." << " Genomes size: " << genomes.size() << endl;
-    int id,index,n,size;
+    int id,index,n,size, id_ann;
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         size = static_cast<int>(species[i]->genomes.size());
@@ -84,10 +84,12 @@ void Population::eliminate(){
         if (n == size) n -= 1;
         for (int j = 0; j < n; j++){
             id = species[i]->genomes.back()->getId();
+            id_ann = species[i]->genomes.back()->getIdAnnarchy();
             index = findIndexGenome(id);
             auto x = genomes.begin() + index;
             genomes.erase(x);
             species[i]->genomes.pop_back();
+            idForGenomes.push_back(id_ann);
         }
         //std::cout << "Species " << i << " eliminados: " << n << endl;
     }
@@ -102,9 +104,7 @@ void Population::reproduce(){
     int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index, difference;
     bool flagInterspecies, flagNoninterspecies;
 
-    std::cout << "-- Offsprings per species --" << endl;
     offspringsPerSpecies();
-    std::cout << "-- Done Offsprings per species --" << endl;
 
     if (species.size() > 1){
         interspeciesRate = parameters.interspeciesRate;
@@ -128,10 +128,6 @@ void Population::reproduce(){
         }
         difference = reproduceInterspecies + reproduceNoninterspecies + reproduceMutations - species[i]->allocatedOffsprings;
 
-        //std::cout << "   reproduceInterspecies: " << reproduceInterspecies << endl;
-        //std::cout << "   reproduceNoninterspecies: " << reproduceNoninterspecies << endl;
-        //std::cout << "   reproduceMutations: " << reproduceMutations << endl;
-        //std::cout << "   diference: " << difference << endl;
 
         for (int j = 0; j < reproduceInterspecies; j++){
             indexS1 = i;
@@ -170,14 +166,13 @@ void Population::reproduce(){
             offspring->setFitness(genomes[index]->getFitness());
             offspring->setConnections(genomes[index]->getConnections());
             offspring->setNodes(genomes[index]->getNodes());
+            offspring->setIdAnnarchy(get_annarchy_id());
             for (int i = 0; i < static_cast<int>(genomes[index]->inputWeights.size()); i++){
                 offspring->inputWeights.push_back(genomes[index]->inputWeights[i]);
             }
 
             offspring->mutation();
             
-            // Verificar el tamaño de inputWeights
-            //std::cout << "Tamaño de inputWeights en el offspring: " << offspring->inputWeights.size() << std::endl;
             genomes.push_back(offspring);
         }
     }
@@ -249,7 +244,7 @@ void Population::speciation(){
     }
 }
 
-void Population::evaluate() {
+void Population::evaluate(std::string folder,int trial) {
     std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
@@ -260,11 +255,12 @@ void Population::evaluate() {
     std::vector<float> fitness_values(nGenomes, 0.0f);
 
     // Obtener número máximo de procesos
-    long max_processes = sysconf(_SC_CHILD_MAX);
+    long max_processes = parameters.process_max;
+    /*long max_processes = sysconf(_SC_CHILD_MAX);
     if (max_processes == -1) {
         std::cerr << "Error al obtener el número máximo de procesos" << std::endl;
         return;
-    }
+    }*/
 
     // Dividir los genomas entre los procesos
     int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
@@ -301,7 +297,7 @@ void Population::evaluate() {
             std::vector<float> child_fitness_values(end - start, 0.0f);
 
             for (int j = start; j < end; ++j) {
-                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module);
+                child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module, folder, trial);
             }
 
             // Escribir los valores de fitness al proceso padre
@@ -332,6 +328,7 @@ void Population::evaluate() {
     for (int i = 0; i < nGenomes; ++i) {
         std::lock_guard<std::mutex> lock(mtx);
         genomes[i]->setFitness(fitness_values[i]);
+        genomes[i]->printGenome();
     }
 
     Py_DECREF(load_module);
@@ -411,11 +408,11 @@ void Population::mutations(){
     }
 }
 
-void Population::evolution(int n){
+void Population::evolution(int n, std::string folder, int trial){
 
     for (int i = 0; i < n; i++){
         std::cout << " generación: " << i << endl; 
-        evaluate();
+        evaluate(folder, trial);
         eliminate();
         mutations();
         reproduce();
@@ -450,7 +447,14 @@ Genome* Population::getBest(){
 }
 
 int Population::get_annarchy_id(){
-    int n_genomes_max = parameters.numberGenomes;
+    int idGenome = idForGenomes.back();
+    if (idGenome >= 0){
+        idForGenomes.pop_back();
+        return idGenome;
+    }
+    return -1;
+    
+    /*int n_genomes_max = parameters.numberGenomes;
     //Vector con los id_annarchy de los genomas
     vector<int> ids;
     for (int i = 0; i < n_genomes_max; i++){
@@ -473,7 +477,7 @@ int Population::get_annarchy_id(){
         }
         id++;
     }
-    return 0;
+    return 0;*/
     
 }
 
@@ -484,31 +488,23 @@ void Population::offspringsPerSpecies() {
     int genomesSize = static_cast<int>(genomes.size());
     int speciesSize = static_cast<int>(species.size());
 
-    std::cout << "-->for 1: ";
     for (int i = 0; i < speciesSize; ++i) {
-        //std::cout << i << "; ";
         species[i]->calculateAdjustedFitness();
         species[i]->calculateAverageFitness();
         totalAverageFitness += species[i]->averageFitness;
     }
 
-    std::cout << "\n-->for 2: ";
     // Asignar descendientes proporcionalmente al fitness promedio ajustado
     for (int i = 0; i < speciesSize; ++i) {
-        std::cout << i << ":";
         offspringsAlloted[i] = round((species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes);
         if (offspringsAlloted[i] < 0) offspringsAlloted[i] = 0;
         sum += offspringsAlloted[i];
-        std::cout << offspringsAlloted[i] << "; ";
     }
 
-    std::cout << "\n-->while: " << endl;
     // Ajustar para asegurar que el número total de descendientes es exactamente igual a parameters.numberGenomes
     int difference = (parameters.numberGenomes - genomesSize) - sum;
     while (difference != 0) {
-        std::cout << " \n----> Difference: " << difference << "; for:";
         for (int i = 0; i < speciesSize; ++i) {
-            std::cout << i << "; ";
             if (difference > 0) {
                 offspringsAlloted[i]++;
                 difference--;
@@ -520,9 +516,7 @@ void Population::offspringsPerSpecies() {
         }
     }
 
-    std::cout << "\n-->for 3: ";
     for (int i = 0; i < speciesSize; ++i) {
-        //std::cout << i << "; ";
         species[i]->allocatedOffsprings = offspringsAlloted[i];
     }
 }

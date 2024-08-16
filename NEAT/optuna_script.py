@@ -3,6 +3,7 @@ import sys
 import logging
 import subprocess
 import numpy as np
+import os
 
 from optuna.visualization import plot_contour
 from optuna.visualization import plot_edf
@@ -16,6 +17,10 @@ from optuna.visualization import plot_slice
 
 # Función de objetivo para Optuna
 def objective(trial):
+
+    # Crear un directorio y sus subdirectorios si no existen
+    os.makedirs("results/trial-"+str(trial.number), exist_ok=True)
+
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
@@ -31,12 +36,26 @@ def objective(trial):
     c1 = trial.suggest_float('c1', 0.1, 3.0)
     c2 = trial.suggest_float('c2', 0.1, 3.0)
     c3 = trial.suggest_float('c3', 0.1, 3.0)
-    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate), str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), str(c1), str(c2), str(c3)],
+    p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate),
+                          str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), 
+                          str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), 
+                          str(c1), str(c2), str(c3), str(trial.number)],
                         stderr=subprocess.PIPE, 
                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
     p.wait()
+
+    # Capturar la salida estándar y de error
+    stdout, stderr = p.communicate()
+
+    # Imprimir la salida estándar del proceso NEAT
+    #print(f"Output del trial {trial.number}:\n{stdout.decode('utf-8')}")
+    
+    # Imprimir la salida de error si existe
+    if stderr:
+        print(f"Errores del trial {trial.number}:\n{stderr.decode('utf-8')}")
+
     FuncValue = p.returncode
 
     #get final line of output
@@ -60,7 +79,7 @@ study = optuna.create_study(study_name=study_name,
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=100, timeout=None, n_jobs=6)
+study.optimize(objective, n_trials=10) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')
@@ -70,6 +89,7 @@ found_params = study.best_params
 found_value  = study.best_value
 found_trial  = study.best_trial
 
+"""
 # Visualization options 
 fig = optuna.visualization.plot_optimization_history(study)
 fig = optuna.visualization.plot_parallel_coordinate(study)
@@ -77,5 +97,7 @@ fig = optuna.visualization.plot_slice(study)
 fig = optuna.visualization.plot_param_importances(study)
 fig = optuna.visualization.plot_edf(study)
 fig.show()
+"""
+
 
 #https://adambaskerville.github.io/posts/PythonSubprocess

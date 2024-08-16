@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>  // Asegúrate de incluir este encabezado 
 #include <cstdlib>  // para std::atof
+#include <filesystem>
 
 
 #define PY_SSIZE_T_CLEAN
@@ -12,7 +13,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-
+//int main() {
   // Recibir parametros de la interfaz de usuario
   float keep=std::atof(argv[1]);
   float threshold=std::atof(argv[2]);
@@ -27,23 +28,46 @@ int main(int argc, char *argv[]) {
   float c1=std::atof(argv[10]);
   float c2=std::atof(argv[11]);
   float c3=std::atof(argv[12]);
+  int trialNumber=std::atoi(argv[13]);
+  /*
+  float keep = 0.5;
+  float threshold = 3.0;
+  float probabilityInterespecies = 0.001;
+  float probabilityNoCrossoverOff = 0.75;
+  float probabilityWeightMutated = 0.8;
+  float probabilityAddNodeSmall = 0.03;
+  float probabilityAddLink_small = 0.05;
+  float probabilityAddNodeLarge = 0.03;
+  float probabilityAddLink_Large = 0.3;
+  int largeSize = 20;
+  float c1 = 1.0;
+  float c2 = 1.0;
+  float c3 = 0.4;
+  int trialNumber = 0;
+  */  
 
   // Parametros constantes
   float initial_weights=110.0;
-  int numberGenomes=50;
-  int numberInputs=8;
-  int numberOutputs=2;
-  int evolutions=50;
+  int numberGenomes=10;
+  int numberInputs=2;
+  int numberOutputs=1;
+  int evolutions=10;
   float learningRate=10.0;
-  float inputWeights_min=0.0;
-  float inputWeights_max=150.0;
-  float weightsRange_min=-20.0;
-  float weightsRange_max=80.0;
-  int process_max=6;
-  string function="cartpole";
+  float inputWeights_min=1.0;
+  float inputWeights_max=1.0;
+  float weightsRange_min=110.0;
+  float weightsRange_max=110.0;
+  int n_max=100;
+  int process_max=2;
+  string function="xor";
 
   // Escribir en el archivo config.cfg
-  ofstream config_file("config/config.cfg", ofstream::trunc);
+  string folder = "results/trial-" + std::to_string(trialNumber);
+  string filename = folder + "/config.cfg";
+  // Crear la carpeta
+  //std::filesystem::create_directories(folder);
+  // Crear y abrir el archivo en modo truncado
+  ofstream config_file(filename, ofstream::trunc);
   if (!config_file.is_open()) {
       cerr << "No se pudo abrir el archivo config.cfg para escribir." << endl;
       return 1;
@@ -66,21 +90,22 @@ int main(int argc, char *argv[]) {
   config_file << "numberInputs=" << numberInputs << "\n";
   config_file << "numberOutputs=" << numberOutputs << "\n";
   config_file << "evolutions=" << evolutions << "\n";
-  config_file << "n_max=200\n";
+  config_file << "n_max=" << n_max << "\n";
   config_file << "learningRate=" << learningRate << "\n";
   config_file << "inputWeights=" << inputWeights_min << "," << inputWeights_max << "\n";
   config_file << "weightsRange=" << weightsRange_min << "," << weightsRange_max << "\n";
   config_file << "process_max=" << process_max << "\n";
   config_file << "function=" << function << "\n";
+  config_file << "folder=" << folder << "\n";
   config_file.close();
 
- 
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
   
   //menu();
   std::cout << "starting" << endl;
-  int fitness = run(1);
+  //float fitness = run(1);
+  float fitness = run2(folder, trialNumber);
   cout << "finalized" << endl;
 
 
