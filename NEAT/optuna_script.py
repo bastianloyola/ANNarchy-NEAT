@@ -49,6 +49,8 @@ def objective(trial):
     # Capturar la salida estándar y de error
     stdout, stderr = p.communicate()
 
+    print(stdout.decode('utf-8'))
+
     # Imprimir la salida estándar del proceso NEAT
     #print(f"Output del trial {trial.number}:\n{stdout.decode('utf-8')}")
     
@@ -79,7 +81,7 @@ study = optuna.create_study(study_name=study_name,
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=10) #timeout in seconds
+study.optimize(objective, n_trials=1) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')

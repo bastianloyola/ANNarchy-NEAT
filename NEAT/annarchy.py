@@ -6,14 +6,19 @@ import scipy.sparse
 import gymnasium as gym
 from scipy.special import erf
 
+# Obtener y mostrar la dirección actual
+
 
 def get_function(trial):
     #open config file and get the parameter "function"
-    with open('results/trial-' + str(int(trial)) + '/config.txt') as f:
-        lines = f.readlines()
-        for line in lines:
-            if "function" in line:
-                return line.split('=')[1].strip()
+    file = open('results/trial-' + str(int(trial)) + '/config.cfg')
+    lines = file.read()
+    print(lines)
+
+    file.close()
+    for line in lines:
+        if "function" in line:
+            return line.split('=')[1].strip()
     return None
 
 
@@ -30,8 +35,7 @@ LIF = Neuron(
     tau_I * dg_inh/dt = -g_inh
     """,
     spike = "v >= -40.0",
-    reset = "v = -65",
-    refractory = 5.0
+    reset = "v = -65"
 )
 
 
@@ -51,8 +55,7 @@ IZHIKEVICH = Neuron(
         du/dt = a*(b*v - u) : init=-14.0
     """,
     spike="v >= 30.0",
-    reset="v = c; u += d",
-    refractory=5.0
+    reset="v = c; u += d"
 )
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
@@ -61,7 +64,6 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
-        print(matrix,"\n")
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -72,10 +74,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         n_rows = matrix.shape[0]
         n_cols = matrix.shape[1]
         lil_matrix[:n_rows, :n_cols] = matrix
-        print('lil_matrix:\n',lil_matrix)
         proj.connect_from_sparse(lil_matrix)
         nombre = 'annarchy/annarchy-'+str(int(trial))+'/annarchy-'+str(int(i))
-        print(nombre)
         compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike'])
         input_index = []
@@ -91,7 +91,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
         
-        fit = fitness(pop,M,input_index,output_index, get_function('results/trial-'+ str(int(trial))), inputWeights)
+        fit = fitness(pop,M,input_index,output_index, get_function(int(trial)), inputWeights)
         #return fit
         return 2
     except Exception as e:
@@ -112,15 +112,6 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
         raise ValueError(f"Unknown function: {funcion}")
 
 
-def get_function(folder):
-    # Open config file and get the parameter "function"
-    config_path = folder + '/config.cfg'
-    with open(config_path) as f:
-        lines = f.readlines()
-        for line in lines:
-            if "function" in line:
-                return line.split('=')[1].strip()
-    return None
      
 
 def xor(pop,Monitor,input_index,output_index,inputWeights):
@@ -260,7 +251,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].v = 30 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(100.0)
             spikes = Monitor.get('spike')
@@ -404,3 +395,4 @@ def exampleIzhikevich():
     return 0
 
 
+#print(get_function(0))
