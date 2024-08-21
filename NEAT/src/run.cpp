@@ -173,7 +173,7 @@ float run2(string folder, int trial) {
 
     outfile << "\n---- Results of cofig: ----\n";
     outfile.close();
-    saveConfig(filename, folder + "/config");
+    saveConfig(filename, folder + "/config.cfg");
     
     printf("---- Loading Config ----\n");
     Parameters parameters(folder + "/config.cfg");
