@@ -93,7 +93,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         
         fit = fitness(pop,M,input_index,output_index, get_function('results/trial-'+ str(int(trial))), inputWeights)
         #return fit
-        return 2
+        return fit
     except Exception as e:
         # Capturar y manejar excepciones
         print("Error:", e)
