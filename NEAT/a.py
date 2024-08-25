@@ -362,20 +362,22 @@ def exampleIzhikevich():
     v = M.get('v')
     t, n = M.raster_plot(spikes)
     print(v)
-    print(spikes)
-    fig = plt.figure(figsize=(12, 12))
 
-    # First plot: raster plot
-    plt.subplot(311)
-    plt.plot(t, n, 'b.')
-    plt.title('Raster plot')
-    
-    # Second plot: membrane potential of a single excitatory cell
-    plt.subplot(312)
-    plt.plot(v[:, ]) # for example
-    plt.title('Membrane potential')
+    spikes.pop(0)
+    # Imprimir los valores del diccionario
+    print("Valores en spikes:", [arreglo for arreglo in spikes.values()])
 
-    plt.show()
+    output_index = np.array([5, 6, 7, 8, 9])
+
+
+
+    left_spikes = spikes[output_index[:2]]
+    right_spikes = spikes[output_index[2:]]
+    print("Left spikes: ", left_spikes)
+    min_left = min([min(arreglo) for arreglo in left_spikes.values() if arreglo])
+    min_right = min([min(arreglo) for arreglo in right_spikes.values() if arreglo])
+    # Encontrar el menor instante de tiempo (excluyendo listas vacías)
+    print("El menor instante de tiempo es:", min(min_left, min_right))
 
 
     return 0

@@ -30,8 +30,7 @@ LIF = Neuron(
     tau_I * dg_inh/dt = -g_inh
     """,
     spike = "v >= -40.0",
-    reset = "v = -65",
-    refractory = 5.0
+    reset = "v = -65"
 )
 
 
@@ -51,12 +50,11 @@ IZHIKEVICH = Neuron(
         du/dt = a*(b*v - u) : init=-14.0
     """,
     spike="v >= 30.0",
-    reset="v = c; u += d",
-    refractory=5.0
+    reset="v = c; u += d"
 )
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
-    file = open("output-python.txt","w")
+    file = open("output-python.txt","a")
     file.write("Paso 1\n")
     file.close()
     try:
@@ -64,7 +62,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         file.write("Paso 2\n")
         file.close()
         clear()
-        pop = Population(geometry=n, neuron=IZHIKEVICH)
+        pop = Population(geometry=n, neuron=LIF)
         proj = Projection(pre=pop, post=pop, target='exc')
 
         #Matrix to numpy array
@@ -305,18 +303,31 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].v = 30 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(100.0)
+
+            # Decodificar la acción basada en la cual neurona de salida tuvo la primera spike
             spikes = Monitor.get('spike')
-            # Decodificar la acción basada en el número de picos en las neuronas de salida
-            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
-            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
-            
-            if left_spikes > right_spikes:
-                action = 0  # Mover a la izquierda
-            else:
-                action = 1  # Mover a la derecha
+            min_left = np.inf
+            for i in output_index[:20]:
+                if len(spikes[i]) > 0:
+                    if min(spikes[i]) < min_left:
+                        min_left = min(spikes[i])
+            min_right = np.inf
+            for i in output_index[20:]:
+                if len(spikes[i]) > 0:
+                    if min(spikes[i]) < min_right:
+                        min_right = min(spikes[i])
+
+
+            action = env.action_space.sample()
+            if min_left < min_right:
+                action = 0
+            elif min_right < min_left:
+                action = 1
+        
+
             
             observation, reward, terminated, truncated, info = env.step(action)
             returns.append(reward)
@@ -456,3 +467,7 @@ def exampleIzhikevich():
     return 0
 
 
+
+
+ #Example SNN for cartpole2
+#snn(80,40,200,0,np.random.rand(200,200),np.random.rand(80),0)

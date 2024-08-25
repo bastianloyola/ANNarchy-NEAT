@@ -47,18 +47,19 @@ int main(int argc, char *argv[]) {
   */  
 
   // Parametros constantes
-  int numberGenomes=1;
+  keep=1.0;
+  int numberGenomes=4;
   int numberInputs=80;
   int numberOutputs=40;
-  int evolutions=1;
+  int evolutions=20;
   float learningRate=10.0;
   float inputWeights_min=0.0;
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
   int n_max=200;
-  int process_max=4;
-  string function="cartopole2";
+  int process_max=1;
+  string function="cartpole2";
 
   // Escribir en el archivo config.cfg
   string folder = "results/trial-" + std::to_string(trialNumber);

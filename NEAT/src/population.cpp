@@ -321,9 +321,7 @@ void Population::evaluate(std::string folder,int trial) {
 
     // Actualizar los valores de fitness en los genomas correspondientes
     for (int i = 0; i < nGenomes; ++i) {
-        std::lock_guard<std::mutex> lock(mtx);
         genomes[i]->setFitness(fitness_values[i]);
-        genomes[i]->printGenome();
     }
 
     Py_DECREF(load_module);
@@ -408,10 +406,10 @@ void Population::evolution(int n, std::string folder, int trial){
     for (int i = 0; i < n; i++){
         std::cout << " generación: " << i << endl; 
         evaluate(folder, trial);
-        //eliminate();
-        //mutations();
-        //reproduce();
-        //speciation();
+        eliminate();
+        mutations();
+        reproduce();
+        speciation();
     }
 }
 
