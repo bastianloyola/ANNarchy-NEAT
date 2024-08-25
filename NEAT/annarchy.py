@@ -54,13 +54,7 @@ IZHIKEVICH = Neuron(
 )
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
-    file = open("output-python.txt","a")
-    file.write("Paso 1\n")
-    file.close()
     try:
-        file = open("output-python.txt","a")
-        file.write("Paso 2\n")
-        file.close()
         clear()
         pop = Population(geometry=n, neuron=LIF)
         proj = Projection(pre=pop, post=pop, target='exc')
@@ -78,15 +72,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
 
         proj.connect_from_sparse(lil_matrix)
         nombre = 'annarchy/annarchy-'+str(int(trial))+'/annarchy-'+str(int(i))
-        file = open("output-python.txt","a")
-        file.write("Paso 3\n")
-        file.close()
 
         compile(directory=nombre, clean=False, silent=True)
-
-        file = open("output-python.txt","a")
-        file.write("Paso 4\n")
-        file.close()
 
         M = Monitor(pop, ['spike'])
         input_index = []
@@ -95,28 +82,17 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         n_salida = int(n_salida)
         for i in range(n_entrada):
             input_index.append(i)
-        file = open("output-python.txt","a")
-        file.write("Paso 5\n")
-        file.close()
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
-        file = open("output-python.txt","a")
-        file.write("Paso 6\n")
-        file.close()
         
         # Verificar el tamaño de inputWeights
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
         
         funcion = get_function('results/trial-'+ str(int(trial)))
-        file = open("output-python.txt","a")
-        file.write("Paso 7\n")
-        file.close()
-        file = open("output-python.txt","a")
-        file.write("funcion: "+funcion)
-        file.close()
 
         fit = fitness(pop,M,input_index,output_index, funcion, inputWeights)
+
         #return fit
         return fit
     except Exception as e:
@@ -124,27 +100,16 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         print("Error:", e)
 
 def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
-
     if funcion == "xor":
-        file = open("output-python.txt","a")
-        file.write("fitness: xor\n")
-        file.close()
         return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
-        file = open("output-python.txt","a")
-        file.write("fitness: cartpole\n")
-        file.close()
         return cartpole(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "lunar_lander":
-        file = open("output-python.txt","a")
-        file.write("fitness: lunar_lander\n")
-        file.close()
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
-        file = open("output-python.txt","a")
-        file.write("fitness: cartpole2\n")
-        file.close()
         return cartpole2(pop, Monitor, input_index, output_index, inputWeights)
+    elif funcion == "cartpole3":
+        return cartpole3(pop, Monitor, input_index, output_index, inputWeights)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -203,7 +168,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     #Generar 4 input weights para cada input
     inputWeights = np.random.uniform(minInput,maxInput,4)
     #Number of episodes
-    episodes = 10
+    episodes = 100
     h=0
     #Final fitness 
     final_fitness = 0
@@ -254,9 +219,6 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
 
 
 def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
-    file = open("output-python.txt","a")
-    file.write("Cartpole2\n")
-    file.close()
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
     max_steps = 1000
@@ -290,9 +252,6 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
 
     
     while h < episodes:
-        file = open("output-python.txt","a")
-        file.write("Episode: " + str(h) + ": ")
-        file.close()
         j = 0
         returns = []
         actions_done = []
@@ -303,6 +262,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(100.0)
@@ -338,15 +298,8 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
         final_fitness += np.sum(returns)
         h += 1
 
-        file = open("output-python.txt","a")
-        file.write(" sum returns: " + str(np.sum(returns)) + "\n")
-        file.close()
-
     final_fitness = final_fitness / episodes
     env.close()
-    file = open("output-python.txt","a")
-    file.write("final fitness: " + str(final_fitness) + "\n")
-    file.close()
     return final_fitness
 
 
@@ -412,7 +365,102 @@ def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
     env.close()
     return final_fitness
 
+def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
+    env = gym.make("CartPole-v1")
+    observation, info = env.reset(seed=42)
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-4.8, 4.8),  # Posición del carro
+        (-10.0, 10.0),  # Velocidad del carro (estimado)
+        (-0.418, 0.418),  # Ángulo del poste en radianes
+        (-10.0, 10.0)  # Velocidad angular del poste (estimado)
+    ]
+    
+    num_neuronas_por_variable = 20
+    intervals = []
 
+    for low, high in limites:
+        # Generar valores centrados en 0 siguiendo una distribución normal
+        values = np.random.normal(loc=0, scale=1, size=1000)
+        z = np.linspace(low, high, num_neuronas_por_variable + 1)
+        interval_limits = np.percentile(values, (0.5 * (1 + erf(z / np.sqrt(2)))) * 100)
+        # Dividir los valores en intervalos
+        intervals = [values[(values >= interval_limits[i]) & (values < interval_limits[i+1])] for i in range(num_neuronas_por_variable)]
+        intervals[-1] = np.append(intervals[-1], values[-1])  # Asegurar que el último intervalo incluye el valor máximo
+
+    simulate(100.0, measure_time=True)
+    spikes = Monitor.get('spike')
+    #v = Monitor.get('v')
+    t, n = Monitor.raster_plot(spikes)
+    fr = Monitor.histogram(spikes)
+    print(spikes[0])
+    fig = plt.figure(figsize=(12, 12))
+
+    # First plot: raster plot
+    plt.subplot(311)
+    plt.plot(t, n, 'b.')
+    plt.title('Raster plot')
+
+    # Second plot: membrane potential of a single excitatory cell
+    #plt.subplot(312)
+    #plt.plot(v[:, 15]) # for example
+    #plt.title('Membrane potential')
+
+    # Third plot: number of spikes per step in the population.
+    plt.subplot(313)
+    plt.plot(fr)
+    plt.title('Number of spikes')
+    plt.xlabel('Time (ms)')
+
+    plt.tight_layout()
+    plt.show()
+
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        while j < max_steps and not terminated and not truncated:
+            # Codificar observación
+            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
+                for j in range(num_neuronas_por_variable):
+                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
+                        break
+            simulate(100.0, measure_time=True)
+            spikes = Monitor.get('spike')
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
+            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
+            
+            action = env.action_space.sample()
+            if left_spikes > right_spikes:
+                action = 0  # Mover a la izquierda
+            elif left_spikes < right_spikes:
+                action = 1  # Mover a la derecha
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        env.reset()
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
         
 def exampleIzhikevich(): 
     pop = Population(geometry=1000, neuron=Izhikevich)
