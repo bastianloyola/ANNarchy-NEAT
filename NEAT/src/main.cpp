@@ -4,6 +4,8 @@
 #include <fstream>  // Asegúrate de incluir este encabezado 
 #include <cstdlib>  // para std::atof
 #include <filesystem>
+#include <sys/stat.h>  // Para mkdir
+#include <sys/types.h> // Para mkdir
 
 
 #define PY_SSIZE_T_CLEAN
@@ -13,6 +15,36 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+  if (argc != 14)
+  {
+    string folder = "results/trial-0";
+    std::string parentFolder = "results";
+    std::string subFolder = parentFolder + "/trial-0";
+
+    // Crear la carpeta padre si no existe
+    if (mkdir(parentFolder.c_str(), 0777) == 0 || errno == EEXIST) {
+        std::cout << "Carpeta padre creada o ya existe: " << parentFolder << std::endl;
+        // Crear la subcarpeta
+        if (mkdir(subFolder.c_str(), 0777) == 0) {
+            std::cout << "Subcarpeta creada exitosamente: " << subFolder << std::endl;
+        } else {
+            std::cout << "Error al crear la subcarpeta o ya existe." << std::endl;
+        }
+    } else {
+        std::cout << "Error al crear la carpeta padre." << std::endl;
+    }
+
+    setenv("PYTHONPATH", ".", 1);
+    Py_Initialize();
+    //menu();
+    std::cout << "starting" << endl;
+    //float fitness = run(1);
+    float fitness = run3();
+    cout << "finalized" << endl;
+    Py_Finalize();
+    return fitness;
+  }
+  
 //int main() {
   // Recibir parametros de la interfaz de usuario
   float keep=std::atof(argv[1]);
@@ -47,11 +79,11 @@ int main(int argc, char *argv[]) {
   */  
 
   // Parametros constantes
+  int numberGenomes=1;
   keep=1.0;
-  int numberGenomes=4;
   int numberInputs=80;
   int numberOutputs=40;
-  int evolutions=20;
+  int evolutions=1;
   float learningRate=10.0;
   float inputWeights_min=0.0;
   float inputWeights_max=150.0;
@@ -60,6 +92,22 @@ int main(int argc, char *argv[]) {
   int n_max=200;
   int process_max=1;
   string function="cartpole2";
+
+  // Parametros constantes
+  /*
+  int numberGenomes=4;
+  int numberInputs=2;
+  int numberOutputs=1;
+  int evolutions=20;
+  float learningRate=10.0;
+  float inputWeights_min=1.0;
+  float inputWeights_max=1.0;
+  float weightsRange_min=110.0;
+  float weightsRange_max=110.0;
+  int n_max=100;
+  int process_max=6;
+  string function="xor";
+  */
 
   // Escribir en el archivo config.cfg
   string folder = "results/trial-" + std::to_string(trialNumber);

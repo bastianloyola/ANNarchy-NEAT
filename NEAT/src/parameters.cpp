@@ -58,8 +58,7 @@ void Parameters::loadFromCfg(const std::string& filename) {
                         float maxWeight = std::stof(rangePart);
                         weightsRange[0] = minWeight;
                         weightsRange[1] = maxWeight;
-                    }
-
+                    }else if (key == "function") function = value;
                 }catch (const std::exception& e) {
                     std::cerr << "Error parsing key: " << key << ", value: " << value << ". Exception: " << e.what() << std::endl;
                 }

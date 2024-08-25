@@ -39,6 +39,7 @@ public:
     float learningRate;
     std::vector<float> inputWeights;
     float weightsRange[2] = {0.0f, 0.0f};
+    std::string function;
 
 private:
     // Función para cargar los parámetros desde el archivo cfg
