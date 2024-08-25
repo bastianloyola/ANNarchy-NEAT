@@ -56,7 +56,13 @@ IZHIKEVICH = Neuron(
 )
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
+    file = open("output-python.txt","w")
+    file.write("Paso 1\n")
+    file.close()
     try:
+        file = open("output-python.txt","a")
+        file.write("Paso 2\n")
+        file.close()
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
@@ -74,8 +80,16 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
 
         proj.connect_from_sparse(lil_matrix)
         nombre = 'annarchy/annarchy-'+str(int(trial))+'/annarchy-'+str(int(i))
+        file = open("output-python.txt","a")
+        file.write("Paso 3\n")
+        file.close()
 
         compile(directory=nombre, clean=False, silent=True)
+
+        file = open("output-python.txt","a")
+        file.write("Paso 4\n")
+        file.close()
+
         M = Monitor(pop, ['spike'])
         input_index = []
         output_index = []
@@ -83,14 +97,28 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         n_salida = int(n_salida)
         for i in range(n_entrada):
             input_index.append(i)
+        file = open("output-python.txt","a")
+        file.write("Paso 5\n")
+        file.close()
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
+        file = open("output-python.txt","a")
+        file.write("Paso 6\n")
+        file.close()
         
         # Verificar el tamaño de inputWeights
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
         
-        fit = fitness(pop,M,input_index,output_index, get_function('results/trial-'+ str(int(trial))), inputWeights)
+        funcion = get_function('results/trial-'+ str(int(trial)))
+        file = open("output-python.txt","a")
+        file.write("Paso 7\n")
+        file.close()
+        file = open("output-python.txt","a")
+        file.write("funcion: "+funcion)
+        file.close()
+
+        fit = fitness(pop,M,input_index,output_index, funcion, inputWeights)
         #return fit
         return fit
     except Exception as e:
@@ -100,12 +128,24 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
 def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
 
     if funcion == "xor":
+        file = open("output-python.txt","a")
+        file.write("fitness: xor\n")
+        file.close()
         return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
+        file = open("output-python.txt","a")
+        file.write("fitness: cartpole\n")
+        file.close()
         return cartpole(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "lunar_lander":
+        file = open("output-python.txt","a")
+        file.write("fitness: lunar_lander\n")
+        file.close()
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
+        file = open("output-python.txt","a")
+        file.write("fitness: cartpole2\n")
+        file.close()
         return cartpole2(pop, Monitor, input_index, output_index, inputWeights)
     else:
         raise ValueError(f"Unknown function: {funcion}")
@@ -165,7 +205,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     #Generar 4 input weights para cada input
     inputWeights = np.random.uniform(minInput,maxInput,4)
     #Number of episodes
-    episodes = 100
+    episodes = 10
     h=0
     #Final fitness 
     final_fitness = 0
@@ -216,6 +256,9 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
 
 
 def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
+    file = open("output-python.txt","a")
+    file.write("Cartpole2\n")
+    file.close()
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
     max_steps = 1000
@@ -249,6 +292,9 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
 
     
     while h < episodes:
+        file = open("output-python.txt","a")
+        file.write("Episode: " + str(h) + ": ")
+        file.close()
         j = 0
         returns = []
         actions_done = []
@@ -281,8 +327,15 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
         final_fitness += np.sum(returns)
         h += 1
 
+        file = open("output-python.txt","a")
+        file.write(" sum returns: " + str(np.sum(returns)) + "\n")
+        file.close()
+
     final_fitness = final_fitness / episodes
     env.close()
+    file = open("output-python.txt","a")
+    file.write("final fitness: " + str(final_fitness) + "\n")
+    file.close()
     return final_fitness
 
 
