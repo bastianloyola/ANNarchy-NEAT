@@ -36,12 +36,6 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
             
             float minWeight = parameters->weightsRange[0];
             float maxWeight = parameters->weightsRange[1];
-
-            //exh or inh value (1 or -1)
-            float inh = (rand() % 2);
-            if (inh == 0){
-                inh = -1;
-            }
             //float weight = maxWeight*inh;
             float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
             
@@ -282,9 +276,15 @@ void Genome::mutation(){
             index =  randomInt(0,n);
             connection = connections[index];
         }
-        //Random delta weight between -1 and 1
-        float weight = ((rand() % 200 - 100)/100.0)*parameters->learningRate; 
-        changeWeight(index,weight);
+        //Random delta weight between -10 or 10
+        //float modification_weight = ((rand() % 200 - 100)/100.0)*parameters->learningRate;
+        float modification_weight = parameters->learningRate;
+        int exc = rand() % 2;
+        if (exc == 1){
+            modification_weight = -1*modification_weight;
+        }
+
+        changeWeight(index,modification_weight);
     }
 
     // add nodeç
