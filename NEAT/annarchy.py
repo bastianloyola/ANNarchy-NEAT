@@ -30,8 +30,7 @@ LIF = Neuron(
     tau_I * dg_inh/dt = -g_inh
     """,
     spike = "v >= -40.0",
-    reset = "v = -65",
-    refractory = 5.0
+    reset = "v = -65"
 )
 
 
@@ -51,14 +50,13 @@ IZHIKEVICH = Neuron(
         du/dt = a*(b*v - u) : init=-14.0
     """,
     spike="v >= 30.0",
-    reset="v = c; u += d",
-    refractory=5.0
+    reset="v = c; u += d"
 )
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
-        pop = Population(geometry=n, neuron=IZHIKEVICH)
+        pop = Population(geometry=n, neuron=LIF)
         proj = Projection(pre=pop, post=pop, target='exc')
 
         #Matrix to numpy array

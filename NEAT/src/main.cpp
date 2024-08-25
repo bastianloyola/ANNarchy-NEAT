@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
   int evolutions=50;
   float learningRate=10.0;
   float inputWeights_min=0.0;
-  float inputWeights_max=15.0;
+  float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
   int n_max=200;
