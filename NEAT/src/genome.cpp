@@ -36,9 +36,16 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
             
             float minWeight = parameters->weightsRange[0];
             float maxWeight = parameters->weightsRange[1];
+            int w = 1;
+            int w2 = 1;
+            if (minWeight == maxWeight){
+                w = rand()%2;
+                if (w == 0) w2 = -1; 
+            }
+            
             //float weight = maxWeight*inh;
             float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
-            
+            weight = weight*w2;
             Connection c(i+1, j+1, weight, true, cInnov);
             connections.push_back(c);
         }
