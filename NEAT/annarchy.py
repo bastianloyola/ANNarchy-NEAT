@@ -18,7 +18,7 @@ def get_function(trial):
 
 
 
-LIF = Neuron(
+LIF = Neuron(  #I = 75
     parameters = """
     tau = 50.0 : population
     I = 0.0
@@ -33,7 +33,7 @@ LIF = Neuron(
     reset = "v = -65"
 )
 
-IZHIKEVICH = Neuron(
+IZHIKEVICH = Neuron(  #I = 20
     parameters="""
         a = 0.02 : population
         b = 0.2 : population
@@ -139,7 +139,7 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
         if output > 1:
             decode_output = 1
 
-
+        pop.reset()
         Monitor.reset()
         #comparar las entradas y la salida esperada con el output
         if entrada[0] ^ entrada[1] == decode_output:
@@ -196,6 +196,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
             observation, reward, terminated, truncated, info = env.step(action)
             returns.append(reward)
             actions_done.append(action)
+            pop.reset()
             Monitor.reset()
             j += 1
         env.reset()
@@ -252,7 +253,6 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             #simulate(100.0)
@@ -312,6 +312,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
             observation, reward, terminated, truncated, info = env.step(action)
             returns.append(reward)
             actions_done.append(action)
+            pop.reset()
             Monitor.reset()
             j += 1
         env.reset()
@@ -425,14 +426,13 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
         terminated = False
         truncated = False
         while j < max_steps and not terminated and not truncated:
-            simulate(10.0, measure_time=True)
             # Codificar observación
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
-            simulate(100.0, measure_time=True)
+            simulate(100.0)
             if True:
                 spikes = Monitor.get('spike')
                 v = Monitor.get('v')
@@ -461,7 +461,6 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
                 plt.show()
                 flag=False
 
-            simulate(100.0, measure_time=True)
             spikes = Monitor.get('spike')
             # Decodificar la acción basada en el número de picos en las neuronas de salida
             left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
@@ -476,6 +475,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
             observation, reward, terminated, truncated, info = env.step(action)
             returns.append(reward)
             actions_done.append(action)
+            pop.reset()
             Monitor.reset()
             #resetear I=0, resetear a -65 (Iz valor de descanso)
             j += 1
