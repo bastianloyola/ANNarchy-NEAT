@@ -79,19 +79,18 @@ int main(int argc, char *argv[]) {
   */  
 
   // Parametros constantes
-  int numberGenomes=1;
-  keep=1.0;
-  int numberInputs=80;
-  int numberOutputs=40;
-  int evolutions=1;
+  int numberGenomes=10;
+  int numberInputs=8;
+  int numberOutputs=2;
+  int evolutions=20;
   float learningRate=10.0;
   float inputWeights_min=0.0;
   float inputWeights_max=150.0;
   float weightsRange_min=-20.0;
   float weightsRange_max=80.0;
-  int n_max=200;
-  int process_max=1;
-  string function="cartpole2";
+  int n_max=300;
+  int process_max=5;
+  string function="cartpole";
 
   // Parametros constantes
   /*

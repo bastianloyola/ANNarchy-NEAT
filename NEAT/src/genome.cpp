@@ -219,7 +219,8 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         int out_node = connections[i].getOutNode();
         double weight = connections[i].getWeight();
         if (in_node >= 0 && in_node < n && out_node >= 0 && out_node <= n) {
-            int index = (out_node-1) * n + (in_node-1);
+            //int index = (out_node-1) * n + (in_node-1);
+            int index = (in_node-1) * n + (out_node-1);
             data[index] = weight;
         }
     }
@@ -234,24 +235,18 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         return -1;
     }
 
-
     // Convertir el vector inputWeights a un array de NumPy
     std::vector<float>& inputWeights2 = inputWeights;
     npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights2.size()) };
     PyObject* numpy_inputWeights = PyArray_SimpleNewFromData(1, inputWeights_dims, NPY_FLOAT, inputWeights.data());
 
-    
-
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
-
     PyObject* args = PyTuple_Pack(7, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)));
-
     PyObject* callfunc = PyObject_CallObject(func, args);
-    
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    //std::cout << "Fitness " << id << ": "<< value << std::endl;
+    std::cout << "Fitness " << id << ": "<< value << std::endl;
     setFitness(value);
 
 
@@ -337,7 +332,6 @@ void Genome::mutation(){
     }
 
     if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
-        cout << "Mutate input weight " << endl;
         int n = inputWeights.size();
         int index = randomInt(0,n);
         //Random delta weight between -1 and 1

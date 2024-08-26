@@ -56,26 +56,21 @@ IZHIKEVICH = Neuron(
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
-
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
             raise ValueError("matrix is empty")
-        
         #lil_matrix scipy nxn with values of matrix
         lil_matrix = scipy.sparse.lil_matrix((int(n), int(n)))
         n_rows = matrix.shape[0]
         n_cols = matrix.shape[1]
         lil_matrix[:n_rows, :n_cols] = matrix
-
         proj.connect_from_sparse(lil_matrix)
         nombre = 'annarchy/annarchy-'+str(int(trial))+'/annarchy-'+str(int(i))
-
         compile(directory=nombre, clean=False, silent=True)
-
-        M = Monitor(pop, ['spike'])
+        M = Monitor(pop, ['spike','v'])
         input_index = []
         output_index = []
         n_entrada = int(n_entrada)
@@ -84,20 +79,17 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
             input_index.append(i)
         for i in range(n_entrada,n_salida+n_entrada):
             output_index.append(i)
-        
         # Verificar el tamaño de inputWeights
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")
-        
+
         funcion = get_function('results/trial-'+ str(int(trial)))
-
         fit = fitness(pop,M,input_index,output_index, funcion, inputWeights)
-
         #return fit
         return fit
     except Exception as e:
         # Capturar y manejar excepciones
-        print("Error:", e)
+        print("Error en annarchy:", e)
 
 def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
     if funcion == "xor":
@@ -210,7 +202,6 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
         env.reset()
         final_fitness += np.sum(returns)
         h += 1
-
     final_fitness = final_fitness/episodes
     env.close()
     #print("Returns: ",returns)
@@ -265,7 +256,37 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
-            simulate(100.0)
+            #simulate(100.0)
+            if flag:
+                simulate(100.0, measure_time=True)
+                spikes = Monitor.get('spike')
+                v = Monitor.get('v')
+                t, n = Monitor.raster_plot(spikes)
+                fr = Monitor.histogram(spikes)
+                print(spikes[0])
+                fig = plt.figure(figsize=(12, 12))
+
+                # First plot: raster plot
+                plt.subplot(311)
+                plt.plot(t, n, 'b.')
+                plt.title('Raster plot')
+
+                # Second plot: membrane potential of a single excitatory cell
+                plt.subplot(312)
+                plt.plot(v[:, 15]) # for example
+                plt.title('Membrane potential')
+
+                # Third plot: number of spikes per step in the population.
+                plt.subplot(313)
+                plt.plot(fr)
+                plt.title('Number of spikes')
+                plt.xlabel('Time (ms)')
+
+                plt.tight_layout()
+                plt.show()
+                flag=False
+            else:
+                simulate(100.0)
 
             # Decodificar la acción basada en la cual neurona de salida tuvo la primera spike
             spikes = Monitor.get('spike')
@@ -397,33 +418,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
         intervals = [values[(values >= interval_limits[i]) & (values < interval_limits[i+1])] for i in range(num_neuronas_por_variable)]
         intervals[-1] = np.append(intervals[-1], values[-1])  # Asegurar que el último intervalo incluye el valor máximo
 
-    simulate(100.0, measure_time=True)
-    spikes = Monitor.get('spike')
-    #v = Monitor.get('v')
-    t, n = Monitor.raster_plot(spikes)
-    fr = Monitor.histogram(spikes)
-    print(spikes[0])
-    fig = plt.figure(figsize=(12, 12))
-
-    # First plot: raster plot
-    plt.subplot(311)
-    plt.plot(t, n, 'b.')
-    plt.title('Raster plot')
-
-    # Second plot: membrane potential of a single excitatory cell
-    #plt.subplot(312)
-    #plt.plot(v[:, 15]) # for example
-    #plt.title('Membrane potential')
-
-    # Third plot: number of spikes per step in the population.
-    plt.subplot(313)
-    plt.plot(fr)
-    plt.title('Number of spikes')
-    plt.xlabel('Time (ms)')
-
-    plt.tight_layout()
-    plt.show()
-
+    flag=True
     while h < episodes:
         j = 0
         returns = []
@@ -431,12 +426,42 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
         terminated = False
         truncated = False
         while j < max_steps and not terminated and not truncated:
+            simulate(10.0, measure_time=True)
             # Codificar observación
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
+            simulate(100.0, measure_time=True)
+            if flag:
+                spikes = Monitor.get('spike')
+                v = Monitor.get('v')
+                t, n = Monitor.raster_plot(spikes)
+                fr = Monitor.histogram(spikes)
+                print(spikes[0])
+                fig = plt.figure(figsize=(12, 12))
+
+                # First plot: raster plot
+                plt.subplot(311)
+                plt.plot(t, n, 'b.')
+                plt.title('Raster plot')
+
+                # Second plot: membrane potential of a single excitatory cell
+                plt.subplot(312)
+                plt.plot(v[:, 15]) # for example
+                plt.title('Membrane potential')
+
+                # Third plot: number of spikes per step in the population.
+                plt.subplot(313)
+                plt.plot(fr)
+                plt.title('Number of spikes')
+                plt.xlabel('Time (ms)')
+
+                plt.tight_layout()
+                plt.show()
+                flag=False
+
             simulate(100.0, measure_time=True)
             spikes = Monitor.get('spike')
             # Decodificar la acción basada en el número de picos en las neuronas de salida
@@ -453,6 +478,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
             returns.append(reward)
             actions_done.append(action)
             Monitor.reset()
+            #resetear I
             j += 1
         env.reset()
         final_fitness += np.sum(returns)

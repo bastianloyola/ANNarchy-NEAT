@@ -24,18 +24,18 @@ def objective(trial):
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
-    keep = trial.suggest_float('keep', 0.1, 0.7)
-    threshold = trial.suggest_float('threshold', 2.0, 5.0)
-    interespeciesRate = trial.suggest_float('interespeciesRate', 0.01, 0.5)
-    noCrossoverOff = trial.suggest_float('noCrossoverOff', 0.2, 0.6)
-    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.4, 0.9)
-    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.01, 0.1)
-    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.1)
-    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.01, 0.1)
-    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.1, 0.4)
-    c1 = trial.suggest_float('c1', 0.1, 3.0)
-    c2 = trial.suggest_float('c2', 0.1, 3.0)
-    c3 = trial.suggest_float('c3', 0.1, 3.0)
+    keep = trial.suggest_float('keep', 0.4, 0.6)
+    threshold = trial.suggest_float('threshold', 2.0, 4.0)
+    interespeciesRate = trial.suggest_float('interespeciesRate', 0.0005, 0.0015)
+    noCrossoverOff = trial.suggest_float('noCrossoverOff', 0.15, 0.35)
+    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.7, 0.9)
+    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04)
+    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.05)#0.01 0.05
+    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.02, 0.4)
+    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.05, 0.2)#0.05 0.2
+    c1 = trial.suggest_float('c1', 0.5, 1.5)
+    c2 = trial.suggest_float('c2', 0.5, 1.5)
+    c3 = trial.suggest_float('c3', 0.3, 0.5)
     p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate),
                           str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), 
                           str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), 
@@ -79,7 +79,7 @@ study = optuna.create_study(study_name=study_name,
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=10) #timeout in seconds
+study.optimize(objective, n_trials=100) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')
