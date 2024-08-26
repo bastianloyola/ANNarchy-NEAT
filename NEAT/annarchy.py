@@ -25,14 +25,13 @@ LIF = Neuron(
     tau_I = 10.0 : population
     """,
     equations = """
-    tau * dv/dt = -v + g_exc - g_inh + I : init=0
+    tau * dv/dt = -v + g_exc - g_inh + (I-65) : init=0
     tau_I * dg_exc/dt = -g_exc
     tau_I * dg_inh/dt = -g_inh
     """,
     spike = "v >= -40.0",
     reset = "v = -65"
 )
-
 
 IZHIKEVICH = Neuron(
     parameters="""
@@ -44,7 +43,7 @@ IZHIKEVICH = Neuron(
         tau_I = 10.0 : population
     """,
     equations="""
-        dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65.0
+        dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65
         tau_I * dg_exc/dt = -g_exc
         tau_I * dg_inh/dt = -g_inh
         du/dt = a*(b*v - u) : init=-14.0
@@ -434,7 +433,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(100.0, measure_time=True)
-            if flag:
+            if True:
                 spikes = Monitor.get('spike')
                 v = Monitor.get('v')
                 t, n = Monitor.raster_plot(spikes)
@@ -478,7 +477,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
             returns.append(reward)
             actions_done.append(action)
             Monitor.reset()
-            #resetear I
+            #resetear I=0, resetear a -65 (Iz valor de descanso)
             j += 1
         env.reset()
         final_fitness += np.sum(returns)
