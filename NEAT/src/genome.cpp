@@ -204,7 +204,6 @@ void Genome::printGenome() {
 
 
 float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
-    std::cout << "Evaluating... id: " << id << " id_annarchy: " << id_annarchy << endl;
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int n_max = parameters->n_max; 
@@ -246,7 +245,6 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
     PyObject* callfunc = PyObject_CallObject(func, args);
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    std::cout << "Fitness " << id << ": "<< value << std::endl;
     setFitness(value);
 
 

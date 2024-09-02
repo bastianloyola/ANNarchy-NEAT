@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream> // Para dividir líneas
 #include <fstream>  // Asegúrate de incluir este encabezado 
 #include <cstdlib>  // para std::atof
 #include <filesystem>
@@ -44,9 +45,54 @@ int main(int argc, char *argv[]) {
     Py_Finalize();
     return fitness;
   }
-  
-//int main() {
-  // Recibir parametros de la interfaz de usuario
+
+  // Parametros constantes
+  int numberGenomes, numberInputs, numberOutputs, evolutions, n_max, process_max;
+  float learningRate, inputWeights_min, inputWeights_max, weightsRange_min, weightsRange_max;
+  string function;
+
+  std::ifstream file("config/config.cfg"); // Abrir el archivo
+  std::string line;
+
+  // Leer línea por línea del archivo
+  while (std::getline(file, line)) {
+      std::istringstream iss(line);
+      std::string key;
+      if (std::getline(iss, key, '=')) {
+          std::string value;
+          if (std::getline(iss, value)) {
+              try {
+                  // Asignar valor al parámetro correspondiente
+                  if (key == "numberGenomes") numberGenomes = std::stoi(value);
+                  else if (key == "numberInputs") numberInputs = std::stoi(value);
+                  else if (key == "numberOutputs") numberOutputs = std::stoi(value);
+                  else if (key == "evolutions") evolutions = std::stoi(value);
+                  else if (key == "process_max") process_max = std::stoi(value);
+                  else if (key == "n_max") n_max = std::stoi(value);
+                  else if (key == "learningRate") learningRate = std::stof(value);
+                  else if (key == "inputWeights") { 
+                      std::istringstream rangeStream(value);
+                      std::string rangePart;
+                      std::getline(rangeStream, rangePart, ',');
+                      inputWeights_min = std::stof(rangePart);
+                      std::getline(rangeStream, rangePart, ',');
+                      inputWeights_max = std::stof(rangePart);
+                  }
+                  else if (key == "weightsRange") {
+                      std::istringstream rangeStream(value);
+                      std::string rangePart;
+                      std::getline(rangeStream, rangePart, ',');
+                      weightsRange_min = std::stof(rangePart);
+                      std::getline(rangeStream, rangePart, ',');
+                      weightsRange_max = std::stof(rangePart);
+                  }else if (key == "function") function = value;
+              }catch (const std::exception& e) {
+                  std::cerr << "Error parsing key: " << key << ", value: " << value << ". Exception: " << e.what() << std::endl;
+              }
+          }
+      }
+  }
+
   float keep=std::atof(argv[1]);
   float threshold=std::atof(argv[2]);
   float probabilityInterespecies=std::atof(argv[3]);
@@ -61,52 +107,6 @@ int main(int argc, char *argv[]) {
   float c2=std::atof(argv[11]);
   float c3=std::atof(argv[12]);
   int trialNumber=std::atoi(argv[13]);
-  /*
-  float keep = 0.5;
-  float threshold = 3.0;
-  float probabilityInterespecies = 0.001;
-  float probabilityNoCrossoverOff = 0.75;
-  float probabilityWeightMutated = 0.8;
-  float probabilityAddNodeSmall = 0.03;
-  float probabilityAddLink_small = 0.05;
-  float probabilityAddNodeLarge = 0.03;
-  float probabilityAddLink_Large = 0.3;
-  int largeSize = 20;
-  float c1 = 1.0;
-  float c2 = 1.0;
-  float c3 = 0.4;
-  int trialNumber = 0;
-  */  
-
-  // Parametros constantes
-  int numberGenomes=10;
-  int numberInputs=8;
-  int numberOutputs=2;
-  int evolutions=20;
-  float learningRate=10.0;
-  float inputWeights_min=0.0;
-  float inputWeights_max=150.0;
-  float weightsRange_min=-20.0;
-  float weightsRange_max=80.0;
-  int n_max=300;
-  int process_max=5;
-  string function="cartpole";
-
-  // Parametros constantes
-  /*
-  int numberGenomes=4;
-  int numberInputs=2;
-  int numberOutputs=1;
-  int evolutions=20;
-  float learningRate=10.0;
-  float inputWeights_min=1.0;
-  float inputWeights_max=1.0;
-  float weightsRange_min=110.0;
-  float weightsRange_max=110.0;
-  int n_max=100;
-  int process_max=6;
-  string function="xor";
-  */
 
   // Escribir en el archivo config.cfg
   string folder = "results/trial-" + std::to_string(trialNumber);
@@ -147,14 +147,8 @@ int main(int argc, char *argv[]) {
 
   setenv("PYTHONPATH", ".", 1);
   Py_Initialize();
-  
-  //menu();
-  std::cout << "starting" << endl;
-  //float fitness = run(1);
+
   float fitness = run2(folder, trialNumber);
-  cout << "finalized" << endl;
-
-
   Py_Finalize();
   return fitness;
 

@@ -159,8 +159,6 @@ float run(int timesPerConfig) {
 float run2(string folder, int trial) {
 
     string filename = folder + "/results.txt";
-
-    printf("---- Running ----\n");
     
     int evolutions;
     float finalFitness;
@@ -175,11 +173,8 @@ float run2(string folder, int trial) {
     outfile.close();
     saveConfig(filename, folder + "/config.cfg");
     
-    printf("---- Loading Config ----\n");
     Parameters parameters(folder + "/config.cfg");
-    printf("---- Loaded Config ----\n");
 
-    printf("---- Running NEAT ----\n");
     Population population(&parameters);
     evolutions = parameters.evolutions;
     population.evolution(evolutions, folder, trial);

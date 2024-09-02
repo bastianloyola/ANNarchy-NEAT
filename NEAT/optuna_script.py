@@ -13,8 +13,6 @@ from optuna.visualization import plot_parallel_coordinate
 from optuna.visualization import plot_param_importances
 from optuna.visualization import plot_slice
 
-
-
 # Función de objetivo para Optuna
 def objective(trial):
 
@@ -24,25 +22,24 @@ def objective(trial):
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
-    keep = trial.suggest_float('keep', 0.4, 0.6)
-    threshold = trial.suggest_float('threshold', 2.0, 4.0)
-    interespeciesRate = trial.suggest_float('interespeciesRate', 0.0005, 0.0015)
-    noCrossoverOff = trial.suggest_float('noCrossoverOff', 0.15, 0.35)
-    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.7, 0.9)
-    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04)
-    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.05)#0.01 0.05
-    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.02, 0.4)
-    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.05, 0.2)#0.05 0.2
-    c1 = trial.suggest_float('c1', 0.5, 1.5)
-    c2 = trial.suggest_float('c2', 0.5, 1.5)
-    c3 = trial.suggest_float('c3', 0.3, 0.5)
+    keep = round(trial.suggest_float('keep', 0.4, 0.6), 3)
+    threshold = round(trial.suggest_float('threshold', 2.0, 4.0), 3)
+    interespeciesRate = round(trial.suggest_float('interespeciesRate', 0.0005, 0.0015), 4)
+    noCrossoverOff = round(trial.suggest_float('noCrossoverOff', 0.15, 0.35), 3)
+    probabilityWeightMutated = round(trial.suggest_float('probabilityWeightMutated', 0.7, 0.9), 3)
+    probabilityAddNodeSmall = round(trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04), 3)
+    probabilityAddLink_small = round(trial.suggest_float('probabilityAddLink_small', 0.01, 0.05), 3)
+    probabilityAddNodeLarge = round(trial.suggest_float('probabilityAddNodeLarge', 0.02, 0.4), 3)
+    probabilityAddLink_Large = round(trial.suggest_float('probabilityAddLink_Large', 0.05, 0.2), 3)
+    c1 = round(trial.suggest_float('c1', 0.5, 1.5), 3)
+    c2 = round(trial.suggest_float('c2', 0.5, 1.5), 3)
+    c3 = round(trial.suggest_float('c3', 0.3, 0.5), 3)
     p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate),
                           str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), 
                           str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), 
                           str(c1), str(c2), str(c3), str(trial.number)],
                         stderr=subprocess.PIPE, 
                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-
 
     p.wait()
 

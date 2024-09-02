@@ -74,7 +74,6 @@ void Population::print(){
 }
 
 void Population::eliminate(){
-    std::cout << "Eliminando..." << " Genomes size: " << genomes.size() << endl;
     int id,index,n,size, id_ann;
 
     for (int i = 0; i < static_cast<int>(species.size()); i++){
@@ -91,14 +90,10 @@ void Population::eliminate(){
             species[i]->genomes.pop_back();
             idForGenomes.push_back(id_ann);
         }
-        //std::cout << "Species " << i << " eliminados: " << n << endl;
     }
-
-    std::cout << "Eliminados..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::reproduce(){
-    std::cout << "Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
     Genome *g1, *g2;
     float interspeciesRate;
     int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index;
@@ -171,12 +166,9 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
     }
-
-    std::cout << "Fin Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
 }
 
 void Population::speciation(){
-    cout << "Especiando..." << endl;
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
     vector<Genome> genomesSpeciation;
@@ -240,7 +232,6 @@ void Population::speciation(){
 }
 
 void Population::evaluate(std::string folder,int trial) {
-    std::cout << "Evaluando..." << std::endl;
     // Importar módulo
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
@@ -391,7 +382,6 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 }
 
 void Population::mutations(){
-    cout << "Mutando..." << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         species[i]->sort_genomes();
@@ -404,7 +394,6 @@ void Population::mutations(){
 void Population::evolution(int n, std::string folder, int trial){
 
     for (int i = 0; i < n; i++){
-        std::cout << " generación: " << i << endl; 
         evaluate(folder, trial);
         eliminate();
         mutations();
@@ -422,7 +411,6 @@ void Population::print_best(){
             bestIndex = i;
         }
     }
-    std::cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
     genomes[bestIndex]->printGenome();
 }
 
@@ -446,32 +434,6 @@ int Population::get_annarchy_id(){
         return idGenome;
     }
     return -1;
-    
-    /*int n_genomes_max = parameters.numberGenomes;
-    //Vector con los id_annarchy de los genomas
-    vector<int> ids;
-    for (int i = 0; i < n_genomes_max; i++){
-        ids.push_back(genomes[i]->getIdAnnarchy());
-    }
-    //Encontrar algun id_annarchy disponible para un genoma que no esté en el vector y quue vaya entre 1 a n_genomes_max
-    //Si no hay ninguno disponible, se devuelve 0
-    bool disponible = false;
-    int id = 1;
-    while (id <= n_genomes_max){
-        disponible = true;
-        for (int i = 0; i < n_genomes_max; i++){
-            if (ids[i] == id){
-                disponible = false;
-                break;
-            }
-        }
-        if (disponible){
-            return id;
-        }
-        id++;
-    }
-    return 0;*/
-    
 }
 
 void Population::offspringsPerSpecies() {
