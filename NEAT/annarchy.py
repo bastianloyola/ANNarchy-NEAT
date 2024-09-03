@@ -182,7 +182,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
                 k += 1
-            simulate(100.0)
+            simulate(50.0)
             spikes = Monitor.get('spike')
             #Output from 2 neurons, one for each action
             output1 = np.size(spikes[output_index[0]])
@@ -255,37 +255,7 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
-            #simulate(100.0)
-            if flag:
-                simulate(100.0, measure_time=True)
-                spikes = Monitor.get('spike')
-                v = Monitor.get('v')
-                t, n = Monitor.raster_plot(spikes)
-                fr = Monitor.histogram(spikes)
-                print(spikes[0])
-                fig = plt.figure(figsize=(12, 12))
-
-                # First plot: raster plot
-                plt.subplot(311)
-                plt.plot(t, n, 'b.')
-                plt.title('Raster plot')
-
-                # Second plot: membrane potential of a single excitatory cell
-                plt.subplot(312)
-                plt.plot(v[:, 15]) # for example
-                plt.title('Membrane potential')
-
-                # Third plot: number of spikes per step in the population.
-                plt.subplot(313)
-                plt.plot(fr)
-                plt.title('Number of spikes')
-                plt.xlabel('Time (ms)')
-
-                plt.tight_layout()
-                plt.show()
-                flag=False
-            else:
-                simulate(100.0)
+            simulate(50.0)
 
             # Decodificar la acción basada en la cual neurona de salida tuvo la primera spike
             spikes = Monitor.get('spike')
@@ -432,7 +402,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
                         pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
-            simulate(100.0)
+            simulate(50.0)
             if True:
                 spikes = Monitor.get('spike')
                 v = Monitor.get('v')
