@@ -24,7 +24,7 @@ def objective(trial):
     # Definir los hiperparámetros que Optuna debe optimizar
     keep = round(trial.suggest_float('keep', 0.4, 0.6), 3)
     threshold = round(trial.suggest_float('threshold', 2.0, 4.0), 3)
-    interespeciesRate = round(trial.suggest_float('interespeciesRate', 0.0005, 0.0015), 4)
+    interespeciesRate = round(trial.suggest_float('interSpeciesRate', 0.0005, 0.0015), 3)
     noCrossoverOff = round(trial.suggest_float('noCrossoverOff', 0.15, 0.35), 3)
     probabilityWeightMutated = round(trial.suggest_float('probabilityWeightMutated', 0.7, 0.9), 3)
     probabilityAddNodeSmall = round(trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04), 3)

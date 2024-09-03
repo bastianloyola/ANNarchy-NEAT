@@ -224,7 +224,7 @@ float run3() {
     }
     config_file << "keep=" << parameters.keep << "\n";
     config_file << "threshold=" << parameters.threshold << "\n";
-    config_file << "interespeciesRate=" << parameters.interspeciesRate << "\n";
+    config_file << "interSpeciesRate=" << parameters.interSpeciesRate << "\n";
     config_file << "noCrossoverOff=" << parameters.noCrossoverOff << "\n";
     config_file << "probabilityWeightMutated=" << parameters.probabilityWeightMutated << "\n";
     config_file << "probabilityAddNodeSmall=" << parameters.probabilityAddNodeSmall << "\n";

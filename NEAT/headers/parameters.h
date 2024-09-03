@@ -10,7 +10,7 @@ public:
     Parameters(const std::string& cfgFilename); // Constructor que carga los parámetros desde el archivo cfg
     Parameters(int numberGenomes, int numberInputs, int numberOutputs, 
         float keep=0.9, float threshold=0.01,
-        float interspeciesRate=0.001, float noCrossoverOff=0.25,
+        float interSpeciesRate=0.001, float noCrossoverOff=0.25,
         float probabilityWeightMutated=0.8, 
         float probabilityAddNodeSmall=0.9, float probabilityAddLinkSmall=0.9,
         float probabilityAddNodeLarge=0.9, float probabilityAddLinkLarge=0.9,
@@ -21,7 +21,7 @@ public:
     int numberOutputs;
     float keep;
     float threshold;
-    float interspeciesRate;
+    float interSpeciesRate;
     float noCrossoverOff;
     float probabilityWeightMutated;
     float probabilityAddNodeSmall;

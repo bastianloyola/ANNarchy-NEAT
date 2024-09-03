@@ -20,6 +20,8 @@ void Parameters::loadFromCfg(const std::string& filename) {
                     // Asignar valor al parámetro correspondiente
                     if (key == "keep") keep = std::stof(value);
                     else if (key == "threshold") threshold = std::stof(value);
+                    else if (key == "interSpeciesRate") interSpeciesRate = std::stof(value);
+                    else if (key == "noCrossoverOff") noCrossoverOff = std::stof(value);
                     else if (key == "probabilityWeightMutated") probabilityWeightMutated = std::stof(value);
                     else if (key == "probabilityAddNodeSmall") probabilityAddNodeSmall = std::stof(value);
                     else if (key == "probabilityAddLink_small") probabilityAddLinkSmall = std::stof(value);
@@ -78,11 +80,11 @@ Parameters::Parameters() {}
 
 // Constructor con parámetros
 Parameters::Parameters(int numberGenomes, int numberInputs, int numberOutputs, float keep, float threshold,
-            float interspeciesRate, float noCrossoverOff, float probabilityWeightMutated, 
+            float interSpeciesRate, float noCrossoverOff, float probabilityWeightMutated, 
             float probabilityAddNodeSmall, float probabilityAddLinkSmall, float probabilityAddNodeLarge, float probabilityAddLinkLarge,
             float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3)
     :numberGenomes(numberGenomes),numberInputs(numberInputs),numberOutputs(numberOutputs),keep(keep),threshold(threshold),
-    interspeciesRate(interspeciesRate),noCrossoverOff(noCrossoverOff),
+    interSpeciesRate(interSpeciesRate),noCrossoverOff(noCrossoverOff),
     probabilityWeightMutated(probabilityWeightMutated),probabilityAddNodeSmall(probabilityAddNodeSmall),
     probabilityAddLinkSmall(probabilityAddLinkSmall),probabilityAddNodeLarge(probabilityAddNodeLarge),
     probabilityAddLinkLarge(probabilityAddLinkLarge), probabilityInputWeightMutated(probabilityInputWeightMutated),

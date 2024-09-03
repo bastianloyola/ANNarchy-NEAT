@@ -95,28 +95,28 @@ void Population::eliminate(){
 
 void Population::reproduce(){
     Genome *g1, *g2;
-    float interspeciesRate;
-    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index;
+    float interSpeciesRate;
+    int reproduceInterSpecies, reproduceNonInterSpecies, reproduceMutations, indexS1, indexS2, index;
 
     offspringsPerSpecies();
 
-    interspeciesRate = (species.size() > 1) ? parameters.interspeciesRate : 0;
+    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0;
     
     for (int i = 0; i < static_cast<int>(species.size()); i++){
 
         //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
 
         reproduceMutations = 0;
-        reproduceInterspecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interspeciesRate);
+        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interSpeciesRate);
 
         if (species[i]->genomes.size() > 1){
-            reproduceNoninterspecies = species[i]->allocatedOffsprings - reproduceInterspecies;
+            reproduceNonInterSpecies = species[i]->allocatedOffsprings - reproduceInterSpecies;
         }else{
-            reproduceNoninterspecies = 0;
+            reproduceNonInterSpecies = 0;
             reproduceMutations = species[i]->allocatedOffsprings;
         }
 
-        for (int j = 0; j < reproduceInterspecies; j++){
+        for (int j = 0; j < reproduceInterSpecies; j++){
             indexS1 = i;
             indexS2 = randomInt(0,static_cast<int>(species.size()));
             while(indexS1 == indexS2){
@@ -129,7 +129,7 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
-        for (int j = 0; j < reproduceNoninterspecies; j++){
+        for (int j = 0; j < reproduceNonInterSpecies; j++){
             g1 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             
