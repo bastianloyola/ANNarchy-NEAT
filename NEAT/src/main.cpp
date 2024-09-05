@@ -16,6 +16,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+
+    float fitness;
     if (argc != 14){
         string folder = "results/trial-0";
         std::string parentFolder = "results";
@@ -39,10 +41,10 @@ int main(int argc, char *argv[]) {
         //menu();
         std::cout << "starting" << endl;
         //float fitness = run(1);
-        float fitness = run3();
+        fitness = run3();
         std::cout << "finalized" << endl;
         Py_Finalize();
-        return fitness;
+
     } else{
 
         // Parametros constantes
@@ -191,8 +193,10 @@ int main(int argc, char *argv[]) {
         setenv("PYTHONPATH", ".", 1);
         Py_Initialize();
 
-        float fitness = run2(folder, trialNumber);
+        fitness = run2(folder, trialNumber);
         Py_Finalize();
-        return fitness;
     }
+    std::cout << "Final fitness: " << std::endl;
+    std::cout << fitness << std::endl;
+    return 0;
 }

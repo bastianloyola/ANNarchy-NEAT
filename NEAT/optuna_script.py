@@ -47,20 +47,27 @@ def objective(trial):
     stdout, stderr = p.communicate()
 
     # Imprimir la salida estándar del proceso NEAT
-    print(f"Output del trial {trial.number}:\n{stdout.decode('utf-8')}")
+    output = stdout.decode('utf-8')
+    #print(f"Output del trial {trial.number}:\n{output}")
     
     # Imprimir la salida de error si existe
     if stderr:
         print(f"Errores del trial {trial.number}:\n{stderr.decode('utf-8')}")
 
-    FuncValue = p.returncode
+    # Asumir que el fitness es la última línea de la salida estándar
+    try:
+        FuncValue = float(output.strip().split("\n")[-1])
+    except ValueError:
+        FuncValue = -np.inf  # En caso de error, retorna un valor muy bajo
 
+    '''
+    FuncValue = p.returncode
     #get final line of output
     if FuncValue != None:
         FuncValue = float(FuncValue)
     else:
         FuncValue = -np.inf
-
+    '''
     return FuncValue
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
@@ -76,7 +83,7 @@ study = optuna.create_study(study_name=study_name,
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
 # Pass the objective function method
-study.optimize(objective, n_trials=100) #timeout in seconds
+study.optimize(objective, n_trials=25) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')
