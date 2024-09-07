@@ -55,7 +55,7 @@ IZHIKEVICH = Neuron(  #I = 20
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
-        pop = Population(geometry=n, neuron=IZHIKEVICH)
+        pop = Population(geometry=n, neuron=LIF)
         proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
@@ -400,37 +400,9 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 75 # Activa la neurona correspondiente
                         break
             simulate(50.0)
-            if True:
-                spikes = Monitor.get('spike')
-                v = Monitor.get('v')
-                t, n = Monitor.raster_plot(spikes)
-                fr = Monitor.histogram(spikes)
-                print(spikes[0])
-                fig = plt.figure(figsize=(12, 12))
-
-                # First plot: raster plot
-                plt.subplot(311)
-                plt.plot(t, n, 'b.')
-                plt.title('Raster plot')
-
-                # Second plot: membrane potential of a single excitatory cell
-                plt.subplot(312)
-                plt.plot(v[:, 15]) # for example
-                plt.title('Membrane potential')
-
-                # Third plot: number of spikes per step in the population.
-                plt.subplot(313)
-                plt.plot(fr)
-                plt.title('Number of spikes')
-                plt.xlabel('Time (ms)')
-
-                plt.tight_layout()
-                plt.show()
-                flag=False
-
             spikes = Monitor.get('spike')
             # Decodificar la acción basada en el número de picos en las neuronas de salida
             left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
