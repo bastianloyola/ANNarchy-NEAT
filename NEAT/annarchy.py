@@ -6,7 +6,6 @@ import scipy.sparse
 import gymnasium as gym
 from scipy.special import erf
 
-
 def get_function(trial):
     #open config file and get the parameter "function"
     with open('results/trial-' + str(int(trial)) + '/config.txt') as f:
@@ -151,7 +150,7 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
 def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
-    max_steps = 1000
+    max_steps = 200
     terminated = False
     truncated = False
     maxInput = inputWeights[1]
@@ -200,9 +199,11 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
             Monitor.reset()
             j += 1
         env.reset()
+        #print("Episode: ",h," Fitness: ",np.sum(returns))
         final_fitness += np.sum(returns)
         h += 1
     final_fitness = final_fitness/episodes
+    #print("Final mean fitness: ",final_fitness,"\n")
     env.close()
     #print("Returns: ",returns)
     #print("Actions: ",actions_done)

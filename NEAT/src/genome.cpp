@@ -337,7 +337,7 @@ void Genome::mutation(){
         float new_inputWeights = inputWeights[index] + weight;
 
         inputWeights.at(index) = new_inputWeights;
-        cout << inputWeights[index] << endl;   
+        //cout << inputWeights[index] << endl;   
     }
 }
 
