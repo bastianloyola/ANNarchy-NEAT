@@ -1,6 +1,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "../headers/menu.h"
-#include <python3.10/numpy/arrayobject.h>
+#include <numpy/arrayobject.h>
 #include <iostream>
 #include <vector>
 

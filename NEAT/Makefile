@@ -1,6 +1,8 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++11 -g
 LIBS = -lpython3.10
+PYTHON_INCLUDE=/home/florencia/magister/trabajo_de_titulacion/repos/ANNarchy-NEAT/venv/include/python3.10
+NUMPY_INCLUDE=/home/florencia/magister/trabajo_de_titulacion/repos/ANNarchy-NEAT/venv/lib/python3.10/site-packages/numpy/_core/include
 
 SRCDIR = src
 BINDIR = bin
