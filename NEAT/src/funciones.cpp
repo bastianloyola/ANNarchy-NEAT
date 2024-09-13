@@ -1,7 +1,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_SSIZE_T_CLEAN
 #include "../headers/funciones.h"
-#include <python3.10/numpy/arrayobject.h>
+#include <numpy/arrayobject.h>
 #include <iostream>
 #include <thread>
 #include <vector>
