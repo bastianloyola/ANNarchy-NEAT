@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <random>
+#include <fstream>
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 
@@ -10,7 +12,7 @@
 #include "../headers/funciones.h"
 using namespace std;
 
-// Constructors
+// ConstructorsGenome::Genome(){}
 Genome::Genome(){}
 Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E, int idAnnarchy){
     id = new_id;
@@ -126,7 +128,7 @@ Node& Genome::getNode(int id){
 }
 
 void Genome::setId(int new_id){ id = new_id;}
-void Genome::setFitness(int new_fitness){ fitness = new_fitness;}
+void Genome::setFitness(float new_fitness){ fitness = new_fitness;}
 void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
 void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 void Genome::setParameters(Parameters* new_parameters){ parameters = new_parameters;}
@@ -255,9 +257,13 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
     return value;
 }
 
-void Genome::mutation(){
+void Genome::mutation(string filenameInfo){
     float add_node, add_link;
 
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << " -> Genome id: " << id << " idAnnarchy: " << id_annarchy << endl;
+
+    //Probabilidades
     if (static_cast<int>(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
@@ -268,6 +274,7 @@ void Genome::mutation(){
 
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
+        outfile << " ----> Mutate weight --" ;
         int n = connections.size();
         int index =  randomInt(0,n);
         Connection connection = connections[index];
@@ -285,11 +292,15 @@ void Genome::mutation(){
         }
 
         changeWeight(index,modification_weight);
+        outfile << " index: " << index << " modification_weight: " << modification_weight << endl;
+    }else{
+        outfile << " ----> Not mutate weight " << endl;
     }
 
-    // add nodeç
+    // add node
     int n_max = parameters->n_max;
     if (getBooleanWithProbability(add_node) && n_max >  (int)(nodes.size())){
+        outfile << " ----> Add node --" << endl;
         int n = connections.size();
         int index = randomInt(0,n);
 
@@ -297,10 +308,12 @@ void Genome::mutation(){
             index = randomInt(0,n);
         }
         createNode(index);
+        outfile << " in: " << connections[index].getInNode() << " out: " << connections[index].getOutNode() << endl;
     }
 
     // add connection
     if (getBooleanWithProbability(add_link)){
+        outfile << " ----> Add link --" << endl;
         int n = nodes.size();
         int in_node = randomInt(0,n);
         int out_node = randomInt(0,n);
@@ -308,6 +321,8 @@ void Genome::mutation(){
         while (in_node == out_node){
             out_node = randomInt(0,n);
         }
+        outfile << " in: " << in_node << " out: " << out_node << endl;
+
         if (connectionExist(in_node, out_node)){
             Connection* conn = getConnection(in_node, out_node);
             if (!conn->getEnabled()){
@@ -328,7 +343,7 @@ void Genome::mutation(){
             createConnection(in_node, out_node, weight);
         }
     }
-
+    // ¿?
     if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
         int n = inputWeights.size();
         int index = randomInt(0,n);
@@ -339,6 +354,8 @@ void Genome::mutation(){
         inputWeights.at(index) = new_inputWeights;
         //cout << inputWeights[index] << endl;   
     }
+
+    outfile.close();
 }
 
 float Genome::compatibility(Genome g1){

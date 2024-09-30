@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <filesystem>
-#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -73,9 +73,11 @@ void Population::print(){
     }
 }
 
-void Population::eliminate(){
+void Population::eliminate(string filenameInfo){
     int id,index,n,size, id_ann;
 
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Eliminate --------\n";
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         size = static_cast<int>(species[i]->genomes.size());
         species[i]->sort_genomes();
@@ -89,11 +91,18 @@ void Population::eliminate(){
             genomes.erase(x);
             species[i]->genomes.pop_back();
             idForGenomes.push_back(id_ann);
+            outfile << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
         }
     }
+    outfile.close();
 }
 
-void Population::reproduce(){
+void Population::reproduce(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Reproduce --------\n";
+    outfile << " number of species: " << species.size() << endl;
+    outfile << " number of genomes: " << genomes.size() << endl;
+
     Genome *g1, *g2;
     float interSpeciesRate;
     int reproduceInterSpecies, reproduceNonInterSpecies, reproduceMutations, indexS1, indexS2, index;
@@ -116,7 +125,15 @@ void Population::reproduce(){
             reproduceMutations = species[i]->allocatedOffsprings;
         }
 
+        outfile << " -> Species: " << i << endl;
+        outfile << " ----> reproduceInterSpecies: " << reproduceInterSpecies << endl;
+        outfile << " ----> reproduceNonInterSpecies: " << reproduceNonInterSpecies << endl;
+        outfile << " ----> reproduceMutations: " << reproduceMutations << endl;
+
+        outfile << " ----> interSpeciesRate: " ;
+
         for (int j = 0; j < reproduceInterSpecies; j++){
+            outfile << " " << j+1 << "/" << reproduceInterSpecies << " ";
             indexS1 = i;
             indexS2 = randomInt(0,static_cast<int>(species.size()));
             while(indexS1 == indexS2){
@@ -129,7 +146,10 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
+        outfile << endl;
+        outfile << " ----> nonInterSpeciesRate: " ;
         for (int j = 0; j < reproduceNonInterSpecies; j++){
+            outfile << " " << j+1 << "/" << reproduceNonInterSpecies << " ";
             g1 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             
@@ -144,7 +164,10 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
+        outfile << endl;
+        outfile << " ----> mutations: " ;
         for (int j = 0; j < reproduceMutations; j++){
+            outfile << " " << j+1 << "/" << reproduceMutations << " ";
             Genome* offspring = new Genome();
             offspring->setParameters(&parameters);
             offspring->setInnovation(&innov);
@@ -161,14 +184,21 @@ void Population::reproduce(){
                 offspring->inputWeights.push_back(genomes[index]->inputWeights[i]);
             }
 
-            offspring->mutation();
+            offspring->mutation(filenameInfo);
             
             genomes.push_back(offspring);
         }
+
+        outfile << endl;
     }
+
+    outfile.close();
 }
 
-void Population::speciation(){
+void Population::speciation(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Speciation --------\n";
+
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
     vector<Genome> genomesSpeciation;
@@ -229,10 +259,18 @@ void Population::speciation(){
             i++;
         }
     }
+    
+    // Extra para informar
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
+        outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
+    }
+
+    outfile.close();
 }
 
 void Population::evaluate(std::string folder,int trial) {
     // Importar módulo
+    //PyObject* name = PyUnicode_FromString("iris_class");
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
@@ -310,10 +348,15 @@ void Population::evaluate(std::string folder,int trial) {
         close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
     }
 
+
+    ofstream outfile(folder + "/info.txt", ios::app);
+    outfile << "\n-------- Evaluation " << " --------\n";
     // Actualizar los valores de fitness en los genomas correspondientes
     for (int i = 0; i < nGenomes; ++i) {
         genomes[i]->setFitness(fitness_values[i]);
+        //std::cout << "Genome id: " << genomes[i]->getId() << " Annarchy id: " << genomes[i]->getIdAnnarchy() << " Fitness: " << genomes[i]->getFitness() << std::endl;
     }
+    outfile.close();
 
     Py_DECREF(load_module);
 }
@@ -381,24 +424,36 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 
 }
 
-void Population::mutations(){
+void Population::mutations(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Mutations --------\n";
+    outfile.close();
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
-            species[i]->genomes[j]->mutation();
+            species[i]->genomes[j]->mutation(filenameInfo);
         }
     }
 }
 
 void Population::evolution(int n, std::string folder, int trial){
-
+    string filenameInfo = folder + "/info.txt";
+    ofstream outfile(filenameInfo, ios::app);
     for (int i = 0; i < n; i++){
+        ofstream outfile(filenameInfo, ios::app);
+        outfile << "\n-------- Generation: " << i << " --------\n";
+        outfile.close();
+
+        std::cout << "-------- Generation: " << i << " --------" << std::endl;
+        
         evaluate(folder, trial);
-        eliminate();
-        mutations();
-        reproduce();
-        speciation();
+        if (i != n-1){
+            eliminate(filenameInfo);
+            mutations(filenameInfo);
+            reproduce(filenameInfo);
+            speciation(filenameInfo);
+        }
     }
 }
 

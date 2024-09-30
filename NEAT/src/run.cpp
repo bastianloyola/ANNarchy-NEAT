@@ -185,10 +185,6 @@ float run2(string folder, int trial) {
 
     saveResults(bestFitnes, 1, filename);
 
-    // Eliminar la carpeta y todo su contenido
-    //std::error_code ec;  // Para capturar posibles errores
-    //std::filesystem::remove_all(folder + "/annarchy", ec);
-
     return finalFitness;
 }
 
@@ -262,5 +258,6 @@ float run3() {
     finalFitness = population.getBest()->getFitness();
 
     saveResults(bestFitnes, 1, filename);
+    
     return finalFitness;
 }

@@ -113,13 +113,13 @@ void menu() {
     case 'i':
       //evolutionate
       cout << "Mutate " << endl;
-      p.mutations();
+      //p.mutations();
       cout << "---------------------------------------------"<< endl;
       break;
     case 'j':
       //evolutionate
       cout << "Eliminate " << endl;
-      p.eliminate();
+      //p.eliminate();
       cout << "---------------------------------------------"<< endl;
       break;
     case 'y':
