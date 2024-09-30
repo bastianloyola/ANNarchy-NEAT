@@ -274,6 +274,8 @@ void Genome::mutation(string filenameInfo){
 
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
+        parameters->mutacionPeso.back() += 1;
+
         outfile << " ----> Mutate weight --" ;
         int n = connections.size();
         int index =  randomInt(0,n);
@@ -300,6 +302,8 @@ void Genome::mutation(string filenameInfo){
     // add node
     int n_max = parameters->n_max;
     if (getBooleanWithProbability(add_node) && n_max >  (int)(nodes.size())){
+        parameters->agregarNodos.back() += 1;
+
         outfile << " ----> Add node --" << endl;
         int n = connections.size();
         int index = randomInt(0,n);
@@ -313,6 +317,8 @@ void Genome::mutation(string filenameInfo){
 
     // add connection
     if (getBooleanWithProbability(add_link)){
+        parameters->agregarLinks.back() += 1;
+
         outfile << " ----> Add link --" << endl;
         int n = nodes.size();
         int in_node = randomInt(0,n);
@@ -345,6 +351,8 @@ void Genome::mutation(string filenameInfo){
     }
     // ¿?
     if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
+        parameters->mutacionPesoInput.back() += 1;
+        outfile << " ----> Mutate input weight --" << endl;
         int n = inputWeights.size();
         int index = randomInt(0,n);
         //Random delta weight between -1 and 1

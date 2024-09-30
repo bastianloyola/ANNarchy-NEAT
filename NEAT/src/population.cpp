@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <filesystem>
 #include <fstream>
+#include <numeric> 
 
 using namespace std;
 
@@ -133,6 +134,8 @@ void Population::reproduce(string filenameInfo){
         outfile << " ----> interSpeciesRate: " ;
 
         for (int j = 0; j < reproduceInterSpecies; j++){
+            parameters.reproducirInter.back() += 1;
+
             outfile << " " << j+1 << "/" << reproduceInterSpecies << " ";
             indexS1 = i;
             indexS2 = randomInt(0,static_cast<int>(species.size()));
@@ -149,6 +152,8 @@ void Population::reproduce(string filenameInfo){
         outfile << endl;
         outfile << " ----> nonInterSpeciesRate: " ;
         for (int j = 0; j < reproduceNonInterSpecies; j++){
+            parameters.reproducirIntra.back() += 1;
+
             outfile << " " << j+1 << "/" << reproduceNonInterSpecies << " ";
             g1 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
@@ -167,6 +172,8 @@ void Population::reproduce(string filenameInfo){
         outfile << endl;
         outfile << " ----> mutations: " ;
         for (int j = 0; j < reproduceMutations; j++){
+            parameters.reproducirMuta.back() += 1;
+
             outfile << " " << j+1 << "/" << reproduceMutations << " ";
             Genome* offspring = new Genome();
             offspring->setParameters(&parameters);
@@ -439,22 +446,59 @@ void Population::mutations(string filenameInfo){
 
 void Population::evolution(int n, std::string folder, int trial){
     string filenameInfo = folder + "/info.txt";
-    ofstream outfile(filenameInfo, ios::app);
+    string filenameOperadores = folder + "/operadores.txt";
+    Genome *best;
+
     for (int i = 0; i < n; i++){
         ofstream outfile(filenameInfo, ios::app);
+        if (i != 0){
+            best = getBest();
+            outfile << "\n---- Best Genome ----" << endl;
+            outfile << "Genome id: " << best->getId() << endl;
+            outfile << "Genome idAnnarchy: " << best->getIdAnnarchy() << endl;
+            outfile << "Genome fitness: " << best->getFitness() << endl;
+        }
+        
         outfile << "\n-------- Generation: " << i << " --------\n";
         outfile.close();
 
         std::cout << "-------- Generation: " << i << " --------" << std::endl;
-        
+        parameters.mutacionPeso.push_back(0);
+        parameters.mutacionPesoInput.push_back(0);
+        parameters.agregarNodos.push_back(0);
+        parameters.agregarLinks.push_back(0);
+        parameters.reproducirInter.push_back(0);
+        parameters.reproducirIntra.push_back(0);
+        parameters.reproducirMuta.push_back(0);
+
         evaluate(folder, trial);
-        if (i != n-1){
-            eliminate(filenameInfo);
-            mutations(filenameInfo);
-            reproduce(filenameInfo);
-            speciation(filenameInfo);
-        }
+        eliminate(filenameInfo);
+        mutations(filenameInfo);
+        reproduce(filenameInfo);
+        speciation(filenameInfo);
+        fstream outfile2(filenameOperadores, ios::app);
+        outfile2 << "\n-------- Resumen operadores Generacion: " << i << " --------\n";
+        outfile2 << "---> mutacionPeso: " << parameters.mutacionPeso.back() << endl;
+        outfile2 << "---> mutacionPesoInput: " << parameters.mutacionPesoInput.back() << endl;
+        outfile2 << "---> agregarNodos: " << parameters.agregarNodos.back() << endl;
+        outfile2 << "---> agregarLinks: " << parameters.agregarLinks.back() << endl;
+        outfile2 << "---> reproducirInter: " << parameters.reproducirInter.back() << endl;
+        outfile2 << "---> reproducirIntra: " << parameters.reproducirIntra.back() << endl;
+        outfile2 << "---> reproducirMuta: " << parameters.reproducirMuta.back() << endl;
+        outfile2.close();
     }
+    evaluate(folder, trial);
+
+    ofstream outfile2(filenameOperadores, ios::app);
+    outfile2 << "\n-------- Resumen operadores Total --------\n";
+    outfile2 << "---> mutacionPeso: " << std::accumulate(parameters.mutacionPeso.begin(), parameters.mutacionPeso.end(), 0) << endl;
+    outfile2 << "---> mutacionPesoInput: " << std::accumulate(parameters.mutacionPesoInput.begin(), parameters.mutacionPesoInput.end(), 0) << endl;
+    outfile2 << "---> agregarNodos: " << std::accumulate(parameters.agregarNodos.begin(), parameters.agregarNodos.end(), 0) << endl;
+    outfile2 << "---> agregarLinks: " << std::accumulate(parameters.agregarLinks.begin(), parameters.agregarLinks.end(), 0) << endl;
+    outfile2 << "---> reproducirInter: " << std::accumulate(parameters.reproducirInter.begin(), parameters.reproducirInter.end(), 0) << endl;
+    outfile2 << "---> reproducirIntra: " << std::accumulate(parameters.reproducirIntra.begin(), parameters.reproducirIntra.end(), 0) << endl;
+    outfile2 << "---> reproducirMuta: " << std::accumulate(parameters.reproducirMuta.begin(), parameters.reproducirMuta.end(), 0) << endl;
+    outfile2.close();
 }
 
 void Population::print_best(){

@@ -41,6 +41,14 @@ public:
     float weightsRange[2] = {0.0f, 0.0f};
     std::string function;
 
+    std::vector<int> mutacionPeso;
+    std::vector<int> mutacionPesoInput;
+    std::vector<int> agregarNodos;
+    std::vector<int> agregarLinks;
+    std::vector<int> reproducirInter;
+    std::vector<int> reproducirIntra;
+    std::vector<int> reproducirMuta;
+
 private:
     // Función para cargar los parámetros desde el archivo cfg
     void loadFromCfg(const std::string& filename);

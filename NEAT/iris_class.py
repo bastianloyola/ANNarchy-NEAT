@@ -59,11 +59,42 @@ def bootstrap_data(data_x, data_y,n_bootstrap, n_samples):
         bootstrap_datasets.append((X_bootstrap, y_bootstrap))
     return bootstrap_datasets
 
+def estadistica(conf_matrix):   
+    precision = []
+    recall = []
+    f1 = []
+    for i in range(len(conf_matrix)):
+        if sum(conf_matrix[i]) == 0:
+            if sum(conf_matrix[:,i]) == 0:
+                precision.append(1)
+                recall.append(1)
+                f1.append(1)
+            else:
+                precision.append(0)
+        else:
+            precision.append(conf_matrix[i][i]/sum(conf_matrix[i]))
+
+        if sum(conf_matrix[:,i]) == 0:
+            recall.append(0)
+        else:
+            recall.append(conf_matrix[i][i]/sum(conf_matrix[:,i]))
+        if precision[i] + recall[i] == 0:
+            f1.append(0)
+        else:
+            f1.append(2*precision[i]*recall[i]/(precision[i]+recall[i]))
+
+    average_f1 = sum(f1)/len(f1)
+    return precision, recall, f1, average_f1
+
 def fitness_iris(pop, M, flag=False):
     spike_rates = rate_code(iris_x, max_rate=100)
     subsets = bootstrap_data(spike_rates, iris_y,50,50)
 
     conf_matrix = np.zeros((3,3))
+    precision = []
+    recall = []
+    f1_cl = []
+    f1 = []
     total = 0
     n = len(subsets)
     for i in range(n):
@@ -110,8 +141,14 @@ def fitness_iris(pop, M, flag=False):
             pop.reset()
             M.reset()
         total += (sum/samples)
+        p,r,f1_c,f = estadistica(conf_matrix)
+        precision.append(p)
+        recall.append(r)
+        f1_cl.append(f1_c)
+        f1.append(f)
 
-    fitness = total/n
+    #fitness = total/n
+    fitness = np.mean(f1)
 
     return fitness
 
