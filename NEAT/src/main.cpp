@@ -19,10 +19,21 @@ int main(int argc, char *argv[]) {
 
     float fitness;
     if (argc != 14){
-        string folder = "results/trial-0";
-        std::string parentFolder = "results";
-        std::string subFolder = parentFolder + "/trial-0";
-
+        std::string folder, parentFolder, subFolder;
+        int trial = 0;
+        if (argc == 2){
+            //std::cout << argc << " entre trial:" << argv[1] << endl;
+            trial = atoi(argv[1]);
+            folder = "results/trial-"+to_string(trial);
+            parentFolder = "results";
+            subFolder = parentFolder + "/trial-"+to_string(trial);
+        }else{
+            //std::cout << argc << endl;
+            folder = "results/trial-0";
+            parentFolder = "results";
+            subFolder = parentFolder + "/trial-0";
+        }
+        std::cout << "Folder: " << folder << " trial: " << trial << endl;
         // Crear la carpeta padre si no existe
         if (mkdir(parentFolder.c_str(), 0777) == 0 || errno == EEXIST) {
             std::cout << "Carpeta padre creada o ya existe: " << parentFolder << std::endl;
@@ -41,7 +52,7 @@ int main(int argc, char *argv[]) {
         //menu();
         std::cout << "starting" << endl;
         //float fitness = run(1);
-        fitness = run3();
+        fitness = run3(trial);
         std::cout << "finalized" << endl;
         Py_Finalize();
 
@@ -135,33 +146,6 @@ int main(int argc, char *argv[]) {
             cerr << "No se pudo abrir el archivo config.cfg para escribir." << endl;
             return 1;
         }
-        /*
-        std::cout << "keep: " << keep << endl;
-        std::cout << "threshold: " << threshold << endl;
-        std::cout << "interSpeciesRate: " << probabilityInterSpecies << endl;
-        std::cout << "noCrossoverOff: " << probabilityNoCrossoverOff << endl;
-        std::cout << "probabilityWeightMutated: " << probabilityWeightMutated << endl;
-        std::cout << "probabilityAddNodeSmall: " << probabilityAddNodeSmall << endl;
-        std::cout << "probabilityAddLink_small: " << probabilityAddLink_small << endl;
-        std::cout << "probabilityAddNodeLarge: " << probabilityAddNodeLarge << endl;
-        std::cout << "probabilityAddLink_Large: " << probabilityAddLink_Large << endl;
-        std::cout << "largeSize: " << largeSize << endl;
-        std::cout << "c1: " << c1 << endl;
-        std::cout << "c2: " << c2 << endl;
-        std::cout << "c3: " << c3 << endl;
-        std::cout << "numberGenomes: " << numberGenomes << endl;
-        std::cout << "numberInputs: " << numberInputs << endl;
-        std::cout << "numberOutputs: " << numberOutputs << endl;
-        std::cout << "evolutions: " << evolutions << endl;
-        std::cout << "process_max: " << process_max << endl;
-        std::cout << "n_max: " << n_max << endl;
-        std::cout << "learningRate: " << learningRate << endl;
-        std::cout << "inputWeights_min: " << inputWeights_min << endl;
-        std::cout << "inputWeights_max: " << inputWeights_max << endl;
-        std::cout << "weightsRange_min: " << weightsRange_min << endl;
-        std::cout << "weightsRange_max: " << weightsRange_max << endl;
-        std::cout << "function: " << function << endl;
-        */
 
         // Escribir los parámetros
         config_file << "keep=" << keep << "\n";

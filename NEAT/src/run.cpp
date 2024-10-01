@@ -188,9 +188,9 @@ float run2(string folder, int trial) {
     return finalFitness;
 }
 
-float run3() {
+float run3(int trial) {
 
-    string folder = "results/trial-0";
+    string folder = "results/trial-" + to_string(trial);
     string filename = folder + "/results.txt";
     printf("---- Running ----\n");
 
@@ -251,7 +251,7 @@ float run3() {
     printf("---- Running NEAT ----\n");
     Population population(&parameters);
     evolutions = parameters.evolutions;
-    population.evolution(evolutions, folder, 0);
+    population.evolution(evolutions, folder, trial);
 
     saveRun(&population, 0, filename, folder);
     bestFitnes.push_back(population.getBest()->getFitness());
