@@ -1,8 +1,9 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++11 -g
-LIBS = -lpython3.10
-PYTHON_INCLUDE=/home/florencia/magister/trabajo_de_titulacion/repos/ANNarchy-NEAT/venv/include/python3.10
-NUMPY_INCLUDE=/home/florencia/magister/trabajo_de_titulacion/repos/ANNarchy-NEAT/venv/lib/python3.10/site-packages/numpy/_core/include
+ROOTDIR = $(realpath ./../)
+LIBS = -L/usr/lib/python3.10/config-3.10-x86_64-linux-gnu -lpython3.10
+PYTHON_INCLUDE=$(ROOTDIR)/venv/include/python3.10
+NUMPY_INCLUDE=$(ROOTDIR)/venv/lib/python3.10/site-packages/numpy/_core/include
 
 SRCDIR = src
 BINDIR = bin
