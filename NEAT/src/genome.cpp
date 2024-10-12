@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <random>
+#include <fstream>
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <python3.10/numpy/arrayobject.h>
 
@@ -10,7 +12,7 @@
 #include "../headers/funciones.h"
 using namespace std;
 
-// Constructors
+// ConstructorsGenome::Genome(){}
 Genome::Genome(){}
 Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E, int idAnnarchy){
     id = new_id;
@@ -126,7 +128,7 @@ Node& Genome::getNode(int id){
 }
 
 void Genome::setId(int new_id){ id = new_id;}
-void Genome::setFitness(int new_fitness){ fitness = new_fitness;}
+void Genome::setFitness(float new_fitness){ fitness = new_fitness;}
 void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
 void Genome::setNodes(std::vector<Node> new_nodes){ nodes = new_nodes;}
 void Genome::setParameters(Parameters* new_parameters){ parameters = new_parameters;}
@@ -204,7 +206,6 @@ void Genome::printGenome() {
 
 
 float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
-    std::cout << "Evaluating... id: " << id << " id_annarchy: " << id_annarchy << endl;
     //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int n_max = parameters->n_max; 
@@ -219,7 +220,8 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         int out_node = connections[i].getOutNode();
         double weight = connections[i].getWeight();
         if (in_node >= 0 && in_node < n && out_node >= 0 && out_node <= n) {
-            int index = (out_node-1) * n + (in_node-1);
+            //int index = (out_node-1) * n + (in_node-1);
+            int index = (in_node-1) * n + (out_node-1);
             data[index] = weight;
         }
     }
@@ -234,24 +236,17 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         return -1;
     }
 
-
     // Convertir el vector inputWeights a un array de NumPy
     std::vector<float>& inputWeights2 = inputWeights;
     npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights2.size()) };
     PyObject* numpy_inputWeights = PyArray_SimpleNewFromData(1, inputWeights_dims, NPY_FLOAT, inputWeights.data());
 
-    
-
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
-
     PyObject* args = PyTuple_Pack(7, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)));
-
     PyObject* callfunc = PyObject_CallObject(func, args);
-    
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    //std::cout << "Fitness " << id << ": "<< value << std::endl;
     setFitness(value);
 
 
@@ -262,9 +257,13 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
     return value;
 }
 
-void Genome::mutation(){
+void Genome::mutation(string filenameInfo){
     float add_node, add_link;
 
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << " -> Genome id: " << id << " idAnnarchy: " << id_annarchy << endl;
+
+    //Probabilidades
     if (static_cast<int>(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
@@ -275,6 +274,9 @@ void Genome::mutation(){
 
     // mutate weight
     if (getBooleanWithProbability(parameters->probabilityWeightMutated)){
+        parameters->mutacionPeso.back() += 1;
+
+        outfile << " ----> Mutate weight --" ;
         int n = connections.size();
         int index =  randomInt(0,n);
         Connection connection = connections[index];
@@ -292,11 +294,17 @@ void Genome::mutation(){
         }
 
         changeWeight(index,modification_weight);
+        outfile << " index: " << index << " modification_weight: " << modification_weight << endl;
+    }else{
+        outfile << " ----> Not mutate weight " << endl;
     }
 
-    // add nodeç
+    // add node
     int n_max = parameters->n_max;
     if (getBooleanWithProbability(add_node) && n_max >  (int)(nodes.size())){
+        parameters->agregarNodos.back() += 1;
+
+        outfile << " ----> Add node --" << endl;
         int n = connections.size();
         int index = randomInt(0,n);
 
@@ -304,10 +312,14 @@ void Genome::mutation(){
             index = randomInt(0,n);
         }
         createNode(index);
+        outfile << " in: " << connections[index].getInNode() << " out: " << connections[index].getOutNode() << endl;
     }
 
     // add connection
     if (getBooleanWithProbability(add_link)){
+        parameters->agregarLinks.back() += 1;
+
+        outfile << " ----> Add link --" << endl;
         int n = nodes.size();
         int in_node = randomInt(0,n);
         int out_node = randomInt(0,n);
@@ -315,6 +327,8 @@ void Genome::mutation(){
         while (in_node == out_node){
             out_node = randomInt(0,n);
         }
+        outfile << " in: " << in_node << " out: " << out_node << endl;
+
         if (connectionExist(in_node, out_node)){
             Connection* conn = getConnection(in_node, out_node);
             if (!conn->getEnabled()){
@@ -335,9 +349,10 @@ void Genome::mutation(){
             createConnection(in_node, out_node, weight);
         }
     }
-
+    // ¿?
     if (getBooleanWithProbability(parameters->probabilityInputWeightMutated)){
-        cout << "Mutate input weight " << endl;
+        parameters->mutacionPesoInput.back() += 1;
+        outfile << " ----> Mutate input weight --" << endl;
         int n = inputWeights.size();
         int index = randomInt(0,n);
         //Random delta weight between -1 and 1
@@ -345,8 +360,10 @@ void Genome::mutation(){
         float new_inputWeights = inputWeights[index] + weight;
 
         inputWeights.at(index) = new_inputWeights;
-        cout << inputWeights[index] << endl;   
+        //cout << inputWeights[index] << endl;   
     }
+
+    outfile.close();
 }
 
 float Genome::compatibility(Genome g1){

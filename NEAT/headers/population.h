@@ -9,7 +9,6 @@
 #include "funciones.h"
 #include "parameters.h"
 
-
 class Population{
     
   public:  
@@ -24,7 +23,7 @@ class Population{
     std::vector<int> idForGenomes;
     float threshold;
     void evaluate(std::string folder, int trial);
-    void mutations();
+    void mutations(std::string file);
     void evolution(int n, std::string folder, int trial);
     void print();
     void print_best();
@@ -39,9 +38,9 @@ class Population{
     Genome* findGenome(int id);
     Genome* getBest();
     int findIndexGenome(int id);
-    void eliminate();
-    void reproduce();
-    void speciation();
+    void eliminate(std::string file);
+    void reproduce(std::string file);
+    void speciation(std::string file);
     void sort_species();
     Genome* crossover(Genome* g1, Genome* g2);
     int get_annarchy_id();
@@ -53,5 +52,4 @@ class Population{
     int nOutputs;
     float keep;
 };
-
 #endif

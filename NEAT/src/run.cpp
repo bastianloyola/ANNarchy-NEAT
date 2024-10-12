@@ -159,8 +159,6 @@ float run(int timesPerConfig) {
 float run2(string folder, int trial) {
 
     string filename = folder + "/results.txt";
-
-    printf("---- Running ----\n");
     
     int evolutions;
     float finalFitness;
@@ -175,9 +173,80 @@ float run2(string folder, int trial) {
     outfile.close();
     saveConfig(filename, folder + "/config.cfg");
     
-    printf("---- Loading Config ----\n");
     Parameters parameters(folder + "/config.cfg");
+
+    Population population(&parameters);
+    evolutions = parameters.evolutions;
+    population.evolution(evolutions, folder, trial);
+
+    saveRun(&population, 0, filename, folder);
+    bestFitnes.push_back(population.getBest()->getFitness());
+    finalFitness = population.getBest()->getFitness();
+
+    saveResults(bestFitnes, 1, filename);
+
+    return finalFitness;
+}
+
+float run3(int trial) {
+
+    string folder = "results/trial-" + to_string(trial);
+    string filename = folder + "/results.txt";
+    printf("---- Running ----\n");
+
+    int evolutions;
+    float finalFitness;
+    vector <int> bestFitnes;
+
+    ofstream outfile(filename, ios::app);
+    if(!outfile) {
+        cerr << "run: No se pudo abrir el archivo: " << filename <<endl;
+    }
+    
+    printf("---- Loading Config ----\n");
+    Parameters parameters("config/config.cfg");
     printf("---- Loaded Config ----\n");
+
+
+    // Escribir en el archivo config.cfg
+    string filename2 = folder + "/config.cfg";
+    // Crear la carpeta
+    //std::filesystem::create_directories(folder);
+    // Crear y abrir el archivo en modo truncado
+    ofstream config_file(filename2, ofstream::trunc);
+    if (!config_file.is_open()) {
+        cerr << "No se pudo abrir el archivo: " << filename2 << endl;
+        return 1;
+    }
+    config_file << "keep=" << parameters.keep << "\n";
+    config_file << "threshold=" << parameters.threshold << "\n";
+    config_file << "interSpeciesRate=" << parameters.interSpeciesRate << "\n";
+    config_file << "noCrossoverOff=" << parameters.noCrossoverOff << "\n";
+    config_file << "probabilityWeightMutated=" << parameters.probabilityWeightMutated << "\n";
+    config_file << "probabilityAddNodeSmall=" << parameters.probabilityAddNodeSmall << "\n";
+    config_file << "probabilityAddLink_small=" << parameters.probabilityAddLinkSmall << "\n";
+    config_file << "probabilityAddNodeLarge=" << parameters.probabilityAddNodeLarge << "\n";
+    config_file << "probabilityAddLink_Large=" << parameters.probabilityAddLinkLarge << "\n";
+    config_file << "largeSize=" << parameters.largeSize << "\n";
+    config_file << "c1=" << parameters.c1 << "\n";
+    config_file << "c2=" << parameters.c2 << "\n";
+    config_file << "c3=" << parameters.c3 << "\n";
+    config_file << "numberGenomes=" << parameters.numberGenomes << "\n";
+    config_file << "numberInputs=" <<  parameters.numberInputs << "\n";
+    config_file << "numberOutputs=" << parameters.numberOutputs << "\n";
+    config_file << "evolutions=" << parameters.evolutions << "\n";
+    config_file << "n_max=" << parameters.n_max << "\n";
+    config_file << "learningRate=" << parameters.learningRate << "\n";
+    config_file << "inputWeights=" << parameters.inputWeights[0] << "," << parameters.inputWeights[1] << "\n";
+    config_file << "weightsRange=" << parameters.weightsRange[0] << "," << parameters.weightsRange[1] << "\n";
+    config_file << "process_max=" << parameters.process_max << "\n";
+    config_file << "function=" << parameters.function << "\n";
+    config_file << "folder=" << folder << "\n";
+    config_file.close();
+
+    outfile << "\n---- Results of cofig: ----\n";
+    outfile.close();
+    saveConfig(filename, folder + "/config.cfg");
 
     printf("---- Running NEAT ----\n");
     Population population(&parameters);
@@ -189,10 +258,6 @@ float run2(string folder, int trial) {
     finalFitness = population.getBest()->getFitness();
 
     saveResults(bestFitnes, 1, filename);
-
-    // Eliminar la carpeta y todo su contenido
-    //std::error_code ec;  // Para capturar posibles errores
-    //std::filesystem::remove_all(folder + "/annarchy", ec);
-
+    
     return finalFitness;
 }

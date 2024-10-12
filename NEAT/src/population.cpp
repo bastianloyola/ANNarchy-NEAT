@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <filesystem>
-#include <iostream>
+#include <fstream>
+#include <numeric> 
 
 using namespace std;
 
@@ -73,10 +74,11 @@ void Population::print(){
     }
 }
 
-void Population::eliminate(){
-    std::cout << "Eliminando..." << " Genomes size: " << genomes.size() << endl;
+void Population::eliminate(string filenameInfo){
     int id,index,n,size, id_ann;
 
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Eliminate --------\n";
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         size = static_cast<int>(species[i]->genomes.size());
         species[i]->sort_genomes();
@@ -90,38 +92,51 @@ void Population::eliminate(){
             genomes.erase(x);
             species[i]->genomes.pop_back();
             idForGenomes.push_back(id_ann);
+            outfile << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
         }
-        //std::cout << "Species " << i << " eliminados: " << n << endl;
     }
-
-    std::cout << "Eliminados..." << " Genomes size: " << genomes.size() << endl;
+    outfile.close();
 }
 
-void Population::reproduce(){
-    std::cout << "Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
+void Population::reproduce(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Reproduce --------\n";
+    outfile << " number of species: " << species.size() << endl;
+    outfile << " number of genomes: " << genomes.size() << endl;
+
     Genome *g1, *g2;
-    float interspeciesRate;
-    int reproduceInterspecies, reproduceNoninterspecies, reproduceMutations, indexS1, indexS2, index;
+    float interSpeciesRate;
+    int reproduceInterSpecies, reproduceNonInterSpecies, reproduceMutations, indexS1, indexS2, index;
 
     offspringsPerSpecies();
 
-    interspeciesRate = (species.size() > 1) ? parameters.interspeciesRate : 0;
+    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0;
     
     for (int i = 0; i < static_cast<int>(species.size()); i++){
 
         //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
 
         reproduceMutations = 0;
-        reproduceInterspecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interspeciesRate);
+        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interSpeciesRate);
 
         if (species[i]->genomes.size() > 1){
-            reproduceNoninterspecies = species[i]->allocatedOffsprings - reproduceInterspecies;
+            reproduceNonInterSpecies = species[i]->allocatedOffsprings - reproduceInterSpecies;
         }else{
-            reproduceNoninterspecies = 0;
+            reproduceNonInterSpecies = 0;
             reproduceMutations = species[i]->allocatedOffsprings;
         }
 
-        for (int j = 0; j < reproduceInterspecies; j++){
+        outfile << " -> Species: " << i << endl;
+        outfile << " ----> reproduceInterSpecies: " << reproduceInterSpecies << endl;
+        outfile << " ----> reproduceNonInterSpecies: " << reproduceNonInterSpecies << endl;
+        outfile << " ----> reproduceMutations: " << reproduceMutations << endl;
+
+        outfile << " ----> interSpeciesRate: " ;
+
+        for (int j = 0; j < reproduceInterSpecies; j++){
+            parameters.reproducirInter.back() += 1;
+
+            outfile << " " << j+1 << "/" << reproduceInterSpecies << " ";
             indexS1 = i;
             indexS2 = randomInt(0,static_cast<int>(species.size()));
             while(indexS1 == indexS2){
@@ -134,7 +149,12 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
-        for (int j = 0; j < reproduceNoninterspecies; j++){
+        outfile << endl;
+        outfile << " ----> nonInterSpeciesRate: " ;
+        for (int j = 0; j < reproduceNonInterSpecies; j++){
+            parameters.reproducirIntra.back() += 1;
+
+            outfile << " " << j+1 << "/" << reproduceNonInterSpecies << " ";
             g1 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
             
@@ -149,7 +169,12 @@ void Population::reproduce(){
             genomes.push_back(offspring);
         }
 
+        outfile << endl;
+        outfile << " ----> mutations: " ;
         for (int j = 0; j < reproduceMutations; j++){
+            parameters.reproducirMuta.back() += 1;
+
+            outfile << " " << j+1 << "/" << reproduceMutations << " ";
             Genome* offspring = new Genome();
             offspring->setParameters(&parameters);
             offspring->setInnovation(&innov);
@@ -166,17 +191,21 @@ void Population::reproduce(){
                 offspring->inputWeights.push_back(genomes[index]->inputWeights[i]);
             }
 
-            offspring->mutation();
+            offspring->mutation(filenameInfo);
             
             genomes.push_back(offspring);
         }
+
+        outfile << endl;
     }
 
-    std::cout << "Fin Reproduciendo..." << " Genomes size: " << genomes.size() << endl;
+    outfile.close();
 }
 
-void Population::speciation(){
-    cout << "Especiando..." << endl;
+void Population::speciation(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Speciation --------\n";
+
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
     vector<Genome> genomesSpeciation;
@@ -237,11 +266,18 @@ void Population::speciation(){
             i++;
         }
     }
+    
+    // Extra para informar
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
+        outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
+    }
+
+    outfile.close();
 }
 
 void Population::evaluate(std::string folder,int trial) {
-    std::cout << "Evaluando..." << std::endl;
     // Importar módulo
+    //PyObject* name = PyUnicode_FromString("iris_class");
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
@@ -319,12 +355,15 @@ void Population::evaluate(std::string folder,int trial) {
         close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
     }
 
+
+    ofstream outfile(folder + "/info.txt", ios::app);
+    outfile << "\n-------- Evaluation " << " --------\n";
     // Actualizar los valores de fitness en los genomas correspondientes
     for (int i = 0; i < nGenomes; ++i) {
-        std::lock_guard<std::mutex> lock(mtx);
         genomes[i]->setFitness(fitness_values[i]);
-        genomes[i]->printGenome();
+        //std::cout << "Genome id: " << genomes[i]->getId() << " Annarchy id: " << genomes[i]->getIdAnnarchy() << " Fitness: " << genomes[i]->getFitness() << std::endl;
     }
+    outfile.close();
 
     Py_DECREF(load_module);
 }
@@ -392,27 +431,74 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
 
 }
 
-void Population::mutations(){
-    cout << "Mutando..." << endl;
+void Population::mutations(string filenameInfo){
+    ofstream outfile(filenameInfo, ios::app);
+    outfile << "\n-------- Mutations --------\n";
+    outfile.close();
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         species[i]->sort_genomes();
         for (int j = 1; j < (int)(species[i]->genomes.size()); j++){
-            species[i]->genomes[j]->mutation();
+            species[i]->genomes[j]->mutation(filenameInfo);
         }
     }
 }
 
 void Population::evolution(int n, std::string folder, int trial){
+    string filenameInfo = folder + "/info.txt";
+    string filenameOperadores = folder + "/operadores.txt";
+    Genome *best;
 
     for (int i = 0; i < n; i++){
-        std::cout << " generación: " << i << endl; 
+        ofstream outfile(filenameInfo, ios::app);
+        if (i != 0){
+            best = getBest();
+            outfile << "\n---- Best Genome ----" << endl;
+            outfile << "Genome id: " << best->getId() << endl;
+            outfile << "Genome idAnnarchy: " << best->getIdAnnarchy() << endl;
+            outfile << "Genome fitness: " << best->getFitness() << endl;
+        }
+        
+        outfile << "\n-------- Generation: " << i << " --------\n";
+        outfile.close();
+
+        std::cout << "-------- Generation: " << i << " --------" << std::endl;
+        parameters.mutacionPeso.push_back(0);
+        parameters.mutacionPesoInput.push_back(0);
+        parameters.agregarNodos.push_back(0);
+        parameters.agregarLinks.push_back(0);
+        parameters.reproducirInter.push_back(0);
+        parameters.reproducirIntra.push_back(0);
+        parameters.reproducirMuta.push_back(0);
+
         evaluate(folder, trial);
-        eliminate();
-        mutations();
-        reproduce();
-        speciation();
+        eliminate(filenameInfo);
+        mutations(filenameInfo);
+        reproduce(filenameInfo);
+        speciation(filenameInfo);
+        fstream outfile2(filenameOperadores, ios::app);
+        outfile2 << "\n-------- Resumen operadores Generacion: " << i << " --------\n";
+        outfile2 << "---> mutacionPeso: " << parameters.mutacionPeso.back() << endl;
+        outfile2 << "---> mutacionPesoInput: " << parameters.mutacionPesoInput.back() << endl;
+        outfile2 << "---> agregarNodos: " << parameters.agregarNodos.back() << endl;
+        outfile2 << "---> agregarLinks: " << parameters.agregarLinks.back() << endl;
+        outfile2 << "---> reproducirInter: " << parameters.reproducirInter.back() << endl;
+        outfile2 << "---> reproducirIntra: " << parameters.reproducirIntra.back() << endl;
+        outfile2 << "---> reproducirMuta: " << parameters.reproducirMuta.back() << endl;
+        outfile2.close();
     }
+    evaluate(folder, trial);
+
+    ofstream outfile2(filenameOperadores, ios::app);
+    outfile2 << "\n-------- Resumen operadores Total --------\n";
+    outfile2 << "---> mutacionPeso: " << std::accumulate(parameters.mutacionPeso.begin(), parameters.mutacionPeso.end(), 0) << endl;
+    outfile2 << "---> mutacionPesoInput: " << std::accumulate(parameters.mutacionPesoInput.begin(), parameters.mutacionPesoInput.end(), 0) << endl;
+    outfile2 << "---> agregarNodos: " << std::accumulate(parameters.agregarNodos.begin(), parameters.agregarNodos.end(), 0) << endl;
+    outfile2 << "---> agregarLinks: " << std::accumulate(parameters.agregarLinks.begin(), parameters.agregarLinks.end(), 0) << endl;
+    outfile2 << "---> reproducirInter: " << std::accumulate(parameters.reproducirInter.begin(), parameters.reproducirInter.end(), 0) << endl;
+    outfile2 << "---> reproducirIntra: " << std::accumulate(parameters.reproducirIntra.begin(), parameters.reproducirIntra.end(), 0) << endl;
+    outfile2 << "---> reproducirMuta: " << std::accumulate(parameters.reproducirMuta.begin(), parameters.reproducirMuta.end(), 0) << endl;
+    outfile2.close();
 }
 
 void Population::print_best(){
@@ -424,7 +510,6 @@ void Population::print_best(){
             bestIndex = i;
         }
     }
-    std::cout << "Best genome: " << genomes[bestIndex]->getId() << " Fitness: " << genomes[bestIndex]->getFitness() << endl;
     genomes[bestIndex]->printGenome();
 }
 
@@ -448,32 +533,6 @@ int Population::get_annarchy_id(){
         return idGenome;
     }
     return -1;
-    
-    /*int n_genomes_max = parameters.numberGenomes;
-    //Vector con los id_annarchy de los genomas
-    vector<int> ids;
-    for (int i = 0; i < n_genomes_max; i++){
-        ids.push_back(genomes[i]->getIdAnnarchy());
-    }
-    //Encontrar algun id_annarchy disponible para un genoma que no esté en el vector y quue vaya entre 1 a n_genomes_max
-    //Si no hay ninguno disponible, se devuelve 0
-    bool disponible = false;
-    int id = 1;
-    while (id <= n_genomes_max){
-        disponible = true;
-        for (int i = 0; i < n_genomes_max; i++){
-            if (ids[i] == id){
-                disponible = false;
-                break;
-            }
-        }
-        if (disponible){
-            return id;
-        }
-        id++;
-    }
-    return 0;*/
-    
 }
 
 void Population::offspringsPerSpecies() {
