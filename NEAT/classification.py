@@ -1,5 +1,5 @@
 from ANNarchy import *
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, load_wine, load_breast_cancer
 from sklearn.model_selection import KFold
 import numpy as np
 import scipy.sparse
@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.utils import resample
 import random as rd
+import pandas as pd
 
 LIF = Neuron(  #I = 75
     parameters = """
@@ -86,15 +87,18 @@ def estadistica(conf_matrix):
     average_f1 = sum(f1)/len(f1)
     return precision, recall, f1, average_f1
 
-def fitness_iris(pop, M, flag=False):
-    spike_rates = rate_code(iris_x, max_rate=100)
-    subsets = bootstrap_data(spike_rates, iris_y,50,50)
+def fitness(pop, M, n_input, n_output, flag=False):
 
-    conf_matrix = np.zeros((3,3))
+    spike_rates = rate_code(data_x, max_rate=100)
+    subsets = bootstrap_data(spike_rates, data_y,100,100)
+
+    conf_matrix = np.zeros((n_output,n_output))
+    '''    
     precision = []
     recall = []
     f1_cl = []
     f1 = []
+    '''
     total = 0
     n = len(subsets)
     for i in range(n):
@@ -106,11 +110,9 @@ def fitness_iris(pop, M, flag=False):
         for j in range(samples):
             sample = x[j]
             target = y[j]
-
-            pop[0].I = sample[0]
-            pop[1].I = sample[1]
-            pop[2].I = sample[2]
-            pop[3].I = sample[3]
+            
+            for k in range(n_input):
+                pop[k].I = sample[k]
 
             simulate(100.0)
             if flag:
@@ -120,9 +122,8 @@ def fitness_iris(pop, M, flag=False):
             spikes = M.get('spike')
 
             output = []
-            output.append(len(spikes[4]))
-            output.append(len(spikes[5]))
-            output.append(len(spikes[6]))
+            for k in range(n_output):
+                output.append(len(spikes[k]))
 
             max_spikes = max(output)
             indices_maximos = [i for i, x in enumerate(output) if x == max_spikes]
@@ -141,21 +142,21 @@ def fitness_iris(pop, M, flag=False):
             pop.reset()
             M.reset()
         total += (sum/samples)
-        p,r,f1_c,f = estadistica(conf_matrix)
-        precision.append(p)
-        recall.append(r)
-        f1_cl.append(f1_c)
-        f1.append(f)
+        #p,r,f1_c,f = estadistica(conf_matrix)
+        #precision.append(p)
+        #recall.append(r)
+        #f1_cl.append(f1_c)
+        #f1.append(f)
 
-    #fitness = total/n
-    fitness = np.mean(f1)
-
+    #print("total:", total, " n:", n)
+    fitness = total/n
+    #fitness = np.mean(f1)
     return fitness
 
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
 
         if matrix.size == 0:
@@ -171,7 +172,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         compile(directory=nombre, clean=False, silent=True)
         M = Monitor(pop, ['spike','v'])
         
-        fit = fitness_iris(pop,M)
+        fit = fitness(pop,M,int(n_entrada),int(n_salida))
         return fit
     except Exception as e:
         # Capturar y manejar excepciones
@@ -184,7 +185,7 @@ def graficos(M):
     t, n = M.raster_plot(spikes)
     fr = M.histogram(spikes)
     print(spikes[0])
-    fig = plt.figure(figsize=(12, 12))
+    fig = plt.figure(figsize=(17, 17))
 
     # First plot: raster plot
     plt.subplot(311)
@@ -206,12 +207,13 @@ def graficos(M):
     plt.show()
     return 0
 
-def test():
-    lil_matrix = scipy.sparse.lil_matrix((int(7), int(7)))
+def test(n_entrada, n_salida):
+    total = n_entrada + n_salida
+    lil_matrix = scipy.sparse.lil_matrix((int(total), int(total)))
     # Asignar los valores deseados (1's en el bloque superior derecho)
-    lil_matrix[0:4, 4:7] = 110
+    lil_matrix[0:n_entrada, n_entrada:total] = 110
 
-    pop = Population(geometry=7, neuron=LIF)
+    pop = Population(geometry=n_entrada+n_salida, neuron=LIF)
     proj = Projection(pre=pop, post=pop, target='exc')
 
     proj.connect_from_sparse(lil_matrix)
@@ -220,12 +222,18 @@ def test():
     compile(directory=nombre, clean=False, silent=True)
     M = Monitor(pop, ['spike','v'])
 
-    fitness_iris(pop, M, True)
+    fitness(pop, M, n_entrada, n_salida, True)
 
 # Cargar datos
-iris = load_iris()
-iris_x = iris.data
-iris_y = iris.target
+## Iris
+#dataset = load_iris()
+#dataset = load_wine()
+#dataset = load_breast_cancer()
 
-# tests
-#test()
+# Cargar los datos del archivo CSV
+df_sample = pd.read_csv('breast_cancer_sample.csv')
+data_x = df_sample.drop(columns=['target']).to_numpy()
+data_y = df_sample['target'].to_numpy()
+
+#data_x = dataset.data
+#data_y = dataset.target

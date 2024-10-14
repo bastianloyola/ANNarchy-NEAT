@@ -277,8 +277,8 @@ void Population::speciation(string filenameInfo){
 
 void Population::evaluate(std::string folder,int trial) {
     // Importar módulo
-    //PyObject* name = PyUnicode_FromString("iris_class");
-    PyObject* name = PyUnicode_FromString("annarchy");
+    PyObject* name = PyUnicode_FromString("classification");
+    //PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
 
