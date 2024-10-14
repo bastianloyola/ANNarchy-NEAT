@@ -30,7 +30,6 @@ def leerConfigFile(file, configuraciones):
                 configuraciones[key] = value
 
 def leerOperadoresFile(file, operadores):
-    print('leyendo ' + file)
     with open(file, 'r') as op:
         for line in op:
             if line == '\n' or 'Generacion' in line:
@@ -41,13 +40,13 @@ def leerOperadoresFile(file, operadores):
             if len(line) == 3:
                 key = line[1].strip()[:-1]
                 num = int(line[2].strip())
-                print(key, num)
                 if key in operadores:
                     operadores[key].append(num)
 
 def leerInfoFile(file, info):
     gen = 0
     etapa = ''
+    n= 0
     with open(file, 'r') as info_file:
         for line in info_file:
             if 'Evaluation' in line:
@@ -75,6 +74,8 @@ def leerInfoFile(file, info):
                 print(etapa)
                 continue
             elif 'Generation' in line:
+                n += 1
+                print('... ' + str(n) + ' ...')
                 print(line)
                 line = line.strip().split()
                 gen = int(line[2])
@@ -126,10 +127,10 @@ def leerResultsFile(file, info):
 
 
 carpetas = ['A-IZ/','A-LIF/'] #MODIFICAR
-trials_por_carpeta = [11,11] #MODIFICAR
+trials_por_carpeta = [(0,11),(0,11)] #MODIFICAR
 
 for k in range(len(carpetas)):
-    for j in range(trials_por_carpeta[k]):
+    for j in range(trials_por_carpeta[k][0], trials_por_carpeta[k][1]):
         file = carpetas[k]+'trial-'+str(j+1)+'/'
         print(file)
 
@@ -156,8 +157,6 @@ for k in range(len(carpetas)):
             #print('--> Reproducidos: ', info['reproducidos'][i])
             #print('--> Species: ', info['species'][i])
             #print('--> BestGenome: ', info['bestGenome'][i])
-
-        
 
         outputFile = file+'output.json'
 
