@@ -51,10 +51,98 @@ IZHIKEVICH = Neuron(  #I = 20
     reset="v = c; u += d"
 )
 
+IZHIKEVICH_DICT = {
+    "X": {
+        "a": "0.02",
+        "b": "0.2",
+        "c": "-65.0",
+        "d": "8.0"
+    },
+    "A": {
+        "a": "0.02",
+        "b": "0.2",
+        "c": "-65.0",
+        "d": "6.0"
+    },
+    "B": {
+        "a": "0.02",
+        "b": "0.25",
+        "c": "-65.0",
+        "d": "6.0"
+    },
+    "E": {
+        "a": "0.02",
+        "b": "0.2",
+        "c": "-55.0",
+        "d": "4.0"
+    },
+    "F": {
+        "a": "0.01",
+        "b": "0.2",
+        "c": "-65.0",
+        "d": "8.0"
+    },
+    "G": {
+        "a": "0.02",
+        "b": "-0.1",
+        "c": "-55.0",
+        "d": "6.0"
+    },
+    "H": {
+        "a": "0.2",
+        "b": "0.26",
+        "c": "-65.0",
+        "d": "0.0"
+    },
+    "M": {
+        "a": "0.03",
+        "b": "0.25",
+        "c": "-60.0",
+        "d": "4.0"
+    },
+    "P": {
+        "a": "0.1",
+        "b": "0.26",
+        "c": "-60.0",
+        "d": "0.0"
+    },
+    "S": {
+        "a": "-0.02",
+        "b": "-1.0",
+        "c": "-60.0",
+        "d": "8.0"
+    }
+}
+
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
+
+    a = IZHIKEVICH_DICT[trial]["a"]
+    b = IZHIKEVICH_DICT[trial]["b"]
+    c = IZHIKEVICH_DICT[trial]["c"]
+    d = IZHIKEVICH_DICT[trial]["d"]
+
+    izhikevich_neuron = Neuron(  #I = 20
+        parameters=f"""
+            a = {a} : population
+            b = {b} : population
+            c = {c} : population
+            d = {d} : population
+            I = 0.0
+            tau_I = 10.0 : population
+        """,
+        equations="""
+            dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65
+            tau_I * dg_exc/dt = -g_exc
+            tau_I * dg_inh/dt = -g_inh
+            du/dt = a*(b*v - u) : init=-14.0
+        """,
+        spike="v >= 30.0",
+        reset="v = c; u += d"
+    )
+
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=izhikevich_neuron) 
         proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
@@ -401,7 +489,7 @@ def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
             for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
                 for j in range(num_neuronas_por_variable):
                     if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 75 # Activa la neurona correspondiente
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
                         break
             simulate(50.0)
             spikes = Monitor.get('spike')
