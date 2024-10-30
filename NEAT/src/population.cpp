@@ -167,21 +167,23 @@ void Population::reproduce(string filenameInfo){
 
     offspringsPerSpecies();
 
-    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0;
+    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0; // No interSpeciesRate si solo hay una especie
     
-    for (int i = 0; i < static_cast<int>(species.size()); i++){
+    for (int i = 0; i < static_cast<int>(species.size()); i++){ // Por cada especie
 
-        //std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
+        std::cout << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
 
-        reproduceMutations = 0;
-        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings) * interSpeciesRate);
+        reproduceMutations = 0; 
+        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings * interSpeciesRate)); // Cantidad de reproducciones entre especies
 
-        if (species[i]->genomes.size() > 1){
+        if (species[i]->genomes.size() > 1){ 
             reproduceNonInterSpecies = species[i]->allocatedOffsprings - reproduceInterSpecies;
         }else{
             reproduceNonInterSpecies = 0;
-            reproduceMutations = species[i]->allocatedOffsprings;
+            reproduceMutations = species[i]->allocatedOffsprings - reproduceInterSpecies;//faltaba - reproduceInterSpecies
         }
+
+        std::cout << "reproduceInterSpecies: " << reproduceInterSpecies << " reproduceNonInterSpecies: " << reproduceNonInterSpecies << " reproduceMutations: " << reproduceMutations << endl;
 
         outfile << " -> Species: " << i << endl;
         outfile << " ----> reproduceInterSpecies: " << reproduceInterSpecies << endl;
@@ -306,13 +308,13 @@ void Population::speciation(string filenameInfo){
             //cout << "-> Species: " << j << endl;
             //cout << "--> Genome: " << species[j]->genome->getId() << endl;
             compatibility = (*auxGenomes[i]).compatibility(*species[j]->genome);
-            cout << "--> Compatibility: " << compatibility << " threshold: " << parameters.threshold << endl;
+            //cout << "--> Compatibility: " << compatibility << " threshold: " << parameters.threshold << endl;
             //genomes[i]->printGenome();
             //cout << "  " << endl;
             //species[j]->genome->printGenome();
 
             if (compatibility < parameters.threshold){   
-                cout << "--> Compatibility < threshold" << endl;                 
+                //cout << "--> Compatibility < threshold" << endl;                 
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 flag = false;
@@ -320,7 +322,7 @@ void Population::speciation(string filenameInfo){
             }
         }
         if (flag){
-            cout << "--> Compatibility >= threshold" << endl;
+            //cout << "--> Compatibility >= threshold" << endl;
             Species* newSpecies = new Species(auxGenomes[i], parameters.threshold);
             species.push_back(newSpecies);
             genomes.push_back(auxGenomes[i]);
