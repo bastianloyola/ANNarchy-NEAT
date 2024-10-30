@@ -105,6 +105,9 @@ def leerInfoFile(file, info):
             elif etapa == 'Speciation':
                 line = line.strip().split()
                 if 'Species' in line[0]:
+                    print(line)
+                    print(int(line[3]))
+                    print(info['species'])
                     info['species'][gen].append(int(line[3]))
                 continue
             elif etapa == 'BestGenome':
@@ -126,8 +129,8 @@ def leerResultsFile(file, info):
                 info['bestGenome'][-1].append(num)
 
 
-carpetas = ['A-IZ/','A-LIF/'] #MODIFICAR
-trials_por_carpeta = [(0,11),(0,11)] #MODIFICAR
+carpetas = ['results/'] #MODIFICAR
+trials_por_carpeta = [(0,1)] #MODIFICAR
 
 for k in range(len(carpetas)):
     for j in range(trials_por_carpeta[k][0], trials_por_carpeta[k][1]):

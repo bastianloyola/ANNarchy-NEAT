@@ -56,9 +56,9 @@ def graficar(directorio):
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     fig1.savefig(directorio + 'page1_estadisticas.png')
 
-    # Segunda página combinada de operadores y distribución de genomas por especie
+    # Segunda página combinada de operadores
     fig2 = plt.figure(figsize=(12, 12))
-    gs2 = fig2.add_gridspec(2, 1)
+    gs2 = fig2.add_gridspec(1, 1)
     fig2.suptitle('Estadísticas por Generación - Página 2', fontsize=20)
 
     # Gráfico combinado de operadores
@@ -72,8 +72,15 @@ def graficar(directorio):
     ax_op.set_ylabel('Cantidad')
     ax_op.legend()
 
-    # Gráfico de distribución de genomas por especie
-    ax_barras = fig2.add_subplot(gs2[1, 0])
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    fig2.savefig(directorio + 'page2_operadores.png')
+
+    # Tercera página para la distribución de genomas por especie
+    fig3 = plt.figure(figsize=(12, 12))
+    gs3 = fig3.add_gridspec(1, 1)
+    fig3.suptitle('Distribución de Genomas por Especie', fontsize=20)
+
+    ax_barras = fig3.add_subplot(gs3[0, 0])
     max_especies_por_generacion = max(len(species) for species in info['Species'])
     genomas_por_especie = []
 
@@ -88,21 +95,19 @@ def graficar(directorio):
         ax_barras.bar(x, especie_data, bottom=bottom, label=f'Especie {i+1}')
         bottom += especie_data
 
-    ax_barras.set_title('Distribución de Genomas por Especie')
     ax_barras.set_xlabel('Generación')
     ax_barras.set_ylabel('Cantidad de Genomas')
     ax_barras.legend(title='Especies', loc='upper left', bbox_to_anchor=(1, 1))
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    fig2.savefig(directorio + 'page2_operadores_distribucion.png')
+    fig3.savefig(directorio + 'page3_distribucion_genomas.png')
 
     plt.show()
 
-##
-carpetas = ['A-IZ/','A-LIF/'] #MODIFICAR
-trials_por_carpeta = [11,11] #MODIFICAR
+carpetas = ['results/']  # MODIFICAR
+trials_por_carpeta = [1]  # MODIFICAR
 
 for k in range(len(carpetas)):
     for j in range(trials_por_carpeta[k]):
-        directorio = carpetas[k]+'trial-'+str(j+1)+'/'
+        directorio = carpetas[k] + 'trial-' + str(j + 1) + '/'
         graficar(directorio)

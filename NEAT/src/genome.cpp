@@ -405,8 +405,8 @@ float Genome::compatibility(Genome g1){
     e=0;
 
     for (int i = 0; i < notMaxConnection; i++){
-        if (connectionsG2[count1].getInnovation() == i){
-            if (connectionsG1[count2].getInnovation() == i){
+        if (connectionsG2[count1].getInnovation() == i+1){
+            if (connectionsG1[count2].getInnovation() == i+1){
                 matching++;
                 weightDifference += abs(connectionsG2[count1].getWeight() - connectionsG1[count2].getWeight());
                 count1++;
@@ -415,19 +415,20 @@ float Genome::compatibility(Genome g1){
                 d++;
                 count1++;
             }   
-        }else if (connectionsG1[count2].getInnovation() == i){
+        }else if (connectionsG1[count2].getInnovation() == i+1){
             d++;
             count2++;
         }
     }
-    for (int i = notMaxConnection; i < maxConnection; i++){
+
+    for (int i = notMaxConnection-1; i < maxConnection; i++){
         if (flag){
-            if (connectionsG2[count1].getInnovation() == i){
+            if (connectionsG2[count1].getInnovation() == i+1){
                 e++;
                 count1++;
             }
         }else{
-            if (connectionsG1[count2].getInnovation() == i){
+            if (connectionsG1[count2].getInnovation() == i+1){
                 e++;
                 count2++;
             }
@@ -438,7 +439,7 @@ float Genome::compatibility(Genome g1){
     c2 = parameters->c2;
     c3 = parameters->c3;
 
-    value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/n);
+    value = ((c1*e)/n) + ((c2*d)/n) + c3*((weightDifference)/matching);
     
     return value;
 }

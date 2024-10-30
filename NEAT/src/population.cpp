@@ -36,6 +36,10 @@ Population::Population(Parameters *param){
         species[0]->add_genome(g);
     }
     keep = parameters.keep;
+    cout << "Population created" << endl;
+    cout << "Number of species: " << species.size() << endl;
+    cout << "Number of genomes: " << genomes.size() << endl;
+
 }
 
 vector<Genome*> Population::getGenomes(){ return genomes;}
@@ -75,15 +79,24 @@ void Population::print(){
 }
 
 void Population::eliminate(string filenameInfo){
-    int id,index,n,size, id_ann;
-
+    int id,index,n,size,id_ann,nGenomesPrevious,nGenomesCurrent,nKeep,indexSpecies;
+    vector<int> idSpeciesVoid;
     ofstream outfile(filenameInfo, ios::app);
     outfile << "\n-------- Eliminate --------\n";
+    cout << "\n-------- Eliminate --------\n";
+
+    nGenomesPrevious = static_cast<int>(genomes.size());
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         size = static_cast<int>(species[i]->genomes.size());
         species[i]->sort_genomes();
         n = static_cast<int>(ceil(size * (1-keep)));
+        cout << "Species " << i << " size: " << size << " n: " << n << endl;
         if (n == size) n -= 1;
+        if (n == 0){
+            cout << "Species " << i << " added to idSpeciesVoid" << endl;
+            idSpeciesVoid.push_back(i);
+            continue;
+        }
         for (int j = 0; j < n; j++){
             id = species[i]->genomes.back()->getId();
             id_ann = species[i]->genomes.back()->getIdAnnarchy();
@@ -93,7 +106,51 @@ void Population::eliminate(string filenameInfo){
             species[i]->genomes.pop_back();
             idForGenomes.push_back(id_ann);
             outfile << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
+            cout << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
         }
+    }
+
+    nGenomesCurrent = static_cast<int>(genomes.size());
+    nKeep = ceil(nGenomesPrevious*keep);
+
+    cout << "nGenomesPrevious: " << nGenomesPrevious << " nGenomesCurrent: " << nGenomesCurrent << " nKeep: " << nKeep << endl;
+    if (nGenomesCurrent > nKeep && idSpeciesVoid.size() > 0){
+        cout << "Species void" << endl;
+        for (int i = 0; i < nGenomesCurrent - nKeep; i++){
+            cout << "idSpeciesVoid.size(): " << idSpeciesVoid.size() << endl;
+            if (idSpeciesVoid.size() == 0) break;
+            if (idSpeciesVoid.size() == 1) indexSpecies = idSpeciesVoid[0];
+            else indexSpecies = randomInt(0, static_cast<int>(idSpeciesVoid.size()) - 1);
+
+            id = species[idSpeciesVoid[indexSpecies]]->genomes.back()->getId();
+            id_ann = species[idSpeciesVoid[indexSpecies]]->genomes.back()->getIdAnnarchy();
+            cout << "id: " << id << " idAnnarchy: " << id_ann << endl;
+            index = findIndexGenome(id);
+            auto x = genomes.begin() + index;
+            genomes.erase(x);
+            species[idSpeciesVoid[indexSpecies]]->genomes.pop_back();
+            idForGenomes.push_back(id_ann);
+            idSpeciesVoid.erase(idSpeciesVoid.begin() + indexSpecies);
+
+            outfile << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
+            cout << "Genome id: " << id << " idAnnarchy: " << id_ann << "  eliminated" << endl;
+
+
+        }
+    }
+    cout << "Number of genomes: " << static_cast<int>(genomes.size()) << " Number of species: " << species.size() << endl;
+    int i = 0;
+    while (i < static_cast<int>(species.size())) {
+        //cout << "i: " << i << endl;
+        //cout << "-> species[i]->genomes.size(): " << species[i]->genomes.size() << endl;
+        if (species[i]->genomes.size() == 0) {
+            species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
+            // No incrementar i ya que el siguiente elemento se ha movido a la posición i
+        } else {
+            // Solo incrementar i si no se elimina el elemento actual
+            i++;
+        }
+        //cout << "-> species.size(): " << species.size() << endl;
     }
     outfile.close();
 }
@@ -205,6 +262,8 @@ void Population::reproduce(string filenameInfo){
 void Population::speciation(string filenameInfo){
     ofstream outfile(filenameInfo, ios::app);
     outfile << "\n-------- Speciation --------\n";
+    cout << "\n-------- Speciation --------\n";
+    cout << "Number of species: " << species.size() << endl;
 
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
@@ -213,11 +272,12 @@ void Population::speciation(string filenameInfo){
     bool flag;
 
     this->genomes.clear();
-
-    //Define new representative for each species
+    
+    cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
     for (int i = 0; i < nSpecies; i++){
-        //randomly select a genome from the species
+        cout << "Species: " << i << endl;
         int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
+        cout << "Genome: " << index << endl;
         
         species[i]->genome = species[i]->genomes[index];
         species[i]->genomes.clear();
@@ -231,17 +291,28 @@ void Population::speciation(string filenameInfo){
             }
         }
     }
+    cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
 
     int compatibility;
     flag = true;
-    //Add genomes to species
+    //cout << "Threshold: " << parameters.threshold << endl;
     for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
+        cout << "Genome: " << auxGenomes[i]->getId() << endl;
         sort_species();
         flag = true;
-        for (int j = 0; j < static_cast<int>(species.size()); j++){
 
-            compatibility = (*genomes[i]).compatibility(*species[j]->genome);
-            if (compatibility < parameters.threshold){                    
+        for (int j = 0; j < static_cast<int>(species.size()); j++){
+            //cout << " ---------- " << endl;
+            //cout << "-> Species: " << j << endl;
+            //cout << "--> Genome: " << species[j]->genome->getId() << endl;
+            compatibility = (*auxGenomes[i]).compatibility(*species[j]->genome);
+            cout << "--> Compatibility: " << compatibility << " threshold: " << parameters.threshold << endl;
+            //genomes[i]->printGenome();
+            //cout << "  " << endl;
+            //species[j]->genome->printGenome();
+
+            if (compatibility < parameters.threshold){   
+                cout << "--> Compatibility < threshold" << endl;                 
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 flag = false;
@@ -249,15 +320,20 @@ void Population::speciation(string filenameInfo){
             }
         }
         if (flag){
+            cout << "--> Compatibility >= threshold" << endl;
             Species* newSpecies = new Species(auxGenomes[i], parameters.threshold);
             species.push_back(newSpecies);
             genomes.push_back(auxGenomes[i]);
         }
     }
 
+    cout << "Number of species: " << species.size() << endl;
+
     //eliminar species con 0 genomas
-    int i =0;
+    int i = 0;
     while (i < static_cast<int>(species.size())) {
+        //cout << "i: " << i << endl;
+        //cout << "-> species[i]->genomes.size(): " << species[i]->genomes.size() << endl;
         if (species[i]->genomes.size() == 0) {
             species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
             // No incrementar i ya que el siguiente elemento se ha movido a la posición i
@@ -265,6 +341,7 @@ void Population::speciation(string filenameInfo){
             // Solo incrementar i si no se elimina el elemento actual
             i++;
         }
+        //cout << "-> species.size(): " << species.size() << endl;
     }
     
     // Extra para informar
@@ -435,6 +512,7 @@ void Population::mutations(string filenameInfo){
     ofstream outfile(filenameInfo, ios::app);
     outfile << "\n-------- Mutations --------\n";
     outfile.close();
+    cout << "------- Mutations ---------" << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         species[i]->sort_genomes();
@@ -448,7 +526,6 @@ void Population::evolution(int n, std::string folder, int trial){
     string filenameInfo = folder + "/info.txt";
     string filenameOperadores = folder + "/operadores.txt";
     Genome *best;
-
     for (int i = 0; i < n; i++){
         ofstream outfile(filenameInfo, ios::app);
         if (i != 0){
@@ -487,7 +564,7 @@ void Population::evolution(int n, std::string folder, int trial){
         outfile2 << "---> reproducirMuta: " << parameters.reproducirMuta.back() << endl;
         outfile2.close();
     }
-    evaluate(folder, trial);
+    //evaluate(folder, trial);
 
     ofstream outfile2(filenameOperadores, ios::app);
     outfile2 << "\n-------- Resumen operadores Total --------\n";
