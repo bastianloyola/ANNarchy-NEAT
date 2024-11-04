@@ -150,7 +150,7 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
 def cartpole(pop,Monitor,input_index,output_index,inputWeights):
     env = gym.make("CartPole-v1")
     observation, info = env.reset(seed=42)
-    max_steps = 200
+    max_steps = 500
     terminated = False
     truncated = False
     maxInput = inputWeights[1]
