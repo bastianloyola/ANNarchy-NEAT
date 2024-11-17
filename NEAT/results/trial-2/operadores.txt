@@ -1,0 +1,27 @@
+
+-------- Resumen operadores Generacion: 0 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 3
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 0
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Generacion: 1 --------
+---> mutacionPeso: 3
+---> mutacionPesoInput: 3
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 0
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Total --------
+---> mutacionPeso: 5
+---> mutacionPesoInput: 6
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 0
+---> reproducirIntra: 0
+---> reproducirMuta: 6

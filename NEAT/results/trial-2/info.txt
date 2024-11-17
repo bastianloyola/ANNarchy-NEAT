@@ -1,0 +1,97 @@
+
+-------- Generation: 0 --------
+
+-------- Evaluation  --------
+
+-------- Eliminate --------
+Species 0 size: 4
+Genome id: 3 idAnnarchy: 3  eliminated
+Genome id: 2 idAnnarchy: 2  eliminated
+Genome id: 1 idAnnarchy: 1  eliminated
+----------------
+nGenomesPrevious: 4
+idSpeciesVoid.size(): 0
+----------------
+Number of genomes: 1 Number of species: 1
+Species 0 size: 1
+----------------
+
+-------- Mutations --------
+
+-------- Reproduce --------
+ number of species: 1
+ number of genomes: 1
+Species 0 allocatedOffsprings: 3
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 3
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 4 idAnnarchy: 1
+ ----> Mutate weight -- index: 5 modification_weight: 5
+ ----> Mutate input weight --
+ -> Genome id: 5 idAnnarchy: 2
+ ----> Mutate weight -- index: 11 modification_weight: 5
+ ----> Mutate input weight --
+ -> Genome id: 6 idAnnarchy: 3
+ ----> Not mutate weight 
+ ----> Mutate input weight --
+ ----> mutations:  1/3  2/3  3/3 
+ --
+----
+
+-------- Speciation --------
+Species 0 size: 4
+
+---- Best Genome ----
+Genome id: 0
+Genome idAnnarchy: 0
+Genome fitness: -1
+
+-------- Generation: 1 --------
+
+-------- Evaluation  --------
+
+-------- Eliminate --------
+Species 0 size: 4
+Genome id: 6 idAnnarchy: 3  eliminated
+Genome id: 5 idAnnarchy: 2  eliminated
+Genome id: 4 idAnnarchy: 1  eliminated
+----------------
+nGenomesPrevious: 4
+idSpeciesVoid.size(): 0
+----------------
+Number of genomes: 1 Number of species: 1
+Species 0 size: 1
+----------------
+
+-------- Mutations --------
+
+-------- Reproduce --------
+ number of species: 1
+ number of genomes: 1
+Species 0 allocatedOffsprings: 3
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 3
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 7 idAnnarchy: 1
+ ----> Mutate weight -- index: 8 modification_weight: -5
+ ----> Mutate input weight --
+ -> Genome id: 8 idAnnarchy: 2
+ ----> Mutate weight -- index: 12 modification_weight: -5
+ ----> Mutate input weight --
+ -> Genome id: 9 idAnnarchy: 3
+ ----> Mutate weight -- index: 15 modification_weight: -5
+ ----> Mutate input weight --
+ ----> mutations:  1/3  2/3  3/3 
+ --
+----
+
+-------- Speciation --------
+Species 0 size: 4

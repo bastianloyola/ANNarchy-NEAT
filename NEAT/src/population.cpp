@@ -79,7 +79,7 @@ void Population::print(){
 }
 
 void Population::eliminate(string filenameInfo){
-    int id,index,n,size,id_ann,nGenomesPrevious,nGenomesCurrent,nKeep,indexSpecies,idBest,nSpecies,counter;
+    int id,index,n,size,id_ann,nGenomesPrevious,nGenomesCurrent,nKeep,indexSpecies,idBest;
     vector<int> idSpeciesVoid;
     float keep = parameters.keep;
     
@@ -120,7 +120,7 @@ void Population::eliminate(string filenameInfo){
         outfile << "----------------" << endl;
     }
 
-    outfile << "nGenomesPrevious: " << nGenomesPrevious << " nGenomesCurrent: " << nGenomesCurrent << " nKeep: " << nKeep << endl;
+    outfile << "nGenomesPrevious: " << nGenomesPrevious  << endl;
     outfile << "idSpeciesVoid.size(): " << idSpeciesVoid.size() << endl;
     outfile << "----------------" << endl;
 
