@@ -1,60 +1,36 @@
-
-
-
-from ANNarchy import *
 import numpy as np
-import matplotlib.pyplot as plt
-import random as rd
-import scipy.sparse
-import gymnasium as gym
-from scipy.special import erf
 
+# Definir límites para cada variable de observación
+limites = [
+    (-4.8, 4.8),  # Posición del carro
+    (-10.0, 10.0),  # Velocidad del carro (estimado)
+    (-0.418, 0.418),  # Ángulo del poste en radianes
+    (-10.0, 10.0)  # Velocidad angular del poste (estimado)
+]
 
+num_neuronas_por_variable = 20
+std_dev = 0.4  # Controla cuán concentrados están los incrementos en el centro
+intervalos_por_variable = []
 
-LIF = Neuron(
-    parameters = """
-    tau = 50.0 : population
-    I = 0.0
-    tau_I = 10.0 : population
-    """,
-    equations = """
-    tau * dv/dt = -v + g_exc - g_inh + (I-65) : init=0
-    tau_I * dg_exc/dt = -g_exc
-    tau_I * dg_inh/dt = -g_inh
-    """,
-    spike = "v >= -40.0",
-    reset = "v = -65"
-)
+for low, high in limites:
+    # Crear una distribución gaussiana normalizada en el rango [-1, 1]
+    x = np.linspace(-1, 1, num_neuronas_por_variable)
+    gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+    
+    # Normalizar los pesos para que sumen 1
+    gaussian_weights /= gaussian_weights.sum()
+    
+    # Escalar los pesos al rango total
+    increments = gaussian_weights * (high - low)
+    
+    # Calcular los límites acumulados
+    limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
+    
+    # Guardar los intervalos como listas anidadas
+    intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
+    intervalos_por_variable.append(intervalos)
 
-IZHIKEVICH = Neuron(
-    parameters="""
-        a = 0.02 : population
-        b = 0.2 : population
-        c = -65.0 : population
-        d = 8.0 : population
-        I = 0.0
-        tau_I = 10.0 : population
-    """,
-    equations="""
-        dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65
-        tau_I * dg_exc/dt = -g_exc
-        tau_I * dg_inh/dt = -g_inh
-        du/dt = a*(b*v - u) : init=-14.0
-    """,
-    spike="v >= 30.0",
-    reset="v = c; u += d"
-)
-
-pop = Population(geometry=1, neuron=LIF)
-
-compile()
-M = Monitor(pop, ['spike', 'v'])
-pop[0].I = 75
-simulate(100.0, measure_time=True)
-spikes = M.get('spike')
-v = M.get('v')
-t, n = M.raster_plot(spikes)
-plt.figure()
-plt.plot(t,n,'v')
-plt.show()
-
+# Imprimir los intervalos generados
+for i, intervalos in enumerate(intervalos_por_variable):
+    print(f"Variable {i + 1}:")
+    print(intervalos)

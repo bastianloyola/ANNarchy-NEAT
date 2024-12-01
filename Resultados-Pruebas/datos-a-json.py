@@ -130,7 +130,7 @@ def leerResultsFile(file, info):
 
 
 carpetas = ['results/'] #MODIFICAR
-trials_por_carpeta = [(0,1)] #MODIFICAR
+trials_por_carpeta = [(1)] #MODIFICAR
 
 for k in range(len(carpetas)):
     for j in range(trials_por_carpeta[k][0], trials_por_carpeta[k][1]):
