@@ -54,7 +54,7 @@ IZHIKEVICH = Neuron(  #I = 20
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
-        pop = Population(geometry=n, neuron=LIF)
+        pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
@@ -62,6 +62,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
             raise ValueError("matrix is empty")
         #lil_matrix scipy nxn with values of matrix
         lil_matrix = scipy.sparse.lil_matrix((int(n), int(n)))
+
         n_rows = matrix.shape[0]
         n_cols = matrix.shape[1]
         lil_matrix[:n_rows, :n_cols] = matrix
@@ -296,6 +297,9 @@ def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
     env.close()
     return final_fitness
 
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
+
 
 def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
     #funcion similar a cartpole, solo que con el entorno de lunar lander 16 entradas y 4 salidas
@@ -306,31 +310,50 @@ def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
     truncated = False
     maxInput = inputWeights[1]
     minInput = inputWeights[0]
+
     #Generar 8 input weights para cada input
     inputWeights = np.random.uniform(minInput,maxInput,8)
     #Number of episodes
-    episodes = 100
+    episodes = 31
     h=0
     #Final fitness
     final_fitness = 0
+
+    limites = [
+        (-2.5, 2.5),
+        (-2.5, 2.5),
+        (-10.0, 10.0),
+        (-10.0, 10.0),
+        (-6.2831855, 6.2831855),
+        (-10.0, 10.0),
+        (-0.0, 1.0),
+        (-0.0, 1.0)
+    ]
     while h < episodes:
         j=0
         returns = []
         actions_done = []
+        terminated = False
+        truncated = False
+        env.reset()
         while j < max_steps and not terminated and not truncated:
             #encode observation, 8 values split in 16 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
             k = 0
             for val in observation:
                 if val < 0:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
                     pop[int(input_index[i])].I = -val*inputWeights[k]
                     pop[int(input_index[i+1])].I = 0
                 else:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
                     pop[int(input_index[i])].I = 0
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
                 k += 1
-            simulate(100.0)
+            simulate(50.0)
             spikes = Monitor.get('spike')
             #Output from 4 neurons, one for each action
             output1 = np.size(spikes[output_index[0]])
@@ -445,11 +468,12 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
     truncated = False
     max_steps = 1000
     # Number of episodes
-    episodes = 100
+    episodes = 31
     h = 0
     # Final fitness
     final_fitness = 0
 
+    # Definir límites para cada variable de observación
     limites = [
         (-2.5, 2.5),
         (-2.5, 2.5),
@@ -463,20 +487,25 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
 
     num_neuronas_por_variable = 20
     std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
-    interval_limits = []
+    intervalos_por_variable = []
 
     for low, high in limites:
         # Crear una distribución gaussiana normalizada en el rango [-1, 1]
         x = np.linspace(-1, 1, num_neuronas_por_variable)
         gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+
+        # Normalizar los pesos para que sumen 1
         gaussian_weights /= gaussian_weights.sum()
 
+        # Escalar los pesos al rango total
         increments = gaussian_weights * (high - low)
 
+        # Calcular los límites acumulados
         limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
-        interval_limits.append(intervalos)
 
+        # Guardar los intervalos como listas anidadas
+        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
+        intervalos_por_variable.append(intervalos)
     while h < episodes:
         l = 0
         returns = []
@@ -485,11 +514,15 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
         truncated = False
         while not terminated and not truncated and l < max_steps:
             # Codificar observación
-            for i, obs in enumerate(observation):
-                for j in range(num_neuronas_por_variable):
-                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 75
-                        break
+            for i, intervalos in enumerate(intervalos_por_variable):
+                min_val, max_val = intervalos[0]
+                for j, (low, high) in enumerate(intervalos):
+                    if observation[i] >= low and observation[i] < high:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+                    elif observation[i] > max_val:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+                    elif observation[i] < min_val:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
             simulate(50.0)
             spikes = Monitor.get('spike')
             # Decodificar la acción basada en el número de picos en las neuronas de salida
@@ -585,5 +618,5 @@ def exampleIzhikevich():
 
 
 
- #Example SNN for cartpole2
-#snn(80,40,200,0,np.random.rand(200,200),np.random.rand(80),0)
+ #Example SNN for lunar_lander2
+#snn(16, 4, 30, 0, np.random.rand(20,20), np.random.rand(2), 0)

@@ -1,36 +1,24 @@
-import numpy as np
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
 
-# Definir límites para cada variable de observación
-limites = [
-    (-4.8, 4.8),  # Posición del carro
-    (-10.0, 10.0),  # Velocidad del carro (estimado)
-    (-0.418, 0.418),  # Ángulo del poste en radianes
-    (-10.0, 10.0)  # Velocidad angular del poste (estimado)
+# Ejemplo con múltiples límites:
+limits = [
+    (-2.5, 2.5),
+    (-2.5, 2.5),
+    (-10.0, 10.0),
+    (-10.0, 10.0),
+    (-6.2831855, 6.2831855),
+    (-10.0, 10.0),
+    (-0.0, 1.0),
+    (-0.0, 1.0)
 ]
 
-num_neuronas_por_variable = 20
-std_dev = 0.4  # Controla cuán concentrados están los incrementos en el centro
-intervalos_por_variable = []
+# Valores de ejemplo para normalizar
+values = [-1.25, 2.0, 0.0, -7.0, 3.14, 5.0, 0.5, 0.75]
 
-for low, high in limites:
-    # Crear una distribución gaussiana normalizada en el rango [-1, 1]
-    x = np.linspace(-1, 1, num_neuronas_por_variable)
-    gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
-    
-    # Normalizar los pesos para que sumen 1
-    gaussian_weights /= gaussian_weights.sum()
-    
-    # Escalar los pesos al rango total
-    increments = gaussian_weights * (high - low)
-    
-    # Calcular los límites acumulados
-    limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-    
-    # Guardar los intervalos como listas anidadas
-    intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
-    intervalos_por_variable.append(intervalos)
+normalized_values = [
+    normalize(value, min_val, max_val)
+    for value, (min_val, max_val) in zip(values, limits)
+]
 
-# Imprimir los intervalos generados
-for i, intervalos in enumerate(intervalos_por_variable):
-    print(f"Variable {i + 1}:")
-    print(intervalos)
+print(normalized_values)
