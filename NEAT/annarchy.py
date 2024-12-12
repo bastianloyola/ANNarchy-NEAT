@@ -54,6 +54,7 @@ IZHIKEVICH = Neuron(  #I = 20
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
     try:
         clear()
+        print(inputWeights)
         pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
@@ -103,6 +104,8 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
         return cartpole3(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "lunar_lander2":
         return lunar_lander2(pop, Monitor, input_index, output_index, inputWeights)
+    elif funcion == "acrobot":
+        return acrobot(pop, Monitor, input_index, output_index, inputWeights)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -557,7 +560,83 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
 
 
 
+def acrobot(pop, Monitor, input_index, output_index, inputWeights):
+    print(1111111111111111)
+    env = gym.make("Acrobot-v1")
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 31
+    h = 0
+    # Final fitness 
+    final_fitness = 0
 
+    maxInput = inputWeights[1]
+    minInput = inputWeights[0]
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-1, 1),  # cos(theta1)
+        (-1, 1),  # sin(theta1)
+        (-1, 1),  # cos(theta2)
+        (-1, 1),  # sin(theta2)
+        (-12.5663706, 12.5663706),  # theta1_dot
+        (-28.2743339, 28.2743339)  # theta2_dot
+    ]
+    
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        env.reset()
+        inputWeights = np.random.uniform(minInput,maxInput,6)
+        while not terminated and not truncated:
+            # Codificar observación
+            i = 0
+            k = 0
+            for val in observation:
+                if val < 0:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                i += 2
+                k += 1
+
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 3 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3:
+                action = 0
+            elif output2 > output1 and output2 > output3:
+                action = 1
+            elif output3 > output1 and output3 > output2:
+                action = 2
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    print("Final mean fitness: ",final_fitness,"\n")
+    return final_fitness
 
 
 
