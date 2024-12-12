@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=ll-b-iz-i
-#SBATCH --output=/home/XI/bloyola/ll/optuna/b-iz-i/output.txt
-#SBATCH --error=/home/XI/bloyola/ll/optuna/b-iz-i/error.txt
+#SBATCH --job-name=acro-a-lif
+#SBATCH --output=/home/XI/bloyola/acrobot/a-lif/output.txt
+#SBATCH --error=/home/XI/bloyola/acrobot/a-lif/error.txt
 #SBATCH --partition=batch
 #SBATCH --cpus-per-task=50  # Cada tarea usará 4 CPU
 
 # Ir al directorio que contiene el ejecutable NEAT
-cd /home/XI/bloyola/ll/optuna/b-iz-i
+cd /home/XI/bloyola/acrobot/a-lif
 mkdir results
 
 # Ejecutar el ejecutable NEAT

@@ -608,7 +608,7 @@ void Population::print_best(){
 }
 
 Genome* Population::getBest(){
-    float bestFitness = 0;
+    float bestFitness = genomes[0]->getFitness();
     int bestIndex = 0;
     for (int i = 0; i < (int)(genomes.size()); i++){
         if (genomes[i]->getFitness() > bestFitness){

@@ -107,6 +107,8 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights, geno
         return lunar_lander2(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "acrobot":
         return acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "acrobot2":
+        return acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -630,6 +632,90 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
             actions_done.append(action)
             Monitor.reset()
             j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+
+def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): #based on lunar_lander2
+    env = gym.make("Acrobot-v1")
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 31
+    h = 0
+    # Final fitness
+    final_fitness = 0
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-1, 1),  # cos(theta1)
+        (-1, 1),  # sin(theta1)
+        (-1, 1),  # cos(theta2)
+        (-1, 1),  # sin(theta2)
+        (-12.5663706, 12.5663706),  # theta1_dot
+        (-28.2743339, 28.2743339)  # theta2_dot
+    ]
+
+    num_neuronas_por_variable = 20
+    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
+    interval_limits = []
+    for low, high in limites:
+        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
+        x = np.linspace(-1, 1, num_neuronas_por_variable)
+        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+        gaussian_weights /= gaussian_weights.sum()
+
+        increments = gaussian_weights * (high - low)
+
+        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
+        interval_limits.append(limites_acumulados)
+    while h < episodes:
+        l = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        env.reset()
+        while not terminated and not truncated:
+            # Codificar observación
+            for i, intervalos in enumerate(interval_limits):
+                min_val, max_val = intervalos[0], intervalos[-1]
+                k = 0
+                while k < len(intervalos) - 1:
+                    if observation[i] >= intervalos[k] and observation[i] < intervalos[k+1]:
+                        pop[input_index[i * num_neuronas_por_variable + k]].I = 20
+                        break
+                    elif observation[i] > max_val:
+                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 20
+                    elif observation[i] < min_val:
+                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 20
+                    k += 1
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            output1 = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
+            output2 = sum(np.size(spikes[idx]) for idx in output_index[20:40])  # Neuronas que controlan el movimiento a la derecha
+            output3 = sum(np.size(spikes[idx]) for idx in output_index[40:])  # Neuronas que controlan el movimiento a la derecha
+
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3:
+                action = 0
+            elif output2 > output1 and output2 > output3:
+                action = 1
+            elif output3 > output1 and output3 > output2:
+                action = 2
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            l += 1
         final_fitness += np.sum(returns)
         h += 1
 
