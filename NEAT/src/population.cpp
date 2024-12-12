@@ -581,7 +581,7 @@ void Population::evolution(int n, std::string folder, int trial){
         outfile2 << "---> reproducirMuta: " << parameters.reproducirMuta.back() << endl;
         outfile2.close();
     }
-    //evaluate(folder, trial);
+    evaluate(folder, trial);
 
     ofstream outfile2(filenameOperadores, ios::app);
     outfile2 << "\n-------- Resumen operadores Total --------\n";

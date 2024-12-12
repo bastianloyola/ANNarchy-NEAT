@@ -254,6 +254,12 @@ float run3(int trial) {
     population.evolution(evolutions, folder, trial);
 
     saveRun(&population, 0, filename, folder);
+
+    //Print fitness of every genome
+    for (int i = 0; i < static_cast<int>(population.getGenomes().size()); i++){
+        cout << "Genome id: " << population.getGenomes()[i]->getId() << " Fitness: " << population.getGenomes()[i]->getFitness() << endl;
+    }
+
     bestFitnes.push_back(population.getBest()->getFitness());
     finalFitness = population.getBest()->getFitness();
 
