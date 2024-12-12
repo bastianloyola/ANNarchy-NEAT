@@ -1,29 +1,23 @@
-#random lunar lander gymnasium
-import gymnasium as gym
+import random as r
+import numpy as np
+I = 0
 
+def f(i):
+    print(1+1)
+    I = i
+    asd = g()
+    print(I)
+    return asd
+def g():
+    print("I",I)
+    return 2
 
+min = 0
+max = 150
+numero = np.random.randint(min, max)
+np.random.seed(0)
+lista = np.random.randint(min, max, 10)
+print(lista)
+print(f(1))
 
-
-env = gym.make('Acrobot-v1', render_mode="rgb_array")
-env.reset()
-fitness = 0
-episode = 0
-returns = []
-while episode < 2:
-    env.reset()
-    while True:
-        env.render()
-        action = env.action_space.sample()
-        print(action)
-        observation, reward, done, truncated, info = env.step(action)
-        fitness += reward
-        if done or truncated:
-            print(fitness)
-            returns.append(fitness)
-            fitness = 0
-            episode += 1
-            break
-env.close()
-
-print("final:",sum(returns)/len(returns))
-
+print(I)

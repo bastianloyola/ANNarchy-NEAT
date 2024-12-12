@@ -50,11 +50,11 @@ IZHIKEVICH = Neuron(  #I = 20
     spike="v >= 30.0",
     reset="v = c; u += d"
 )
-
-def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
+I = 0
+def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id):
     try:
+        I = i
         clear()
-        print(inputWeights)
         pop = Population(geometry=n, neuron=IZHIKEVICH)
         proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
@@ -84,14 +84,15 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
             raise ValueError("inputWeights is empty")
 
         funcion = get_function('results/trial-'+ str(int(trial)))
-        fit = fitness(pop,M,input_index,output_index, funcion, inputWeights)
+        fit = fitness(pop,M,input_index,output_index, funcion, inputWeights, genome_id*int(trial))
         #return fit
+
         return fit
     except Exception as e:
         # Capturar y manejar excepciones
         print("Error en annarchy:", e)
 
-def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
+def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights, genome_id):
     if funcion == "xor":
         return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
@@ -105,7 +106,7 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights):
     elif funcion == "lunar_lander2":
         return lunar_lander2(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "acrobot":
-        return acrobot(pop, Monitor, input_index, output_index, inputWeights)
+        return acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -560,8 +561,7 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
 
 
 
-def acrobot(pop, Monitor, input_index, output_index, inputWeights):
-    print(1111111111111111)
+def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
     env = gym.make("Acrobot-v1")
     observation, info = env.reset()
     terminated = False
@@ -584,7 +584,8 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights):
         (-12.5663706, 12.5663706),  # theta1_dot
         (-28.2743339, 28.2743339)  # theta2_dot
     ]
-    
+    np.random.seed(int(genome_id))
+    inputWeights = np.random.uniform(minInput,maxInput,6)
     while h < episodes:
         j = 0
         returns = []
@@ -592,7 +593,6 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights):
         terminated = False
         truncated = False
         env.reset()
-        inputWeights = np.random.uniform(minInput,maxInput,6)
         while not terminated and not truncated:
             # Codificar observación
             i = 0
@@ -635,7 +635,6 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights):
 
     final_fitness = final_fitness / episodes
     env.close()
-    print("Final mean fitness: ",final_fitness,"\n")
     return final_fitness
 
 

@@ -248,10 +248,11 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
 
     //Llamado a función
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
-    PyObject* args = PyTuple_Pack(7, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)));
+    PyObject* args = PyTuple_Pack(8, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)), PyFloat_FromDouble(double(id)));
     PyObject* callfunc = PyObject_CallObject(func, args);
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
+    std::cout << "Fitness de " << id << ": " << value << std::endl;
     setFitness(value);
 
 
