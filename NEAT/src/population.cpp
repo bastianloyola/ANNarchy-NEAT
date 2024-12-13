@@ -279,8 +279,8 @@ void Population::reproduce(string filenameInfo){
 void Population::speciation(string filenameInfo){
     ofstream outfile(filenameInfo, ios::app);
     outfile << "\n-------- Speciation --------\n";
-    cout << "\n-------- Speciation --------\n";
-    cout << "Number of species: " << species.size() << endl;
+    //cout << "\n-------- Speciation --------\n";
+    outfile << "Number of species: " << species.size() << endl;
 
     int nSpecies = static_cast<int>(species.size());
     vector<int> idGenomesSpecies;
@@ -290,11 +290,11 @@ void Population::speciation(string filenameInfo){
 
     this->genomes.clear();
     
-    cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
+    outfile << "Size of auxGenomes: " << auxGenomes.size() << endl;
     for (int i = 0; i < nSpecies; i++){
-        cout << "Species: " << i << endl;
+        outfile << "Species: " << i << endl;
         int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
-        cout << "Genome: " << index << endl;
+        outfile << "Genome: " << index << endl;
         
         species[i]->genome = species[i]->genomes[index];
         species[i]->genomes.clear();
@@ -308,13 +308,13 @@ void Population::speciation(string filenameInfo){
             }
         }
     }
-    cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
+    outfile << "Size of auxGenomes: " << auxGenomes.size() << endl;
 
     int compatibility;
     flag = true;
     //cout << "Threshold: " << parameters.threshold << endl;
     for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
-        cout << "Genome: " << auxGenomes[i]->getId() << endl;
+        outfile << "Genome: " << auxGenomes[i]->getId() << endl;
         sort_species();
         flag = true;
 
@@ -344,12 +344,15 @@ void Population::speciation(string filenameInfo){
         }
     }
 
-    cout << "Number of species: " << species.size() << endl;
+    outfile << "Number of species: " << species.size() << endl;
+    outfile.close();
+
+    ofstream outfile2(filenameInfo, ios::app);
 
     //eliminar species con 0 genomas
     int i = 0;
     while (i < static_cast<int>(species.size())) {
-        //cout << "i: " << i << endl;
+        outfile2 << "i: " << i << endl;
         //cout << "-> species[i]->genomes.size(): " << species[i]->genomes.size() << endl;
         if (species[i]->genomes.size() == 0) {
             species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
@@ -363,7 +366,7 @@ void Population::speciation(string filenameInfo){
     
     // Extra para informar
     for (int i = 0; i < static_cast<int>(species.size()); i++){
-        outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
+        outfile2 << "Species " << i << " size: " << species[i]->genomes.size() << endl;
     }
 
     outfile.close();
@@ -371,8 +374,8 @@ void Population::speciation(string filenameInfo){
 
 void Population::evaluate(std::string folder,int trial) {
     // Importar módulo
-    //PyObject* name = PyUnicode_FromString("classification");
-    PyObject* name = PyUnicode_FromString("annarchy");
+    PyObject* name = PyUnicode_FromString("classification");
+    //PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
 
@@ -565,11 +568,27 @@ void Population::evolution(int n, std::string folder, int trial){
         parameters.reproducirIntra.push_back(0);
         parameters.reproducirMuta.push_back(0);
 
-        evaluate(folder, trial);
+        evaluate(folder, trial);        
+        
+        outfile << "\n-------- fin eval ----------\n" << endl;
+        outfile.close();
         eliminate(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- fin elim ----------\n" << endl;
+        outfile.close();
         mutations(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- fin mut ----------\n" << endl;
+        outfile.close();
         reproduce(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- fin rep ----------\n" << endl;
+        outfile.close();
         speciation(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- fin spec ----------\n" << endl;
+        outfile.close();
+        
         fstream outfile2(filenameOperadores, ios::app);
         outfile2 << "\n-------- Resumen operadores Generacion: " << i << " --------\n";
         outfile2 << "---> mutacionPeso: " << parameters.mutacionPeso.back() << endl;

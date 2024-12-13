@@ -218,7 +218,10 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
     for (int i = 0; i < numConnections; i++) {
         int in_node = connections[i].getInNode();
         int out_node = connections[i].getOutNode();
-        double weight = connections[i].getWeight();
+        double weight;
+        if (connections[i].getEnabled()) weight = connections[i].getWeight();
+        else weight = 0;
+        
         if (in_node >= 0 && in_node < n && out_node >= 0 && out_node <= n) {
             //int index = (out_node-1) * n + (in_node-1);
             int index = (in_node-1) * n + (out_node-1);
