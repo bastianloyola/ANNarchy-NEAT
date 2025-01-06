@@ -4,6 +4,7 @@ configFile = 'config.cfg'
 infoFile = 'info.txt'
 operadoresFile = 'operadores.txt'
 resultsFile = 'results.txt'
+gen = 'generations.txt'
 
 def leerBestFile(file, nodos, conexiones):
     with open(file, 'r') as best:
@@ -95,6 +96,8 @@ def leerInfoFile(file, info):
                 continue
             elif etapa == 'Reproduce':
                 line = line.strip().split()
+                if len(line) < 3:
+                    continue
                 if 'reproduceInterSpecies' in line[1]:
                     info['reproducidos'][gen][0] += int(line[2])
                 elif 'reproduceNonInterSpecies' in line[1]:
@@ -106,9 +109,9 @@ def leerInfoFile(file, info):
                 line = line.strip().split()
                 if 'Species' in line[0]:
                     print(line)
-                    print(int(line[3]))
+                    print(int(line[1]))
                     print(info['species'])
-                    info['species'][gen].append(int(line[3]))
+                    info['species'][gen].append(int(line[1]))
                 continue
             elif etapa == 'BestGenome':
                 line = line.strip().split(':')
@@ -128,9 +131,18 @@ def leerResultsFile(file, info):
                 info['bestGenome'][-1].append(0)
                 info['bestGenome'][-1].append(num)
 
+def leerGenFile(file, info):
+    with open(file, 'r') as gen:
+        for line in gen:
+            if "Results" in line:
+                info['FitGeneraciones'].append([])
+                continue
+            line = line.strip().split(":")
+            fit = float(line[1])
+            info['FitGeneraciones'][-1].append(fit)
 
 carpetas = ['results/'] #MODIFICAR
-trials_por_carpeta = [(0,1)] #MODIFICAR
+trials_por_carpeta = [(-1,0)] #MODIFICAR
 
 for k in range(len(carpetas)):
     for j in range(trials_por_carpeta[k][0], trials_por_carpeta[k][1]):
@@ -141,7 +153,7 @@ for k in range(len(carpetas)):
         conexiones = set()
         configuraciones = dict()
         operadores = {'mutacionPeso': [], 'mutacionPesoInput': [], 'agregarNodos': [], 'agregarLinks': [], 'reproducirInter': [], 'reproducirIntra': [], 'reproducirMuta': []}
-        info = {'eliminados': [], 'reproducidos': [], 'species': [], 'bestGenome': []}
+        info = {'eliminados': [], 'reproducidos': [], 'species': [], 'bestGenome': [], 'FitGeneraciones': []}
 
         leerConfigFile(file + configFile, configuraciones)
         #print('Configuracion: \n', configuraciones)
@@ -152,6 +164,9 @@ for k in range(len(carpetas)):
         leerInfoFile(file + infoFile, info)
         #print('Info: \n', info)
         leerResultsFile(file + resultsFile, info)
+        #print('Info: \n', info)
+        leerGenFile(file + gen, info)
+        #print('Info: \n', info)
 
         #print('Info: ')
         #for i in range(configuraciones.get('evolutions', 0)):
@@ -172,7 +187,8 @@ for k in range(len(carpetas)):
                 'Eliminados': info['eliminados'],
                 'Reproducidos': info['reproducidos'],
                 'Species': info['species'],
-                'BestGenome': info['bestGenome']
+                'BestGenome': info['bestGenome'],
+                'FitGeneraciones': info['FitGeneraciones']
             }
         }
 

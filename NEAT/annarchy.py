@@ -73,10 +73,10 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial):
         output_index = []
         n_entrada = int(n_entrada)
         n_salida = int(n_salida)
-        for i in range(n_entrada):
-            input_index.append(i)
-        for i in range(n_entrada,n_salida+n_entrada):
-            output_index.append(i)
+        for j in range(n_entrada):
+            input_index.append(j)
+        for j in range(n_entrada,n_salida+n_entrada):
+            output_index.append(j)
         # Verificar el tamaño de inputWeights
         if inputWeights.size == 0:
             raise ValueError("inputWeights is empty")

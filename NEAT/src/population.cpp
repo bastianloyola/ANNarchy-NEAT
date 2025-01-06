@@ -374,8 +374,8 @@ void Population::speciation(string filenameInfo){
 
 void Population::evaluate(std::string folder,int trial) {
     // Importar módulo
-    PyObject* name = PyUnicode_FromString("classification");
-    //PyObject* name = PyUnicode_FromString("annarchy");
+    //PyObject* name = PyUnicode_FromString("classification");
+    PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
 
@@ -532,7 +532,6 @@ void Population::mutations(string filenameInfo){
     ofstream outfile(filenameInfo, ios::app);
     outfile << "\n-------- Mutations --------\n";
     outfile.close();
-    cout << "------- Mutations ---------" << endl;
     //mutate
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         species[i]->sort_genomes();
@@ -599,6 +598,23 @@ void Population::evolution(int n, std::string folder, int trial){
         outfile2 << "---> reproducirIntra: " << parameters.reproducirIntra.back() << endl;
         outfile2 << "---> reproducirMuta: " << parameters.reproducirMuta.back() << endl;
         outfile2.close();
+
+        cout << "Saving generation " << n << endl;
+
+        std::string filename3 = folder + "/generations.txt";
+        cout << "Saving in " << filename3 << endl;
+        std::ofstream outfile3(filename3, ios::app);
+
+        if(!outfile3) {
+            cerr << "saveGeneration: No se pudo abrir el archivo." << filename3 <<endl;
+        }
+
+        outfile3 << "--Results of generation:" << n << " --\n";
+        for (int i = 0; i < genomes.size(); i++){
+            Genome* gen = genomes[i];
+            outfile3 << gen->getId() << ":" << gen->getFitness() << "\n";
+        }
+        outfile3.close();
     }
     //evaluate(folder, trial);
 
@@ -612,6 +628,14 @@ void Population::evolution(int n, std::string folder, int trial){
     outfile2 << "---> reproducirIntra: " << std::accumulate(parameters.reproducirIntra.begin(), parameters.reproducirIntra.end(), 0) << endl;
     outfile2 << "---> reproducirMuta: " << std::accumulate(parameters.reproducirMuta.begin(), parameters.reproducirMuta.end(), 0) << endl;
     outfile2.close();
+
+    ofstream outfile(filenameInfo, ios::app);
+    best = getBest();
+    outfile << "\n---- Best Genome Final ----" << endl;
+    outfile << "Genome id: " << best->getId() << endl;
+    outfile << "Genome idAnnarchy: " << best->getIdAnnarchy() << endl;
+    outfile << "Genome fitness: " << best->getFitness() << endl;
+    outfile.close();
 }
 
 void Population::print_best(){
@@ -686,4 +710,24 @@ void Population::offspringsPerSpecies() {
     for (int i = 0; i < speciesSize; ++i) {
         species[i]->allocatedOffsprings = offspringsAlloted[i];
     }
+}
+
+
+void saveGeneration(Population* population, int n, std::string folder) {
+    cout << "Saving generation " << n << endl;
+
+    std::string filename = folder + "/generations.txt";
+    cout << "Saving in " << filename << endl;
+    std::ofstream outfile(filename, ios::app);
+
+    if(!outfile) {
+        cerr << "saveGeneration: No se pudo abrir el archivo." << filename <<endl;
+    }
+
+    outfile << "--Results of generation:" << n << " --\n";
+    for (int i = 0; i < population->genomes.size(); i++){
+        Genome* gen = population->genomes[i];
+        outfile << "Genome Id: " << gen->getId() << "Genome Fitness: " << gen->getFitness() << "\n";
+    }
+    outfile.close();
 }
