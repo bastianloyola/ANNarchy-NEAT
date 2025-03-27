@@ -1,0 +1,459 @@
+
+-------- Resumen operadores Generacion: 0 --------
+---> mutacionPeso: 19
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 0
+---> reproducirIntra: 26
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 1 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 2 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 3 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 4 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 1
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 5 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 6 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 7 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 8 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 9 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 10 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 11 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 1
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 12 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 13 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 1
+---> agregarLinks: 0
+---> reproducirInter: 22
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 14 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 15 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 16 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 22
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Generacion: 17 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 18 --------
+---> mutacionPeso: 3
+---> mutacionPesoInput: 0
+---> agregarNodos: 1
+---> agregarLinks: 0
+---> reproducirInter: 22
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Generacion: 19 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 20 --------
+---> mutacionPeso: 3
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 1
+---> reproducirInter: 22
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Generacion: 21 --------
+---> mutacionPeso: 3
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 22
+---> reproducirIntra: 0
+---> reproducirMuta: 3
+
+-------- Resumen operadores Generacion: 22 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 23 --------
+---> mutacionPeso: 2
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 2
+
+-------- Resumen operadores Generacion: 24 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 25 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 26 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 27 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 28 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 29 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 30 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 31 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 32 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 33 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 34 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 35 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 36 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 37 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 38 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 39 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 40 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 41 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 42 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 43 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 44 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 45 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 46 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 47 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 23
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Generacion: 48 --------
+---> mutacionPeso: 1
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 24
+---> reproducirIntra: 0
+---> reproducirMuta: 1
+
+-------- Resumen operadores Generacion: 49 --------
+---> mutacionPeso: 0
+---> mutacionPesoInput: 0
+---> agregarNodos: 0
+---> agregarLinks: 0
+---> reproducirInter: 25
+---> reproducirIntra: 0
+---> reproducirMuta: 0
+
+-------- Resumen operadores Total --------
+---> mutacionPeso: 50
+---> mutacionPesoInput: 0
+---> agregarNodos: 2
+---> agregarLinks: 3
+---> reproducirInter: 1165
+---> reproducirIntra: 26
+---> reproducirMuta: 37

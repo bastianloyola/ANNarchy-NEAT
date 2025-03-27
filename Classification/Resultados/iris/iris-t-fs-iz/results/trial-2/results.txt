@@ -1,0 +1,88 @@
+
+---- Results of cofig: ----
+  keep=0.473
+  threshold=2.714
+  interSpeciesRate=0.001
+  noCrossoverOff=0.347
+  probabilityWeightMutated=0.827
+  probabilityAddNodeSmall=0.021
+  probabilityAddLink_small=0.033
+  probabilityAddNodeLarge=0.359
+  probabilityAddLink_Large=0.195
+  largeSize=20
+  c1=1.072
+  c2=0.799
+  c3=0.302
+  numberGenomes=50
+  numberInputs=16
+  numberOutputs=3
+  evolutions=50
+  n_max=300
+  learningRate=5
+  inputWeights=110,150
+  weightsRange=-10,10
+  process_max=25
+  function=
+  folder=results/trial-2
+
+--Results of run:0 --
+Best Genome 
+Genome id: 1221
+Genome fitness: 0.96
+   IN  OUT    Weight  Innov
+    1   17   12.8942      1
+    1   18   15.1918      2
+    1   19  -8.52724      3
+    2   17   6.51789      4
+    2   18  -4.83486      5
+    2   19  -3.81502      6
+    3   17 -0.175725      7
+    3   18  -13.7969      8
+    3   19  0.352146      9
+    4   17  -1.99704     10
+    4   18  -17.9513     11
+    4   19  -2.25455     12
+    5   17   3.36937     13
+    5   18   8.68017     14
+    5   19   2.96334     15
+    6   17 -0.208054     16
+    6   18   6.59137     17
+    6   19   6.05326     18
+    7   17  -14.6289     19
+    7   18   7.40105     20
+    8   17  -4.91135     22
+    8   19   3.05027     24
+    9   17   10.1954     25
+    9   18  -19.5827     26
+    9   19   -6.9735     27
+   10   17  -4.25638     28
+   10   18    6.6445     29
+   10   19  -4.90547     30
+   11   17   -11.998     31
+   11   18   10.6859     32
+   11   19   2.55036     33
+   12   17  -4.76228     34
+   12   18  -17.6375     35
+   12   19   6.97824     36
+   13   17   5.93576     37
+   13   18  -8.47806     38
+   13   19  -9.12018     39
+   14   17  -4.00644     40
+   14   18   1.90969     41
+   15   17   -12.016     43
+   15   18   6.78701     44
+   15   19-0.0918398     45
+   16   17  -12.7915     46
+   16   18  -3.66694     47
+   16   19   9.92083     48
+   14   47   11.2235    126
+    0    6  -10.0938    170
+    9   13  -7.13102    188
+   47   64   8.55894    209
+   64   19  -1.70616    210
+
+Summerized results: 
+run: 0 bestFitness: 0
+Max fitness: 0
+Percentage: 100% (1 of 1)
+--------------------------------------------------------------
