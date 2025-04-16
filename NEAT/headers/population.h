@@ -12,7 +12,7 @@
 class Population{
     
   public:  
-    // Constructor de la clase
+    // Class constructor
     Population();
     Population(Parameters *param);
 

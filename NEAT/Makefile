@@ -34,15 +34,3 @@ clean:
 
 Aclean:
 	rm -rf annarchy
-
-# Compilación estática para ejecutable autónomo
-export: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -static -o $(EXECUTABLE) $(OBJECTS) \
-		/usr/lib/x86_64-linux-gnu/libpython3.10.a \
-		/usr/lib/x86_64-linux-gnu/libz.a \
-		/usr/lib/x86_64-linux-gnu/libexpat.a \
-		/usr/lib/x86_64-linux-gnu/libm.a \
-		/usr/lib/x86_64-linux-gnu/libpthread.a \
-		/usr/lib/x86_64-linux-gnu/libc.a \
-		/usr/lib/gcc/x86_64-linux-gnu/11/libgcc.a \
-		/usr/lib/gcc/x86_64-linux-gnu/11/libstdc++.a

@@ -10,7 +10,7 @@
 #include "innovation.h"
 #include "parameters.h"
 
-// Clase para Genoma
+// Class for Genome
 class Genome {
     
     public:  

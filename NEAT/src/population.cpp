@@ -11,7 +11,7 @@
 
 using namespace std;
 
-// Declarar un mutex global
+// Global mutex
 #include <mutex>
 #include <fcntl.h>
 
@@ -36,9 +36,6 @@ Population::Population(Parameters *param){
         species[0]->add_genome(g);
     }
     keep = parameters.keep;
-    //cout << "Population created" << endl;
-    //cout << "Number of species: " << species.size() << endl;
-    //cout << "Number of genomes: " << genomes.size() << endl;
 
 }
 
@@ -90,14 +87,14 @@ void Population::eliminate(string filenameInfo){
 
     nGenomesPrevious = static_cast<int>(genomes.size());
 
-    // Eliminar genomas por especies
+    // Eliminate genomes from species
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
 
         size = static_cast<int>(species[i]->genomes.size());
-        species[i]->sort_genomes(); // order genomes by fitness
+        species[i]->sort_genomes(); // order genomes by fitness, in descending order
 
-        n = static_cast<int>(ceil(size * (1-keep))); // cantidad a eliminar
+        n = static_cast<int>(ceil(size * (1-keep))); // Number of genomes to eliminate
 
         if (n == size && n != 0) n -= 1;
 
@@ -127,7 +124,7 @@ void Population::eliminate(string filenameInfo){
     nGenomesCurrent = static_cast<int>(genomes.size());
     nKeep = ceil(nGenomesPrevious*keep);
 
-    // Eliminar genomas sobrantes si es que alguna especie no eliminó genomas
+    // Elimination of genomes if some species did not eliminate genomes
     if (nGenomesCurrent > nKeep && idSpeciesVoid.size() > 0){
         outfile << "Species void" << endl;
 
@@ -156,12 +153,12 @@ void Population::eliminate(string filenameInfo){
 
     outfile << "Number of genomes: " << static_cast<int>(genomes.size()) << " Number of species: " << species.size() << endl;
 
-    // Eliminar especies vacias
+    // Eliminate empty species
     for (int i = static_cast<int>(species.size()) - 1; i >= 0; i--) {
         outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
         if (species[i]->genomes.size() == 0) {
             outfile << "Species " << i << " eliminated" << endl;
-            species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
+            species.erase(species.begin() + i); // Eliminate the species if it has no genomes
         }
     }
 
@@ -181,24 +178,23 @@ void Population::reproduce(string filenameInfo){
 
     offspringsPerSpecies();
 
-    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0; // No interSpeciesRate si solo hay una especie
+    interSpeciesRate = (species.size() > 1) ? parameters.interSpeciesRate : 0; // No interSpeciesRate if there is only one species
     
-    for (int i = 0; i < static_cast<int>(species.size()); i++){ // Por cada especie
+    for (int i = 0; i < static_cast<int>(species.size()); i++){ // For each species
 
         outfile << "Species " << i << " allocatedOffsprings: " << species[i]->allocatedOffsprings << endl;
         outfile << "Species " << i << " genomes.size(): " << species[i]->genomes.size() << endl;
 
         reproduceMutations = 0; 
-        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings * interSpeciesRate)); // Cantidad de reproducciones entre especies
+        reproduceInterSpecies = static_cast<int>(ceil(species[i]->allocatedOffsprings * interSpeciesRate)); // Number of inter-species reproductions
 
         if (species[i]->genomes.size() > 1){ 
             reproduceNonInterSpecies = species[i]->allocatedOffsprings - reproduceInterSpecies;
         }else{
             reproduceNonInterSpecies = 0;
-            reproduceMutations = species[i]->allocatedOffsprings - reproduceInterSpecies; //faltaba - reproduceInterSpecies
+            reproduceMutations = species[i]->allocatedOffsprings - reproduceInterSpecies; 
         }
 
-        //std::cout << "reproduceInterSpecies: " << reproduceInterSpecies << " reproduceNonInterSpecies: " << reproduceNonInterSpecies << " reproduceMutations: " << reproduceMutations << endl;
 
         outfile << " -> Species: " << i << endl;
         outfile << " ----> reproduceInterSpecies: " << reproduceInterSpecies << endl;
@@ -215,7 +211,7 @@ void Population::reproduce(string filenameInfo){
             indexS2 = randomInt(0,static_cast<int>(species.size()));
             while(indexS1 == indexS2){
                 indexS2 = randomInt(0,static_cast<int>(species.size()));
-            } // Revisar
+            }
             g1 = species[indexS1]->genomes[randomInt(0,static_cast<int>(species[indexS1]->genomes.size()))];
             g2 = species[indexS2]->genomes[randomInt(0,static_cast<int>(species[indexS2]->genomes.size()))];
 
@@ -236,7 +232,7 @@ void Population::reproduce(string filenameInfo){
                 g2 = species[i]->genomes[randomInt(0,static_cast<int>(species[i]->genomes.size()))];
                 if (species[i]->genomes.size() <= 1) {
                     std::cout << "ERROR g1 == g2  species[i]->genomes.size() <= 1" << std::endl;
-                } //Revisar
+                } 
             }
 
             Genome* offspring = crossover(g1,g2);
@@ -312,24 +308,15 @@ void Population::speciation(string filenameInfo){
 
     int compatibility;
     flag = true;
-    //cout << "Threshold: " << parameters.threshold << endl;
     for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
         cout << "Genome: " << auxGenomes[i]->getId() << endl;
         sort_species();
         flag = true;
 
         for (int j = 0; j < static_cast<int>(species.size()); j++){
-            //cout << " ---------- " << endl;
-            //cout << "-> Species: " << j << endl;
-            //cout << "--> Genome: " << species[j]->genome->getId() << endl;
             compatibility = (*auxGenomes[i]).compatibility(*species[j]->genome);
-            //cout << "--> Compatibility: " << compatibility << " threshold: " << parameters.threshold << endl;
-            //genomes[i]->printGenome();
-            //cout << "  " << endl;
-            //species[j]->genome->printGenome();
 
             if (compatibility < parameters.threshold){   
-                //cout << "--> Compatibility < threshold" << endl;                 
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 flag = false;
@@ -337,7 +324,6 @@ void Population::speciation(string filenameInfo){
             }
         }
         if (flag){
-            //cout << "--> Compatibility >= threshold" << endl;
             Species* newSpecies = new Species(auxGenomes[i], parameters.threshold);
             species.push_back(newSpecies);
             genomes.push_back(auxGenomes[i]);
@@ -346,22 +332,16 @@ void Population::speciation(string filenameInfo){
 
     cout << "Number of species: " << species.size() << endl;
 
-    //eliminar species con 0 genomas
+    // Eliminate species with 0 genomes
     int i = 0;
     while (i < static_cast<int>(species.size())) {
-        //cout << "i: " << i << endl;
-        //cout << "-> species[i]->genomes.size(): " << species[i]->genomes.size() << endl;
         if (species[i]->genomes.size() == 0) {
-            species.erase(species.begin() + i); // Eliminar la especie si no tiene genomas
-            // No incrementar i ya que el siguiente elemento se ha movido a la posición i
+            species.erase(species.begin() + i); // Eliminate the species if it has no genomes
         } else {
-            // Solo incrementar i si no se elimina el elemento actual
             i++;
         }
-        //cout << "-> species.size(): " << species.size() << endl;
     }
     
-    // Extra para informar
     for (int i = 0; i < static_cast<int>(species.size()); i++){
         outfile << "Species " << i << " size: " << species[i]->genomes.size() << endl;
     }
@@ -370,34 +350,28 @@ void Population::speciation(string filenameInfo){
 }
 
 void Population::evaluate(std::string folder,int trial) {
-    // Importar módulo
-    //PyObject* name = PyUnicode_FromString("classification");
+    // Import module
     PyObject* name = PyUnicode_FromString("annarchy");
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
 
-    // Crear un vector para almacenar los valores de fitness de cada genoma
+    // Create a vector to store the fitness values of each genome
     std::vector<float> fitness_values(nGenomes, 0.0f);
 
-    // Obtener número máximo de procesos
+    // Get the maximum number of processes
     long max_processes = parameters.process_max;
-    /*long max_processes = sysconf(_SC_CHILD_MAX);
-    if (max_processes == -1) {
-        std::cerr << "Error al obtener el número máximo de procesos" << std::endl;
-        return;
-    }*/
 
-    // Dividir los genomas entre los procesos
-    int genomes_per_process = nGenomes / max_processes; // Redondeo hacia arriba
+    // Divide the genomes among the processes
+    int genomes_per_process = nGenomes / max_processes; // Round up
     if (genomes_per_process == 0){
         genomes_per_process = 1;
     }
     
 
-    // Crear un vector de pipes para la comunicación con los procesos hijos
+    // Create a vector of pipes for communication with child processes
     std::vector<std::array<int, 2>> pipes(max_processes);
 
-    // Crear un vector para almacenar los IDs de procesos hijos
+    // Create a vector to store the IDs of child processes
     std::vector<pid_t> child_processes;
 
     for (int i = 0; i < max_processes; ++i) {
@@ -408,16 +382,16 @@ void Population::evaluate(std::string folder,int trial) {
             break;
         }
         
-        // Crear un nuevo pipe para la comunicación con el proceso hijo
+        // Create a new pipe for communication with the child process
         if (pipe(pipes[i].data()) == -1) {
-            std::cerr << "Error al crear pipe" << std::endl;
+            std::cerr << "Error creating pipe" << std::endl;
             return;
         }
 
         pid_t pid = fork();
         if (pid == 0) {
-            // Código para el proceso hijo
-            close(pipes[i][0]); // Cerrar el extremo de lectura del pipe en el hijo
+            // Code for the child process
+            close(pipes[i][0]); // Close the read end of the pipe in the child
 
             std::vector<float> child_fitness_values(end - start, 0.0f);
 
@@ -425,20 +399,20 @@ void Population::evaluate(std::string folder,int trial) {
                 child_fitness_values[j - start] = genomes[j]->singleEvaluation(load_module, folder, trial);
             }
 
-            // Escribir los valores de fitness al proceso padre
+            // Write the fitness values to the parent process
             write(pipes[i][1], child_fitness_values.data(), (end - start) * sizeof(float));
-            close(pipes[i][1]); // Cerrar el extremo de escritura del pipe
+            close(pipes[i][1]); // Close the write end of the pipe
 
-            exit(0); // Salir del proceso hijo después de ejecutar singleEvaluation
+            exit(0); // Exit the child process after executing singleEvaluation
         } else if (pid < 0) {
-            std::cerr << "Error al crear proceso hijo" << std::endl;
+            std::cerr << "Error creating child process" << std::endl;
         } else {
-            close(pipes[i][1]); // Cerrar el extremo de escritura del pipe en el padre
+            close(pipes[i][1]); // Close the write end of the pipe in the parent
             child_processes.push_back(pid);
         }
     }
 
-    // Esperar a que todos los procesos hijos terminen y leer los valores de fitness de los pipes
+    // Wait for all child processes to finish and read the fitness values from the pipes
     for (int i = 0; i < static_cast<int>(child_processes.size()); ++i) {
         waitpid(child_processes[i], nullptr, 0);
 
@@ -446,16 +420,15 @@ void Population::evaluate(std::string folder,int trial) {
         int end = std::min(start + genomes_per_process, nGenomes);
 
         read(pipes[i][0], fitness_values.data() + start, (end - start) * sizeof(float));
-        close(pipes[i][0]); // Cerrar el extremo de lectura del pipe
+        close(pipes[i][0]); // Close the read end of the pipe
     }
 
 
     ofstream outfile(folder + "/info.txt", ios::app);
     outfile << "\n-------- Evaluation " << " --------\n";
-    // Actualizar los valores de fitness en los genomas correspondientes
+    // Update the fitness values in the corresponding genomes
     for (int i = 0; i < nGenomes; ++i) {
         genomes[i]->setFitness(fitness_values[i]);
-        //std::cout << "Genome id: " << genomes[i]->getId() << " Annarchy id: " << genomes[i]->getIdAnnarchy() << " Fitness: " << genomes[i]->getFitness() << std::endl;
     }
     outfile.close();
 
@@ -566,10 +539,25 @@ void Population::evolution(int n, std::string folder, int trial){
         parameters.reproducirMuta.push_back(0);
 
         evaluate(folder, trial);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Eval --------\n";
+        outfile.close();
         eliminate(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Eliminate --------\n";
+        outfile.close();
         mutations(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Mutations --------\n";
+        outfile.close();
         reproduce(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Reproduce --------\n";
+        outfile.close();
         speciation(filenameInfo);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Speciation --------\n";
+        outfile.close();
         fstream outfile2(filenameOperadores, ios::app);
         outfile2 << "\n-------- Resumen operadores Generacion: " << i << " --------\n";
         outfile2 << "---> mutacionPeso: " << parameters.mutacionPeso.back() << endl;
@@ -642,14 +630,14 @@ void Population::offspringsPerSpecies() {
         totalAverageFitness += species[i]->averageFitness;
     }
 
-    // Asignar descendientes proporcionalmente al fitness promedio ajustado
+    // Asignate offspring proportionally to the adjusted average fitness
     for (int i = 0; i < speciesSize; ++i) {
         offspringsAlloted[i] = round((species[i]->averageFitness / totalAverageFitness) * parameters.numberGenomes);
         if (offspringsAlloted[i] < 0) offspringsAlloted[i] = 0;
         sum += offspringsAlloted[i];
     }
 
-    // Ajustar para asegurar que el número total de descendientes es exactamente igual a parameters.numberGenomes
+    // Adjust to ensure that the total number of offspring is exactly equal to parameters.numberGenomes
     int difference = (parameters.numberGenomes - genomesSize) - sum;
     while (difference != 0) {
         for (int i = 0; i < speciesSize; ++i) {

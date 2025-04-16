@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <sstream> // Para dividir líneas
-#include <fstream>  // Asegúrate de incluir este encabezado 
-#include <cstdlib>  // para std::atof
+#include <sstream>
+#include <fstream> //  To ensure that the header is included
+#include <cstdlib>  
 #include <filesystem>
-#include <sys/stat.h>  // Para mkdir
-#include <sys/types.h> // Para mkdir
+#include <sys/stat.h>  
+#include <sys/types.h> 
 
 
 #define PY_SSIZE_T_CLEAN
@@ -22,51 +22,47 @@ int main(int argc, char *argv[]) {
         std::string folder, parentFolder, subFolder;
         int trial = 0;
         if (argc == 2){
-            //std::cout << argc << " entre trial:" << argv[1] << endl;
             trial = atoi(argv[1]);
             folder = "results/trial-"+to_string(trial);
             parentFolder = "results";
             subFolder = parentFolder + "/trial-"+to_string(trial);
         }else{
-            //std::cout << argc << endl;
             folder = "results/trial-0";
             parentFolder = "results";
             subFolder = parentFolder + "/trial-0";
         }
         std::cout << "Folder: " << folder << " trial: " << trial << endl;
-        // Crear la carpeta padre si no existe
+        // Create the parent folder if it does not exist
         if (mkdir(parentFolder.c_str(), 0777) == 0 || errno == EEXIST) {
-            std::cout << "Carpeta padre creada o ya existe: " << parentFolder << std::endl;
-            // Crear la subcarpeta
+            std::cout << "Parent folder created or already exists: " << parentFolder << std::endl;
+            // Create the subfolder
             if (mkdir(subFolder.c_str(), 0777) == 0) {
-                std::cout << "Subcarpeta creada exitosamente: " << subFolder << std::endl;
+                std::cout << "Subfolder created successfully: " << subFolder << std::endl;
             } else {
-                std::cout << "Error al crear la subcarpeta o ya existe." << std::endl;
+                std::cout << "Error creating subfolder or already exists." << std::endl;
             }
         } else {
-            std::cout << "Error al crear la carpeta padre." << std::endl;
+            std::cout << "Error creating parent folder." << std::endl;
         }
 
         setenv("PYTHONPATH", ".", 1);
         Py_Initialize();
-        //menu();
         std::cout << "starting" << endl;
-        //float fitness = run(1);
         fitness = run3(trial);
         std::cout << "finalized" << endl;
         Py_Finalize();
 
     } else{
 
-        // Parametros constantes
+        // Constant parameters
         int numberGenomes, numberInputs, numberOutputs, evolutions, n_max, process_max;
         float learningRate, inputWeights_min, inputWeights_max, weightsRange_min, weightsRange_max;
         string function;
 
-        std::ifstream file("config/config.cfg"); // Abrir el archivo
+        std::ifstream file("config/config.cfg"); // Open the file
         std::string line;
 
-        // Leer línea por línea del archivo
+        // Read line by line from the file
         while (std::getline(file, line)) {
             std::istringstream iss(line);
             std::string key;
@@ -74,7 +70,7 @@ int main(int argc, char *argv[]) {
                 std::string value;
                 if (std::getline(iss, value)) {
                     try {
-                        // Asignar valor al parámetro correspondiente
+                        // Assign value to the corresponding parameter
                         if (key == "numberGenomes") numberGenomes = std::stoi(value);
                         else if (key == "numberInputs") numberInputs = std::stoi(value);
                         else if (key == "numberOutputs") numberOutputs = std::stoi(value);
@@ -124,30 +120,27 @@ int main(int argc, char *argv[]) {
         std::string parentFolder = "results";
         std::string subFolder = parentFolder + "/trial-"+std::to_string(trialNumber);
 
-        // Crear la carpeta padre si no existe
+        // Create the parent folder if it does not exist
         if (mkdir(parentFolder.c_str(), 0777) == 0 || errno == EEXIST) {
-            //std::cout << "Carpeta padre creada o ya existe: " << parentFolder << std::endl;
-            // Crear la subcarpeta
+            // Create the subfolder
             if (mkdir(subFolder.c_str(), 0777) == 0) {
-                //std::cout << "Subcarpeta creada exitosamente: " << subFolder << std::endl;
+                //std::cout << "Subfolder created successfully: " << subFolder << std::endl;
             } else {
-                //std::cout << "Error al crear la subcarpeta o ya existe." << std::endl;
+                //std::cout << "Error creating subfolder or already exists." << std::endl;
             }
         } else {
-            //std::cout << "Error al crear la carpeta padre." << std::endl;
+            //std::cout << "Error creating parent folder." << std::endl;
         }
 
         string filename = folder + "/config.cfg";
-        // Crear la carpeta
-        //std::filesystem::create_directories(folder);
-        // Crear y abrir el archivo en modo truncado
+        // Create and open the file in truncate mode
         ofstream config_file(filename, ofstream::trunc);
         if (!config_file.is_open()) {
             cerr << "No se pudo abrir el archivo config.cfg para escribir." << endl;
             return 1;
         }
 
-        // Escribir los parámetros
+        // Write the parameters
         config_file << "keep=" << keep << "\n";
         config_file << "threshold=" << threshold << "\n";
         config_file << "interSpeciesRate=" << probabilityInterSpecies << "\n";

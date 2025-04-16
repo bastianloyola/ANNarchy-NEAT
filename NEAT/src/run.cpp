@@ -18,7 +18,7 @@ std::vector<std::string> configNames(std::string directory) {
     std::string path = "config";
     DIR* dir = opendir(path.c_str());
     if (dir == nullptr) {
-        std::cerr << "configNames: No se pudo abrir el directorio." << std::endl;
+        std::cerr << "configNames: Could not open the directory." << std::endl;
     }
 
     struct dirent* entry;
@@ -33,11 +33,11 @@ std::vector<std::string> configNames(std::string directory) {
     return configNames;
 }
 void saveConfig(std::string filename, std::string configName) {
-    std::ifstream file(configName); // Abrir el archivo
+    std::ifstream file(configName); 
     std::string line;
 
     ofstream outfile(filename, ios::app);
-    // Leer línea por línea del archivo
+    // Read line by line from the file
     while (std::getline(file, line)) {
         outfile << "  " << line << "\n";
     }
@@ -50,7 +50,7 @@ void saveRun(Population* population, int n, string filename, string folder) {
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
-        cerr << "saveRun: No se pudo abrir el archivo." << filename <<endl;
+        cerr << "saveRun: Could not open the file." << filename <<endl;
     }
     outfile << "--Results of run:" << n << " --\n";
     outfile << "Best Genome \n";
@@ -80,7 +80,7 @@ void saveRun(Population* population, int n, string filename, string folder) {
     string file2 = folder + "/best" + to_string(n) + ".txt";
     ofstream outfile2(file2, ios::app);
     if(!outfile2) {
-        cerr << "saveRun: No se pudo abrir el archivo outfile2: " << file2 << endl;
+        cerr << "saveRun: Could not open the file." << file2 <<endl;
     }
 
     for (int i = 0; i < nConnections; i++) {
@@ -97,7 +97,7 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
     ofstream outfile(filename, ios::app);
 
     if(!outfile) {
-        cerr << "saveResults: No se pudo abrir el archivo." << filename <<endl;
+        cerr << "saveResults: Could not open the file." << filename <<endl;
     }
 
     outfile << "Summerized results: \n";
@@ -116,8 +116,8 @@ void saveResults(vector<int> bestFitness, int n, string filename) {
 float run(int timesPerConfig) {
 
     string filename = "results/results.txt";
-    string folder_path_1= "annarchy"; // Ruta de la carpeta que deseas borrar
-    string folder_path_2 = "__pycache__"; // Ruta de la carpeta que deseas borrar
+    string folder_path_1= "annarchy"; 
+    string folder_path_2 = "__pycache__";
     printf("---- Running ----\n");
     vector <string> names = configNames("config");
     int nConfig = static_cast<int>(names.size());
@@ -129,7 +129,7 @@ float run(int timesPerConfig) {
         printf("---- Config: %s ----\n", names[j].c_str());
         ofstream outfile(filename, ios::app);
         if(!outfile) {
-            cerr << "run: No se pudo abrir el archivo." << filename <<endl;
+            cerr << "run: Could not open the file." << filename <<endl;
         }
         outfile << "\n---- Results of cofig: " << j << " ----\n";
         outfile.close();
@@ -166,7 +166,7 @@ float run2(string folder, int trial) {
 
     ofstream outfile(filename, ios::app);
     if(!outfile) {
-        cerr << "run: No se pudo abrir el archivo." << filename <<endl;
+        cerr << "run: Could not open the file." << filename <<endl;
     }
 
     outfile << "\n---- Results of cofig: ----\n";
@@ -200,7 +200,7 @@ float run3(int trial) {
 
     ofstream outfile(filename, ios::app);
     if(!outfile) {
-        cerr << "run: No se pudo abrir el archivo: " << filename <<endl;
+        cerr << "run: Could not open the file." << filename <<endl;
     }
     
     printf("---- Loading Config ----\n");
@@ -208,14 +208,12 @@ float run3(int trial) {
     printf("---- Loaded Config ----\n");
 
 
-    // Escribir en el archivo config.cfg
+    // Write to the config.cfg file
     string filename2 = folder + "/config.cfg";
-    // Crear la carpeta
-    //std::filesystem::create_directories(folder);
-    // Crear y abrir el archivo en modo truncado
+    // Create and open the file in truncate mode
     ofstream config_file(filename2, ofstream::trunc);
     if (!config_file.is_open()) {
-        cerr << "No se pudo abrir el archivo: " << filename2 << endl;
+        cerr << "Could not open the file: " << filename2 << endl;
         return 1;
     }
     config_file << "keep=" << parameters.keep << "\n";
@@ -244,7 +242,7 @@ float run3(int trial) {
     config_file << "folder=" << folder << "\n";
     config_file.close();
 
-    outfile << "\n---- Results of cofig: ----\n";
+    outfile << "\n---- Results of config: ----\n";
     outfile.close();
     saveConfig(filename, folder + "/config.cfg");
 

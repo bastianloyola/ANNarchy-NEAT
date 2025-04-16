@@ -1,11 +1,11 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-// Clase de las conexiones entre nodos
+// Class of the connections between nodes
 class Connection {    
 
   public:  
-    // Constructor de la clase
+    // Class constructor
     Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int innovation);
     Connection();
     // Getters         

@@ -45,7 +45,6 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
                 if (w == 0) w2 = -1; 
             }
             
-            //float weight = maxWeight*inh;
             float weight = minWeight + static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(maxWeight-minWeight)));
             weight = weight*w2;
             Connection c(i+1, j+1, weight, true, cInnov);
@@ -54,10 +53,9 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     }
     for (int i = 0; i < static_cast<int>(parameters->inputWeights.size()); i++){
         inputWeights.push_back(parameters->inputWeights[i]);
-        //printf("Input weight %d: %f\n", i, inputWeights[i]);
+
     }
-    // Verificar el tamaño de inputWeights
-    //std::cout << "Tamaño de inputWeights en el constructor: " << inputWeights.size() << std::endl;
+
 }
 
 std::vector<Connection> Genome::getConnections(){ 
@@ -206,11 +204,10 @@ void Genome::printGenome() {
 
 
 float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
-    //Inicializar varibles necesarias
     int n = static_cast<int>(nodes.size());
     int n_max = parameters->n_max; 
     int numConnections = static_cast<int>(connections.size());
-    //Obtener npArray
+    // Create a NumPy array with the weights of the connections
     double data[n*n];
     for (int i = 0; i < n*n; i++){
         data[i] = 0;
@@ -235,28 +232,27 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
     npy_intp dims[2] = {n, n};
     PyObject* numpy_array = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, data);
 
-    // Convertir el vector inputWeights a un array de NumPy
+    // Check if the inputWeights vector is empty
     if (inputWeights.empty()) {
         std::cerr << "Error: inputWeights está vacío en singleEvaluation." << std::endl;
         return -1;
     }
 
-    // Convertir el vector inputWeights a un array de NumPy
+    // Convert the inputWeights vector to a NumPy array
     std::vector<float>& inputWeights2 = inputWeights;
     npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights2.size()) };
     PyObject* numpy_inputWeights = PyArray_SimpleNewFromData(1, inputWeights_dims, NPY_FLOAT, inputWeights.data());
 
-    //Llamado a función
+    // Call the function
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
     PyObject* args = PyTuple_Pack(8, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)), PyFloat_FromDouble(double(id)));
     PyObject* callfunc = PyObject_CallObject(func, args);
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
-    std::cout << "Fitness de " << id << ": " << value << std::endl;
     setFitness(value);
 
 
-    //Decref de variables necesarias
+    // Decref of necesary variables
     Py_DECREF(numpy_array);
     Py_DECREF(args);
 
@@ -269,7 +265,7 @@ void Genome::mutation(string filenameInfo){
     ofstream outfile(filenameInfo, ios::app);
     outfile << " -> Genome id: " << id << " idAnnarchy: " << id_annarchy << endl;
 
-    //Probabilidades
+    // Probabilities
     if (static_cast<int>(nodes.size()) < parameters->largeSize){
         add_node = parameters->probabilityAddNodeLarge;
         add_link = parameters->probabilityAddLinkLarge;
@@ -366,7 +362,6 @@ void Genome::mutation(string filenameInfo){
         float new_inputWeights = inputWeights[index] + weight;
 
         inputWeights.at(index) = new_inputWeights;
-        //cout << inputWeights[index] << endl;   
     }
 
     outfile.close();

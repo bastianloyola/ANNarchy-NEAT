@@ -1,7 +1,7 @@
 #ifndef SPECIES_H
 #define SPECIES_H
 
-#include "genome.h" // Include necessary dependencies
+#include "genome.h" 
 
 #include <vector>
 
@@ -14,6 +14,11 @@ public:
     float threshold;
     double averageFitness;
     int allocatedOffsprings;
+    float tau_c;
+    float a_minus;
+    float a_plus;
+    float tau_minus;
+    float tau_plus;
 
     // Method to add a genome to the species
     void add_genome(Genome *genome);

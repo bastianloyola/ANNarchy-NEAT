@@ -3,7 +3,7 @@
 
 using namespace std;
 
-// Constructor de la clase
+// Class constructor
 Connection::Connection(int c_in_node, int c_out_node, float c_weight, bool c_enabled, int c_innovation){
     in = c_in_node;
     out = c_out_node;

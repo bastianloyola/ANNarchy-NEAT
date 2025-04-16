@@ -2,12 +2,12 @@
 #define PARAMETERS_H
 
 #include <vector>
-#include <string> // Para manejar cadenas de caracteres
+#include <string> 
 
 class Parameters{
 public:
     Parameters();
-    Parameters(const std::string& cfgFilename); // Constructor que carga los parámetros desde el archivo cfg
+    Parameters(const std::string& cfgFilename); // Constructor that loads the parameters from the cfg file
     Parameters(int numberGenomes, int numberInputs, int numberOutputs, 
         float keep=0.9, float threshold=0.01,
         float interSpeciesRate=0.001, float noCrossoverOff=0.25,
@@ -15,7 +15,7 @@ public:
         float probabilityAddNodeSmall=0.9, float probabilityAddLinkSmall=0.9,
         float probabilityAddNodeLarge=0.9, float probabilityAddLinkLarge=0.9,
         float probabilityInputWeightMutated=0.05, int largeSize=20,
-        float c1=1.0, float c2=1.0, float c3=0.4);
+        float c1=1.0, float c2=1.0, float c3=0.4, float tau_c = 1, float a_minus = 1, float a_plus = 1, float tau_minus = 1, float tau_plus = 1);
     int numberGenomes;
     int numberInputs;
     int numberOutputs;
@@ -39,8 +39,12 @@ public:
     float learningRate;
     std::vector<float> inputWeights;
     float weightsRange[2] = {0.0f, 0.0f};
+    float tau_c;
+    float a_plus;
+    float a_minus;
+    float tau_minus;
+    float tau_plus;
     std::string function;
-
     std::vector<int> mutacionPeso;
     std::vector<int> mutacionPesoInput;
     std::vector<int> agregarNodos;
@@ -50,7 +54,7 @@ public:
     std::vector<int> reproducirMuta;
 
 private:
-    // Función para cargar los parámetros desde el archivo cfg
+    // Function to load the parameters from the cfg file
     void loadFromCfg(const std::string& filename);
 };
 

@@ -8,18 +8,15 @@
 #include <random>
 #include <atomic>
 #include <mutex>
-#include <cstdlib> // Para la función rand()
-#include <ctime>   // Para la función time()
+#include <cstdlib> 
+#include <ctime>   
 
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
 using namespace std;
-/*
-//vector<Genome> eliminate_less_fit(vector<Genome>)
 
-*/
 bool getBooleanWithProbability(double probability) {
     // Generador de números aleatorios
     random_device rd;
@@ -42,7 +39,7 @@ bool compareIdNode(Node& a,Node& b) {
 }
 
 
-// Función para generar un número aleatorio en un rango específico [min, max]
+// Function to generate a random number in a specific range [min, max]
 int randomInt(int min, int max) {
     if (min>max){
         std::cout << "Error: min > max" << std::endl;
@@ -51,12 +48,12 @@ int randomInt(int min, int max) {
         std::cout << "Error: min == max" << std::endl;
     }
     
-    // Generador de números aleatorios
-    std::random_device rd;  // Semilla aleatoria
-    std::mt19937 gen(rd()); // Generador Mersenne Twister
+    // Random number generator
+    std::random_device rd; 
+    std::mt19937 gen(rd());
     std::uniform_int_distribution<> distrib(min, max-1);
 
-    // Genera un número aleatorio dentro del rango
+    // Generate a random number within the range
     return distrib(gen);
 }
 
@@ -72,19 +69,19 @@ void deleteDirectory(const std::string& path) {
                 struct stat entryInfo;
                 if (stat(fullPath.c_str(), &entryInfo) == 0) {
                     if (S_ISDIR(entryInfo.st_mode)) {
-                        // Es un directorio, eliminar recursivamente
+                        // It's a directory, delete recursively
                         deleteDirectory(fullPath);
                     } else {
-                        // Es un archivo, eliminar
+                        // It's a file, delete it
                         unlink(fullPath.c_str());
                     }
                 }
             }
         }
         closedir(dir);
-        // Eliminar el directorio ahora que está vacío
+        // Erase the directory now that it's empty
         rmdir(path.c_str());
     } else {
-        std::cerr << "No se pudo abrir el directorio: " << path << std::endl;
+        std::cerr << "Could not open directory: " << path << std::endl;
     }
 }

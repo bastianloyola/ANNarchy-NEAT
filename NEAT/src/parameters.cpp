@@ -1,15 +1,15 @@
 #include "../headers/parameters.h"
-#include <fstream> // Para leer archivos
-#include <sstream> // Para dividir líneas
-#include <string> // Para manejar cadenas de caracteres
+#include <fstream> 
+#include <sstream> 
+#include <string> 
 #include <iostream>
 
-// Función para cargar los parámetros desde el archivo cfg
+// Function to load the parameters from the cfg file
 void Parameters::loadFromCfg(const std::string& filename) {
-    std::ifstream file(filename); // Abrir el archivo
+    std::ifstream file(filename);
     std::string line;
 
-    // Leer línea por línea del archivo
+    // Read line by line from the file
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string key;
@@ -17,7 +17,7 @@ void Parameters::loadFromCfg(const std::string& filename) {
             std::string value;
             if (std::getline(iss, value)) {
                 try {
-                    // Asignar valor al parámetro correspondiente
+                    // Assign value to the corresponding parameter
                     if (key == "keep") keep = std::stof(value);
                     else if (key == "threshold") threshold = std::stof(value);
                     else if (key == "interSpeciesRate") interSpeciesRate = std::stof(value);
@@ -61,6 +61,12 @@ void Parameters::loadFromCfg(const std::string& filename) {
                         weightsRange[0] = minWeight;
                         weightsRange[1] = maxWeight;
                     }else if (key == "function") function = value;
+                    else if (key == "tau_c") tau_c = std::stof(value);
+                    else if (key == "a_minus") a_minus = std::stof(value);
+                    else if (key == "a_plus") a_plus = std::stof(value);
+                    else if (key == "tau_minus") tau_minus = std::stof(value);
+                    else if (key == "tau_plus") tau_plus = std::stof(value);
+                    
                 }catch (const std::exception& e) {
                     std::cerr << "Error parsing key: " << key << ", value: " << value << ". Exception: " << e.what() << std::endl;
                 }
@@ -69,23 +75,23 @@ void Parameters::loadFromCfg(const std::string& filename) {
     }
 }
 
-// Constructor que carga los parámetros desde el archivo cfg
+// Constructor that loads the parameters from the cfg file
 Parameters::Parameters(const std::string& cfgFilename) {
-    // Cargar parámetros desde el archivo cfg
+    // Load parameters from the cfg file
     loadFromCfg(cfgFilename);
 }
 
-// Constructor por defecto
+// Default constructor
 Parameters::Parameters() {}
 
-// Constructor con parámetros
+// Constructor with parameters
 Parameters::Parameters(int numberGenomes, int numberInputs, int numberOutputs, float keep, float threshold,
             float interSpeciesRate, float noCrossoverOff, float probabilityWeightMutated, 
             float probabilityAddNodeSmall, float probabilityAddLinkSmall, float probabilityAddNodeLarge, float probabilityAddLinkLarge,
-            float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3)
+            float probabilityInputWeightMutated, int largeSize, float c1, float c2, float c3, float tau_c, float a_minus, float a_plus, float tau_minus, float tau_plus)
     :numberGenomes(numberGenomes),numberInputs(numberInputs),numberOutputs(numberOutputs),keep(keep),threshold(threshold),
     interSpeciesRate(interSpeciesRate),noCrossoverOff(noCrossoverOff),
     probabilityWeightMutated(probabilityWeightMutated),probabilityAddNodeSmall(probabilityAddNodeSmall),
     probabilityAddLinkSmall(probabilityAddLinkSmall),probabilityAddNodeLarge(probabilityAddNodeLarge),
     probabilityAddLinkLarge(probabilityAddLinkLarge), probabilityInputWeightMutated(probabilityInputWeightMutated),
-    largeSize(largeSize),c1(c1),c2(c2),c3(c3){}
+    largeSize(largeSize),c1(c1),c2(c2),c3(c3),tau_c(tau_c),a_plus(a_plus),a_minus(a_minus),tau_minus(tau_minus),tau_plus(tau_plus){}

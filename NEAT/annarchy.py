@@ -96,7 +96,7 @@ def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights, geno
     if funcion == "xor":
         return xor(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
-        return cartpole(pop, Monitor, input_index, output_index, inputWeights)
+        return cartpole(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "lunar_lander":
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
@@ -156,36 +156,48 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
 
 
 
-def cartpole(pop,Monitor,input_index,output_index,inputWeights):
+def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
     env = gym.make("CartPole-v1")
-    observation, info = env.reset(seed=42)
-    max_steps = 500
+    observation, info = env.reset()
     terminated = False
     truncated = False
     maxInput = inputWeights[1]
     minInput = inputWeights[0]
-    #Generar 4 input weights para cada input
+    #Generate 4 input weights for each input
+    np.random.seed(int(genome_id))
     inputWeights = np.random.uniform(minInput,maxInput,4)
     #Number of episodes
     episodes = 100
     h=0
     #Final fitness 
     final_fitness = 0
+
+    # Limits for each observation variable
+    limits = [
+        (-4.8, 4.8),  # Cart position
+        (-10.0, 10.0),  # Cart velocity (estimated)
+        (-0.418, 0.418),  # Pole angle in radians
+        (-10.0, 10.0)  # Pole angular velocity (estimated)
+    ]
+    
     while h < episodes:
         j=0
         returns = []
         actions_done = []
         terminated = False
         truncated = False
-        while j < max_steps and not terminated and not truncated:
+        env.reset()
+        while not terminated and not truncated:
             #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
             k = 0
             for val in observation:
                 if val < 0:
+                    val = normalize(val, limits[k][0], limits[k][1])
                     pop[int(input_index[i])].I = -val*inputWeights[k]
                     pop[int(input_index[i+1])].I = 0
                 else:
+                    val = normalize(val, limits[k][0], limits[k][1])
                     pop[int(input_index[i])].I = 0
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
@@ -197,9 +209,9 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
             output2 = np.size(spikes[output_index[1]])
             #Choose the action with the most spikes
             action = env.action_space.sample()
-            if output1 > output2:
+            if output1 > output2: #left
                 action = 0
-            elif output1 < output2:
+            elif output1 < output2: #right
                 action = 1
             observation, reward, terminated, truncated, info = env.step(action)
             returns.append(reward)
@@ -207,15 +219,12 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights):
             pop.reset()
             Monitor.reset()
             j += 1
-        env.reset()
-        #print("Episode: ",h," Fitness: ",np.sum(returns))
+        #The fitness is the sum of the rewards for each episode
         final_fitness += np.sum(returns)
         h += 1
+    #The final fitness is the mean of the fitness for each episode
     final_fitness = final_fitness/episodes
-    #print("Final mean fitness: ",final_fitness,"\n")
     env.close()
-    #print("Returns: ",returns)
-    #print("Actions: ",actions_done)
     return final_fitness
 
 
@@ -723,64 +732,3 @@ def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): 
     env.close()
     return final_fitness
 
-
-
-
-        
-def exampleIzhikevich(): 
-    pop = Population(geometry=1000, neuron=Izhikevich)
-    excSize = int(800)
-    Exc = pop[:800]
-    Inh = pop[800:]
-    print("2")
-
-    re = np.random.random(800)      ; ri = np.random.random(200)
-    Exc.noise = 5.0                 ; Inh.noise = 2.0
-    Exc.a = 0.02                    ; Inh.a = 0.02 + 0.08 * ri
-    Exc.b = 0.2                     ; Inh.b = 0.25 - 0.05 * ri
-    Exc.c = -65.0 + 15.0 * re**2    ; Inh.c = -65.0
-    Exc.d = 8.0 - 6.0 * re**2       ; Inh.d = 2.0
-    Exc.v = -65.0                   ; Inh.v = -65.0
-    Exc.u = Exc.v * Exc.b           ; Inh.u = Inh.v * Inh.b
-    exc_proj = Projection(pre=Exc, post=pop, target='exc')
-    exc_proj.connect_all_to_all(weights=Uniform(0.0, 0.5))
-
-    inh_proj = Projection(pre=Inh, post=pop, target='inh')
-    inh_proj.connect_all_to_all(weights=Uniform(0.0, 1.0))
-
-    compile()
-    M = Monitor(pop, ['spike', 'v'])
-
-    simulate(3000.0, measure_time=True)
-    spikes = M.get('spike')
-    v = M.get('v')
-    t, n = M.raster_plot(spikes)
-    fr = M.histogram(spikes)
-    print(spikes[0])
-    fig = plt.figure(figsize=(12, 12))
-
-    # First plot: raster plot
-    plt.subplot(311)
-    plt.plot(t, n, 'b.')
-    plt.title('Raster plot')
-
-    # Second plot: membrane potential of a single excitatory cell
-    plt.subplot(312)
-    plt.plot(v[:, 15]) # for example
-    plt.title('Membrane potential')
-
-    # Third plot: number of spikes per step in the population.
-    plt.subplot(313)
-    plt.plot(fr)
-    plt.title('Number of spikes')
-    plt.xlabel('Time (ms)')
-
-    plt.tight_layout()
-    plt.show()
-    return 0
-
-
-
-
- #Example SNN for lunar_lander2
-#snn(16, 4, 30, 0, np.random.rand(20,20), np.random.rand(2), 0)
