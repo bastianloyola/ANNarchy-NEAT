@@ -96,7 +96,7 @@ IZHIKEVICH = Neuron(
 pop = Population(10, IZHIKEVICH)
 
 #syn = Projection(pop, pop, target='exc')
-syn = Projection(pop, pop, target='exc', synapse=R_STDP)
+syn = Projection(pop, pop, target='exc')
 
 #matriz de conexion de los 8 de enntradas a los 2 de salida
 input_index = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -121,7 +121,7 @@ matrix = sparse.csr_matrix(matrix)
 syn.connect_from_sparse(matrix)
 
 
-compile(directory="cartpole-rstdp")
+compile(directory="cartpole")
 
 weights = syn.w[0]
 print("Pesos de INICIO: ", weights)
@@ -197,11 +197,11 @@ for ep in range(episodes):
                 pop[int(input_index[i+1])].I = val*20 #inputWeights[k]
             i += 2
             k += 1
-        distance = - abs(observation[2])
-        distancias.append(distance)
-        r = distance - np.mean(distancias)
-        syn.reward = r
-        rs.append(r)
+        #distance = - abs(observation[2])
+        #distancias.append(distance)
+        #r = distance - np.mean(distancias)
+        #syn.reward = r
+        #rs.append(r)
 
         simulate(50.0)
         #print("Recompensa: ", syn.reward)

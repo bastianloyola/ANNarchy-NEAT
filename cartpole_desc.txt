@@ -1,0 +1,5 @@
+cartpole_nosinpapsis.py (212): Es el cartpole con la topologia basica sin funcion de sinapsis
+cartpole_STDP.py (21): Cartpole con la regla STDP que trae annarchy
+cartpole_RSTDP.py (189): Version prototipo de la regla,  tiene abs en traza de elegibilidad da errores en los calculos
+cartpole_RSTDP traza.py (188): Version mejorada de la anterior sin el abs
+cartpole_RSTDP definitivo.py (209): Este es el con mejores resultados combinacion de los anteriores, que arregla la situacion donde R y C < 0, que deberia ser un LTD

@@ -38,13 +38,19 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         Synapse.__init__(self,
@@ -121,7 +127,7 @@ matrix = sparse.csr_matrix(matrix)
 syn.connect_from_sparse(matrix)
 
 
-compile(directory="cartpole-rstdp")
+compile(directory="cartpole-rstdp-LTDFIX")
 
 weights = syn.w[0]
 print("Pesos de INICIO: ", weights)

@@ -1,6 +1,10 @@
 from ANNarchy import *
 import matplotlib.pyplot as plt
 import numpy as np
+import gymnasium as gym
+from ns_gym.wrappers import NSClassicControlWrapper
+from ns_gym.schedulers import ContinuousScheduler, PeriodicScheduler
+from ns_gym.update_functions import RandomWalk, IncrementUpdate
 
 
 class R_STDP(Synapse):
@@ -38,13 +42,19 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         Synapse.__init__(self,
@@ -121,15 +131,22 @@ matrix = sparse.csr_matrix(matrix)
 syn.connect_from_sparse(matrix)
 
 
-compile(directory="cartpole-rstdp")
+compile(directory="ns-cartpole-rstdp-LTDFIX")
 
 weights = syn.w[0]
 print("Pesos de INICIO: ", weights)
 
-import gymnasium as gym
 
-#cartpole
-env = gym.make('CartPole-v1')
+
+
+
+# Entorno base
+base_env = gym.make("CartPole-v1")
+scheduler = PeriodicScheduler(period=3)
+update_function = IncrementUpdate(scheduler, k=0.1)
+tunable_params = {"gravity": update_function}
+env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+
 i = 0
 limites = [
         (-4.8, 4.8),  
@@ -156,17 +173,21 @@ returns = []
 actions_done = []
 terminated = False
 truncated = False
-observation = env.reset()[0]
+observation = env.reset()[0].state
+print(observation)
 np.random.seed(10)
 inputWeights = np.random.uniform(0,150,4)
 #print("Pesos de entrada: ", inputWeights)
 #print(observation)
 
+gravedades = []
+
+
 M = Monitor(pop, ['spike','v'])
 num_steps = 1000
 i = 0
 acciones = []
-episodes = 100
+episodes = 500
 total_return = 0.0
 for ep in range(episodes):
     observation, _ = env.reset()
@@ -184,7 +205,7 @@ for ep in range(episodes):
         # Codificar observación
         i = 0
         k = 0
-        for val in observation:
+        for val in observation.state:
             if val < 0:
                 #Normalizar val
                 val = normalize(val, limites[k][0], limites[k][1])
@@ -197,12 +218,12 @@ for ep in range(episodes):
                 pop[int(input_index[i+1])].I = val*20 #inputWeights[k]
             i += 2
             k += 1
-        distance = - abs(observation[2])
+        distance = - abs(observation.state[2])
         distancias.append(distance)
         r = distance - np.mean(distancias)
         syn.reward = r
         rs.append(r)
-
+        gravedades.append(env.unwrapped.gravity)
         simulate(50.0)
         #print("Recompensa: ", syn.reward)
         weights = syn.w[0]
@@ -234,7 +255,7 @@ for ep in range(episodes):
             acciones2.append(2)
             #print("Accion Aleatoria")
         observation, reward, terminated, truncated, info = env.step(action)
-        episode_return += reward
+        episode_return += reward.reward
         #La recomensa será la distancia de la vara desde el punto optimo cuando esta a 90ª
         # reward = 90º - abs(observation[2])
         #print(np.rad2deg(observation[2]))
@@ -300,3 +321,10 @@ plt.show()
 
 
 #print(valores)
+plt.figure()
+plt.plot(gravedades)
+plt.xlabel("Paso")
+plt.ylabel("Valor de gravedad")
+plt.title("Evolución del parámetro 'gravity'")
+plt.grid(True)
+plt.show()

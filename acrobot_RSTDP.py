@@ -1,0 +1,203 @@
+from ANNarchy import *
+
+class R_STDP(Synapse):
+    """
+    R-STDP con trazas pre y post, y modulación por recompensa.
+    La actualización del peso depende de la coincidencia temporal (STDP) y el refuerzo externo.
+    """
+
+    _instantiated = []
+
+    def __init__(self, tau_c=100.0, a=0.005,
+                 A_plus=1.0, A_minus=1.0,
+                 tau_plus=20.0, tau_minus=20.0,
+                 w_min=0.0, w_max=1.0):
+
+        parameters = """
+            tau_c = %(tau_c)s : projection
+            a = %(a)s : projection
+            A_plus = %(A_plus)s : projection
+            A_minus = %(A_minus)s : projection
+            tau_plus = %(tau_plus)s : projection
+            tau_minus = %(tau_minus)s : projection
+            w_min = %(w_min)s : projection
+            w_max = %(w_max)s : projection
+            reward = 0.0 : projection
+        """ % locals()
+
+        equations = """
+            tau_c * dc/dt = -c : event-driven
+            tau_plus  * dx/dt = -x : event-driven
+            tau_minus * dy/dt = -y : event-driven
+        """
+
+        pre_spike = """
+            g_target += w
+            x += A_plus
+            c += y
+            w = clip(w + a * c * reward, w_min, w_max)
+        """
+
+        post_spike = """
+            y -= A_minus
+            c += x
+            w = clip(w + a * c * reward, w_min, w_max)
+        """
+
+        Synapse.__init__(self,
+                         parameters=parameters,
+                         equations=equations,
+                         pre_spike=pre_spike,
+                         post_spike=post_spike,
+                         name="R-STDP")
+
+        self._instantiated.append(True)
+
+
+LIF = Neuron(
+    parameters="""
+        tau = 50.0 : population
+        I = 0.0
+        tau_I = 10.0 : population
+    """,
+    equations="""
+        tau * dv/dt = -v + g_exc - g_inh + (I - 65) : init=0
+        tau_I * dg_exc/dt = -g_exc
+        tau_I * dg_inh/dt = -g_inh
+    """,
+    spike="v >= -40.0",
+    reset="v = -65"
+)
+
+
+IZHIKEVICH = Neuron(
+    parameters="""
+        a = 0.02 : population
+        b = 0.2 : population
+        c = -65.0 : population
+        d = 8.0 : population
+        I = 0.0
+        tau_I = 10.0 : population
+    """,
+    equations="""
+        dv/dt = 0.04*v*v + 5*v + 140 - u + I + g_exc - g_inh : init=-65
+        du/dt = a*(b*v - u) : init=-14.0
+        tau_I * dg_exc/dt = -g_exc
+        tau_I * dg_inh/dt = -g_inh
+    """,
+    spike="v >= 30.0",
+    reset="v = c; u += d"
+)
+
+
+pop = Population(15, IZHIKEVICH)
+
+
+syn = Projection(pop, pop, target='exc', synapse=R_STDP)
+
+#matriz de conexion de los 12 de enntradas a los 3 de salida
+input_index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+output_index = [12, 13, 14]
+
+#crear matrix 15x15
+matrix = np.zeros((15, 15))
+#conectar los 12 de entrada con los 3 de salida
+for i in range(12):
+    for j in range(3):
+        matrix[i][j+12] = 1
+
+#convertir en sparse matrix
+from scipy import sparse
+matrix = sparse.csr_matrix(matrix)
+
+syn.connect_from_sparse(matrix)
+
+
+compile()
+
+import gymnasium as gym
+
+env = gym.make('Acrobot-v1', render_mode='human')
+num_steps = 1000
+i = 0
+limites = [
+        (-1, 1),  # cos(theta1)
+        (-1, 1),  # sin(theta1)
+        (-1, 1),  # cos(theta2)
+        (-1, 1),  # sin(theta2)
+        (-12.5663706, 12.5663706),  # theta1_dot
+        (-28.2743339, 28.2743339)  # theta2_dot
+    ]
+
+
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
+
+
+j = 0
+returns = []
+actions_done = []
+terminated = False
+truncated = False
+observation = env.reset()[0]
+np.random.seed(4)
+inputWeights = np.random.uniform(0,150,6)
+print(observation)
+#Prediccion de recompensa en base a la media movil de la recompensa
+recompensas = []
+
+M = Monitor(pop, ['spike','v'])
+while not terminated:
+    # Codificar observación
+    i = 0
+    k = 0
+    for val in observation:
+        if val < 0:
+            #Normalizar val
+            val = normalize(val, limites[k][0], limites[k][1])
+            pop[int(input_index[i])].I = -val*inputWeights[k]
+            pop[int(input_index[i+1])].I = 0
+        else:
+            #Normalizar val
+            val = normalize(val, limites[k][0], limites[k][1])
+            pop[int(input_index[i])].I = 0
+            pop[int(input_index[i+1])].I = val*inputWeights[k]
+        i += 2
+        k += 1
+
+    simulate(50.0)
+    spikes = M.get('spike')
+    #Output from 3 neurons, one for each action
+    output1 = np.size(spikes[output_index[0]])
+    output2 = np.size(spikes[output_index[1]])
+    output3 = np.size(spikes[output_index[2]])
+    #Choose the action with the most spikes
+    action = env.action_space.sample()
+    if output1 > output2 and output1 > output3:
+        action = 0
+    elif output2 > output1 and output2 > output3:
+        action = 1
+    elif output3 > output1 and output3 > output2:
+        action = 2
+    observation, reward, terminated, truncated, info = env.step(action)
+
+    #La recomensa será la distancia al objetivo
+    #Termination: The free end reaches the target height, which is constructed as: -cos(theta1) - cos(theta2 + theta1) > 1.0
+    #cos(theta1) = observation[0]
+    #cos(theta2) = observation[2]
+    #r = 1 - (-cos(theta1) - cos(theta2 + theta1))
+    theta1 = np.arccos(observation[0])
+    theta2 = np.arccos(observation[2])
+    reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
+    
+    returns.append(reward)
+    r = reward - np.mean(recompensas)
+    syn.reward = r
+    simulate(50.0)
+
+    actions_done.append(action)
+    M.reset()
+
+print("Returns: ", sum(returns))
+
+

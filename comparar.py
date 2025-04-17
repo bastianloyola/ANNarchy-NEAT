@@ -1,3 +1,13 @@
+recompensas_1 = []
+recompensas_2 = []
+
+
+
+
+
+
+
+
 from ANNarchy import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,13 +48,19 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w = w + clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         Synapse.__init__(self,
@@ -92,11 +108,10 @@ IZHIKEVICH = Neuron(
     reset="v = c; u += d"
 )
 
-
-pop = Population(10, IZHIKEVICH)
+pop2 = Population(10, IZHIKEVICH)
 
 #syn = Projection(pop, pop, target='exc')
-syn = Projection(pop, pop, target='exc', synapse=R_STDP)
+syn2 = Projection(pop2, pop2, target='exc')
 
 #matriz de conexion de los 8 de enntradas a los 2 de salida
 input_index = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -118,10 +133,200 @@ for i in range(8):
 from scipy import sparse
 matrix = sparse.csr_matrix(matrix)
 
+syn2.connect_from_sparse(matrix)
+
+
+compile(directory="cartpole")
+
+weights = syn2.w[0]
+print("Pesos de INICIO: ", weights)
+
+import gymnasium as gym
+
+#cartpole
+env = gym.make('CartPole-v1')
+i = 0
+limites = [
+        (-4.8, 4.8),  
+        (-10.0, 10.0),  
+        (-0.418, 0.418), 
+        (-10.0, 10.0)  
+    ]
+
+simulate(1)
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
+
+#dends = list(syn.dendrites)
+#print(dends[0])
+#for i, dend in enumerate(syn.dendrites):
+#    print(f"Dendrita {i}: conecta con pre = {dend.pre}, pesos = {dend.w}")
+syn2.reset(synapses=True)
+#dends = list(syn.dendrites)
+#for i, dend in enumerate(syn.dendrites):
+#    print(f"Dendrita {i}: conecta con pre = {dend.pre}, pesos = {dend.w}")#
+
+j = 0
+returns = []
+actions_done = []
+terminated = False
+truncated = False
+observation = env.reset()[0]
+np.random.seed(10)
+inputWeights = np.random.uniform(0,150,4)
+#print("Pesos de entrada: ", inputWeights)
+#print(observation)
+
+M2 = Monitor(pop2, ['spike','v'])
+num_steps = 1000
+i = 0
+acciones = []
+episodes = 500
+total_return = 0.0
+for ep in range(episodes):
+    observation, _ = env.reset()
+    terminated = False
+    truncated = False
+    episode_return = 0.0
+    #print("Comienzo del episodio %d" % (ep + 1))
+    #for i, dend in enumerate(syn.dendrites):
+     #   print(f"Dendrita {i}: conecta con pre = {dend.pre}, pesos = {dend.w}")
+    #Prediccion de recompensa en base a la media movil de la recompensa
+    distancias = []
+    acciones2  = []
+    rs = []
+    while not terminated and not truncated:
+        # Codificar observación
+        i = 0
+        k = 0
+        for val in observation:
+            if val < 0:
+                #Normalizar val
+                val = normalize(val, limites[k][0], limites[k][1])
+                pop2[int(input_index[i])].I = val*20 #inputWeights[k]
+                pop2[int(input_index[i+1])].I = 0
+            else:
+                #Normalizar val
+                val = normalize(val, limites[k][0], limites[k][1])
+                pop2[int(input_index[i])].I = 0
+                pop2[int(input_index[i+1])].I = val*20 #inputWeights[k]
+            i += 2
+            k += 1
+        #distance = - abs(observation[2])
+        #distancias.append(distance)
+        #r = distance - np.mean(distancias)
+        #syn.reward = r
+        #rs.append(r)
+
+        simulate(50.0)
+        #print("Recompensa: ", syn.reward)
+        weights = syn2.w[0]
+        #print("Pesos de salida: ", weights)
+        spikes = M2.get('spike')
+        #Output from 2vneurons, one for each action
+        output1 = np.size(spikes[output_index[0]])
+        output2 = np.size(spikes[output_index[1]])
+        #print("Output1: ", output1)
+        #print("Output2: ", output2)
+        #print("-------")
+
+        #graficar actividad de las neuronas
+        t, n = M2.raster_plot(spikes)
+        #plt.plot(t, n, 'b.')
+        #plt.title('Raster plot')
+        #plt.show()
+        #Choose the action with the most spikes
+        action = env.action_space.sample()
+        if output1 > output2:
+            action = 0
+            acciones2.append(0)
+            #print("Accion 0")
+        elif output2 > output1:
+            action = 1
+            acciones2.append(1)
+            #print("Accion 1")
+        else:
+            acciones2.append(2)
+            #print("Accion Aleatoria")
+        observation, reward, terminated, truncated, info = env.step(action)
+        episode_return += reward
+        #La recomensa será la distancia de la vara desde el punto optimo cuando esta a 90ª
+        # reward = 90º - abs(observation[2])
+        #print(np.rad2deg(observation[2]))
+        #print(observation[2])
+        
+        
+
+
+
+
+
+        M2.reset()
+        pop2.reset()
+        syn2.reward = 0.0
+    acciones.append(acciones2)
+
+    print("Episode %d reward: %f" % (ep + 1, episode_return))
+    #print("Recompensas: ", distancias)
+    #print("Acciones: ", rs)
+    total_return += episode_return
+    recompensas_1.append(episode_return)
+    dends = list(syn2.dendrites)
+    #print(dends[0])
+    #for i, dend in enumerate(syn.dendrites):
+     #   print(f"Dendrita {i}: conecta con pre = {dend.pre}, pesos = {dend.w}")
+    simulate(50.0)
+    M2.reset()
+    pop2.reset()
+    #syn.reset(synapses=True)
+env.close()
+
+
+
+#grafico de barras de las acciones, segun las màs frecuentes en todos los episodios
+
+
+
+# Convertir la lista de acciones en un array de numpy
+
+accion1 = 0
+accion2 = 0
+accion3 = 0
+
+for i in range(episodes):
+    for j in range(len(acciones[i])):
+        if acciones[i][j] == 0:
+            accion1 += 1
+        elif acciones[i][j] == 1:
+            accion2 += 1
+        elif acciones[i][j] == 2:
+            accion3 += 1
+# Crear una lista con los nombres de las acciones
+acciones = ['Accion 1', 'Accion 2', 'Accion 3']
+# Crear una lista con los valores de las acciones
+valores = [accion1, accion2, accion3]
+# Crear el gráfico de barras
+plt.bar(acciones, valores)
+# Añadir etiquetas y título
+plt.xlabel('Acciones')
+plt.ylabel('Frecuencia')
+plt.title('Frecuencia de acciones en episodios')
+# Mostrar el gráfico
+plt.show()
+
+
+clear()
+
+pop = Population(10, IZHIKEVICH)
+
+#syn = Projection(pop, pop, target='exc')
+syn = Projection(pop, pop, target='exc', synapse=R_STDP)
+
+
 syn.connect_from_sparse(matrix)
 
 
-compile(directory="cartpole-rstdp")
+compile(directory="cartpole-rstdp-LTDFIX")
 
 weights = syn.w[0]
 print("Pesos de INICIO: ", weights)
@@ -166,7 +371,6 @@ M = Monitor(pop, ['spike','v'])
 num_steps = 1000
 i = 0
 acciones = []
-episodes = 100
 total_return = 0.0
 for ep in range(episodes):
     observation, _ = env.reset()
@@ -255,6 +459,7 @@ for ep in range(episodes):
     #print("Recompensas: ", distancias)
     #print("Acciones: ", rs)
     total_return += episode_return
+    recompensas_2.append(episode_return)
     dends = list(syn.dendrites)
     #print(dends[0])
     #for i, dend in enumerate(syn.dendrites):
@@ -264,7 +469,6 @@ for ep in range(episodes):
     pop.reset()
     #syn.reset(synapses=True)
 env.close()
-print("Total reward across episodes:", total_return/episodes)
 
 
 #grafico de barras de las acciones, segun las màs frecuentes en todos los episodios
@@ -300,3 +504,37 @@ plt.show()
 
 
 #print(valores)
+
+
+import matplotlib.pyplot as plt
+
+# Reemplaza estos valores por los resultados reales
+
+
+# Etiquetas opcionales
+nombre_1 = "Sin regla"
+nombre_2 = "R-STDP"
+
+# Puedes modificar esto según el número de episodios reales
+episodios = list(range(1, len(recompensas_1) + 1))
+
+# Graficar
+plt.figure(figsize=(10, 5))
+plt.plot(episodios, recompensas_1, label=nombre_1, marker="o")
+plt.plot(episodios, recompensas_2, label=nombre_2, marker="x")
+plt.xlabel("Episodio")
+plt.ylabel("Recompensa total")
+plt.title("Comparación de recompensas por episodio sin y con R-STDP")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(8, 5))
+plt.boxplot([recompensas_1, recompensas_2], labels=[nombre_1, nombre_2])
+plt.ylabel("Recompensa total por episodio")
+plt.title("Distribución de recompensas sin y con R-STDP")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
