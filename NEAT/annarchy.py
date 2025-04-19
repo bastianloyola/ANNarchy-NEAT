@@ -16,6 +16,65 @@ def get_function(trial):
     return None
 
 
+class R_STDP(Synapse):
+    """
+    R-STDP con trazas pre y post, y modulación por recompensa.
+    La actualización del peso depende de la coincidencia temporal (STDP) y el refuerzo externo.
+    """
+
+    _instantiated = []
+
+    def __init__(self, tau_c=20.0, a=0.1,
+                 A_plus=0.01, A_minus=0.01,
+                 tau_plus=20.0, tau_minus=20.0,
+                 w_min=0.0, w_max=1.0):
+
+        parameters = """
+            tau_c = %(tau_c)s : projection
+            a = %(a)s : projection
+            A_plus = %(A_plus)s : projection
+            A_minus = %(A_minus)s : projection
+            tau_plus = %(tau_plus)s : projection
+            tau_minus = %(tau_minus)s : projection
+            w_min = %(w_min)s : projection
+            w_max = %(w_max)s : projection
+            reward = 0.0 : projection
+        """ % locals()
+
+        equations = """
+            tau_c * dc/dt = -c : event-driven
+            tau_plus  * dx/dt = -x : event-driven
+            tau_minus * dy/dt = -y : event-driven
+        """
+
+        pre_spike = """
+            g_target += w
+            x += A_plus
+            c += y
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
+        """
+
+        post_spike = """
+            y -= A_minus
+            c += x
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
+        """
+
+        Synapse.__init__(self,
+                         parameters=parameters,
+                         equations=equations,
+                         pre_spike=pre_spike,
+                         post_spike=post_spike,
+                         name="R-STDP")
+
+        self._instantiated.append(True)
+
 
 LIF = Neuron(  #I = 75
     parameters = """
@@ -56,7 +115,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id):
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        proj = Projection(pre=pop, post=pop, target='exc')
+        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP)
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -84,7 +143,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id):
             raise ValueError("inputWeights is empty")
 
         funcion = get_function('results/trial-'+ str(int(trial)))
-        fit = fitness(pop,M,input_index,output_index, funcion, inputWeights, genome_id*int(trial))
+        fit = fitness(pop,proj,M,input_index,output_index, funcion, inputWeights, genome_id*int(trial))
         #return fit
 
         return fit
@@ -92,11 +151,11 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id):
         # Capturar y manejar excepciones
         print("Error en annarchy:", e)
 
-def fitness(pop, Monitor, input_index, output_index, funcion, inputWeights, genome_id):
+def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights, genome_id):
     if funcion == "xor":
-        return xor(pop, Monitor, input_index, output_index, inputWeights)
+        return xor(pop, proj, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
-        return cartpole(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+        return cartpole(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "lunar_lander":
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
@@ -156,7 +215,7 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
 
 
 
-def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
+def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
     env = gym.make("CartPole-v1")
     observation, info = env.reset()
     terminated = False
@@ -184,8 +243,10 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
         j=0
         returns = []
         actions_done = []
+        observation, info = env.reset()
         terminated = False
         truncated = False
+        distancias = []
         env.reset()
         while not terminated and not truncated:
             #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
@@ -194,7 +255,7 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
             for val in observation:
                 if val < 0:
                     val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i])].I = val*inputWeights[k]
                     pop[int(input_index[i+1])].I = 0
                 else:
                     val = normalize(val, limits[k][0], limits[k][1])
@@ -202,6 +263,11 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
                     pop[int(input_index[i+1])].I = val*inputWeights[k]
                 i += 2
                 k += 1
+            distance = - abs(observation[2])
+            distancias.append(distance)
+            r = distance - np.mean(distancias)
+            proj.reward = r
+
             simulate(50.0)
             spikes = Monitor.get('spike')
             #Output from 2 neurons, one for each action
@@ -218,10 +284,14 @@ def cartpole(pop,Monitor,input_index,output_index,inputWeights, genome_id):
             actions_done.append(action)
             pop.reset()
             Monitor.reset()
+            proj.reward = 0.0
             j += 1
         #The fitness is the sum of the rewards for each episode
         final_fitness += np.sum(returns)
         h += 1
+        simulate(50.0)
+        Monitor.reset()
+        pop.reset()
     #The final fitness is the mean of the fitness for each episode
     final_fitness = final_fitness/episodes
     env.close()

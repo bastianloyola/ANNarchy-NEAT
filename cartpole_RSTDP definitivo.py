@@ -172,7 +172,7 @@ M = Monitor(pop, ['spike','v'])
 num_steps = 1000
 i = 0
 acciones = []
-episodes = 100
+episodes = 500
 total_return = 0.0
 for ep in range(episodes):
     observation, _ = env.reset()

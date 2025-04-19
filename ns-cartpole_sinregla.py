@@ -132,6 +132,7 @@ np.random.seed(10)
 inputWeights = np.random.uniform(0, 150, 4)
 M = Monitor(pop, ['spike', 'v'])
 gravedades = []
+retornos = []
 acciones = []
 episodes = 500
 total_return = 0.0
@@ -182,6 +183,7 @@ for ep in range(episodes):
 
     acciones.append(acciones2)
     print("Episode %d reward: %f" % (ep + 1, episode_return))
+    retornos.append(episode_return)
     total_return += episode_return
     simulate(50.0)
     M.reset()
@@ -209,5 +211,13 @@ plt.plot(gravedades)
 plt.xlabel("Paso")
 plt.ylabel("Valor de gravedad")
 plt.title("Evolución del parámetro 'gravity'")
+plt.grid(True)
+plt.show()
+
+plt.figure()
+plt.plot(retornos)
+plt.xlabel("Episodio")
+plt.ylabel("Retorno")
+plt.title("Retorno por episodio")
 plt.grid(True)
 plt.show()

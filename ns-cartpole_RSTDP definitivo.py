@@ -181,6 +181,7 @@ inputWeights = np.random.uniform(0,150,4)
 #print(observation)
 
 gravedades = []
+retornos = []
 
 
 M = Monitor(pop, ['spike','v'])
@@ -273,6 +274,7 @@ for ep in range(episodes):
     acciones.append(acciones2)
 
     print("Episode %d reward: %f" % (ep + 1, episode_return))
+    retornos.append(episode_return)
     #print("Recompensas: ", distancias)
     #print("Acciones: ", rs)
     total_return += episode_return
@@ -326,5 +328,14 @@ plt.plot(gravedades)
 plt.xlabel("Paso")
 plt.ylabel("Valor de gravedad")
 plt.title("Evolución del parámetro 'gravity'")
+plt.grid(True)
+plt.show()
+
+
+plt.figure()
+plt.plot(retornos)
+plt.xlabel("Episodio")
+plt.ylabel("Retorno")
+plt.title("Retorno por episodio")
 plt.grid(True)
 plt.show()
