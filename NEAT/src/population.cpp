@@ -25,17 +25,23 @@ Population::Population(Parameters *param){
     maxGenome = nGenomes;
     parameters = *param;
     innov = Innovation(nInputs, nOutputs);
-    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters, 0);
+
+
+    Genome* g = new Genome(0,nInputs, nOutputs, innov, parameters, 0, parameters.tau_c, parameters.a_plus, parameters.a_minus, parameters.tau_minus, parameters.tau_plus);
     threshold = parameters.threshold;
-    Species* s = new Species(g, threshold);
+    Species* s = new Species(g, threshold, parameters.tau_c, parameters.a_plus, parameters.a_minus, parameters.tau_minus, parameters.tau_plus);
     species.push_back(s);
     genomes.push_back(g);
     for (int i = 1; i < nGenomes; i++){
-        g = new Genome(i,nInputs, nOutputs, innov, parameters, i);
+        g = new Genome(i,nInputs, nOutputs, innov, parameters, i, parameters.tau_c, parameters.a_plus, parameters.a_minus, parameters.tau_minus, parameters.tau_plus);
         genomes.push_back(g);
         species[0]->add_genome(g);
     }
     keep = parameters.keep;
+
+    for (int i = 0; i < (int)(species.size()); i++){
+        species[i]->set_RSTDP(parameters.tau_c, parameters.a_plus, parameters.a_minus, parameters.tau_minus, parameters.tau_plus);
+    }
 
 }
 
@@ -316,7 +322,11 @@ void Population::speciation(string filenameInfo){
         for (int j = 0; j < static_cast<int>(species.size()); j++){
             compatibility = (*auxGenomes[i]).compatibility(*species[j]->genome);
 
-            if (compatibility < parameters.threshold){   
+            if (compatibility < parameters.threshold){
+                auxGenomes[i]->setTauC(species[j]->getTauC());
+                auxGenomes[i]->setAPlus(species[j]->getAPlus());
+                auxGenomes[i]->setAMinus(species[j]->getAMinus());
+                auxGenomes[i]->setTauMinus(species[j]->getTauMinus());   
                 species[j]->add_genome(auxGenomes[i]);
                 genomes.push_back(auxGenomes[i]);
                 flag = false;
@@ -324,7 +334,7 @@ void Population::speciation(string filenameInfo){
             }
         }
         if (flag){
-            Species* newSpecies = new Species(auxGenomes[i], parameters.threshold);
+            Species* newSpecies = new Species(auxGenomes[i], parameters.threshold, auxGenomes[i]->getTauC(), auxGenomes[i]->getAPlus(), auxGenomes[i]->getAMinus(), auxGenomes[i]->getTauMinus(), auxGenomes[i]->getTauPlus());
             species.push_back(newSpecies);
             genomes.push_back(auxGenomes[i]);
         }
@@ -347,6 +357,10 @@ void Population::speciation(string filenameInfo){
     }
 
     outfile.close();
+
+    for (int i = 0; i < static_cast<int>(species.size()); i++){
+        species[i]->set_RSTDP(species[i]->getTauC(), species[i]->getAPlus(), species[i]->getAMinus(), species[i]->getTauMinus(), species[i]->getTauPlus());
+    }
 }
 
 void Population::evaluate(std::string folder,int trial) {
@@ -442,7 +456,15 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
     vector<Connection> connections_a, connections_b, connections;
 
     int count_a=0, count_b = 0;
-    Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters, get_annarchy_id());
+    // R-stdp
+    std::cout << "R-stdp crossover" << endl;
+    std::cout << "tau_c: " << g1->tau_c << endl;
+    std::cout << "a_plus: " << g1->a_plus << endl;
+    std::cout << "a_minus: " << g1->a_minus << endl;
+    std::cout << "tau_minus: " << g1->tau_minus << endl;
+    std::cout << "tau_plus: " << g1->tau_plus << endl;
+    std::cout << "R-stdp crossover" << endl;
+    Genome* offspring = new Genome(maxGenome, nInputs, nOutputs, innov, parameters, get_annarchy_id(), g1->getTauC(), g1->getAPlus(), g1->getAMinus(), g1->getTauMinus(), g1->getTauPlus());
     maxGenome++;
     vector<Node> offNodes;
 
@@ -458,6 +480,12 @@ Genome* Population::crossover(Genome* g1, Genome* g2){
         offNodes = g2->getNodes();
         connections_a = g2->getConnections();
         connections_b = g1->getConnections();
+        offspring->setTauC(g2->getTauC());
+        offspring->setAPlus(g2->getAPlus());
+        offspring->setAMinus(g2->getAMinus());
+        offspring->setTauMinus(g2->getTauMinus());
+        offspring->setTauPlus(g2->getTauPlus());
+
 
     }
     int connection_size_a = connections_a.size();
@@ -537,6 +565,7 @@ void Population::evolution(int n, std::string folder, int trial){
         parameters.reproducirInter.push_back(0);
         parameters.reproducirIntra.push_back(0);
         parameters.reproducirMuta.push_back(0);
+
 
         evaluate(folder, trial);
         outfile.open(filenameInfo, ios::app);

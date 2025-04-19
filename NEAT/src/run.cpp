@@ -240,6 +240,11 @@ float run3(int trial) {
     config_file << "process_max=" << parameters.process_max << "\n";
     config_file << "function=" << parameters.function << "\n";
     config_file << "folder=" << folder << "\n";
+    config_file << "tau_c=" << parameters.tau_c << "\n";
+    config_file << "a_minus=" << parameters.a_minus << "\n";
+    config_file << "a_plus=" << parameters.a_plus << "\n";
+    config_file << "tau_minus=" << parameters.tau_minus << "\n";
+    config_file << "tau_plus=" << parameters.tau_plus << "\n";
     config_file.close();
 
     outfile << "\n---- Results of config: ----\n";

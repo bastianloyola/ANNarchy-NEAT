@@ -110,12 +110,13 @@ IZHIKEVICH = Neuron(  #I = 20
     reset="v = c; u += d"
 )
 I = 0
-def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id):
+def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp):
     try:
+        #print("rstdp: ", rstdp)
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP)
+        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:

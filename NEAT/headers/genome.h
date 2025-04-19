@@ -15,7 +15,7 @@ class Genome {
     
     public:  
         Genome();
-        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters, int new_id_annarchy);
+        Genome(int new_id, int num_in, int num_out, Innovation &innov, Parameters &parameters, int new_id_annarchy, float tau_c, float a_plus, float a_minus, float tau_minus, float tau_plus);
 
         std::vector<Connection> getConnections();
         std::vector<Node> getNodes();
@@ -35,6 +35,13 @@ class Genome {
 
         Node& getNode(int id);
 
+        float getTauC();
+        float getAPlus();
+        float getAMinus();
+        float getTauMinus();
+        float getTauPlus();
+
+
         void setId(int new_id);
         void setFitness(float new_fitness);
         void setConnections(std::vector<Connection> new_connections);
@@ -43,6 +50,12 @@ class Genome {
         void setInnovation(Innovation* new_innov);
         void setIdAnnarchy(int new_id_annarchy);
         void setAdjustedFitness(float new_adjustedFitness);
+        void setTauC(float new_tau_c);
+        void setTauMinus(float new_tau_minus);
+        void setTauPlus(float new_tau_plus);
+        void setAMinus(float new_a_minus);
+        void setAPlus(float new_a_plus);
+        
         // Mutators
 
         // Change weight, this depends
@@ -67,6 +80,12 @@ class Genome {
         void sort_nodes();
 
         std::vector<float> inputWeights;
+        float tau_c;
+        float a_plus;
+        float a_minus;
+        float tau_minus;
+        float tau_plus;
+
 
     private:
         int id;
@@ -79,6 +98,7 @@ class Genome {
         Parameters* parameters;
         int id_annarchy;
         double adjustedFitness;
+        
 };
 
 #endif

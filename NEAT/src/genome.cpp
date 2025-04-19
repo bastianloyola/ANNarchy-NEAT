@@ -14,7 +14,7 @@ using namespace std;
 
 // ConstructorsGenome::Genome(){}
 Genome::Genome(){}
-Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E, int idAnnarchy){
+Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Parameters &parameters_E, int idAnnarchy, float tau_c, float a_plus, float a_minus, float tau_minus, float tau_plus){
     id = new_id;
     numIn = num_in;
     numOut = num_out;
@@ -23,6 +23,11 @@ Genome::Genome(int new_id, int num_in, int num_out, Innovation &innov_E, Paramet
     parameters = &parameters_E;  
     id_annarchy = idAnnarchy;
     adjustedFitness = 0;
+    tau_c = tau_c;
+    a_plus = a_plus;
+    a_minus = a_minus;
+    tau_minus = tau_minus;
+    tau_plus = tau_plus;
     for (int i = 0; i < numIn; i++){
         Node n(i+1, 0);
         nodes.push_back(n);
@@ -125,6 +130,13 @@ Node& Genome::getNode(int id){
     return null_node;
 }
 
+float Genome::getTauC(){ return tau_c;}
+float Genome::getAPlus(){ return a_plus;}
+float Genome::getAMinus(){ return a_minus;}
+float Genome::getTauMinus(){ return tau_minus;}
+float Genome::getTauPlus(){ return tau_plus;}
+
+
 void Genome::setId(int new_id){ id = new_id;}
 void Genome::setFitness(float new_fitness){ fitness = new_fitness;}
 void Genome::setConnections(std::vector<Connection> new_connections){ connections = new_connections;}
@@ -133,6 +145,12 @@ void Genome::setParameters(Parameters* new_parameters){ parameters = new_paramet
 void Genome::setInnovation(Innovation* new_innov){ innov = new_innov;}
 void Genome::setIdAnnarchy(int new_id_annarchy){ id_annarchy = new_id_annarchy;}
 void Genome::setAdjustedFitness(float new_adjustedFitness){ adjustedFitness = new_adjustedFitness;};
+void Genome::setTauC(float new_tau_c){ tau_c = new_tau_c;};
+void Genome::setAPlus(float new_a_plus){ a_plus = new_a_plus;};
+void Genome::setAMinus(float new_a_minus){ a_minus = new_a_minus;};
+void Genome::setTauMinus(float new_tau_minus){ tau_minus = new_tau_minus;};
+void Genome::setTauPlus(float new_tau_plus){ tau_plus = new_tau_plus;};
+
 // Mutators
 
 // Change weight, this depends
@@ -238,6 +256,18 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         return -1;
     }
 
+    //Generar un arreglo de largo 5 con los parametros de la regla R-STDP que se sacan de la especie
+    std::vector<float> rstdp_parameters;
+    rstdp_parameters.push_back(tau_c);
+    rstdp_parameters.push_back(a_plus);
+    rstdp_parameters.push_back(a_minus);
+    rstdp_parameters.push_back(tau_minus);
+    rstdp_parameters.push_back(tau_plus);
+    // Convert the rstdp_parameters vector to a NumPy array
+    npy_intp rstdp_dims[1] = { static_cast<npy_intp>(rstdp_parameters.size()) };
+    PyObject* numpy_rstdp = PyArray_SimpleNewFromData(1, rstdp_dims, NPY_FLOAT, rstdp_parameters.data());
+    
+
     // Convert the inputWeights vector to a NumPy array
     std::vector<float>& inputWeights2 = inputWeights;
     npy_intp inputWeights_dims[1] = { static_cast<npy_intp>(inputWeights2.size()) };
@@ -245,7 +275,7 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
 
     // Call the function
     PyObject* func = PyObject_GetAttrString(load_module, "snn");
-    PyObject* args = PyTuple_Pack(8, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)), PyFloat_FromDouble(double(id)));
+    PyObject* args = PyTuple_Pack(9, PyFloat_FromDouble(double(parameters->numberInputs)), PyFloat_FromDouble(double(parameters->numberOutputs)), PyFloat_FromDouble(double(n_max)), PyFloat_FromDouble(double(id_annarchy)), numpy_array, numpy_inputWeights, PyFloat_FromDouble(double(trial)), PyFloat_FromDouble(double(id)), numpy_rstdp);
     PyObject* callfunc = PyObject_CallObject(func, args);
     //Set de fit
     double value = PyFloat_AsDouble(callfunc);
