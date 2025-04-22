@@ -571,6 +571,13 @@ void Population::evolution(int n, std::string folder, int trial){
         outfile.open(filenameInfo, ios::app);
         outfile << "\n-------- Fin Eval --------\n";
         outfile.close();
+
+        mutate_RSTDP(folder, trial);
+        outfile.open(filenameInfo, ios::app);
+        outfile << "\n-------- Fin Mutate RSTDP --------\n";
+        outfile.close();
+
+
         eliminate(filenameInfo);
         outfile.open(filenameInfo, ios::app);
         outfile << "\n-------- Fin Eliminate --------\n";
@@ -612,7 +619,69 @@ void Population::evolution(int n, std::string folder, int trial){
     outfile2.close();
 }
 
-void Population::print_best(){
+void Population::mutate_RSTDP(std::string folder, int trial)
+{
+    int mutations_per_species = 10;
+
+
+    for (int s = 0; s < static_cast<int>(species.size()); ++s)
+    {
+        species[s]->sort_genomes();
+        Genome* best = species[s]->genome;
+
+        std::vector<float> fitness_values(mutations_per_species, 0.0f);
+        std::vector<Genome*> mutated_genomes(mutations_per_species, nullptr);
+        int best_index = 0;
+        int cambiar = 0;
+        for (int h = 0; h < mutations_per_species; ++h)
+        {   
+            PyObject* name = PyUnicode_FromString("annarchy");
+            PyObject* load_module = PyImport_Import(name);
+            Py_DECREF(name);
+            Genome* mutated = new Genome(*best);
+            mutated->setTauC(abs(best->getTauC() + randomInt(-100, 100) * 0.0001));
+            mutated->setAPlus(abs(best->getAPlus() + randomInt(-100, 100) * 0.000001));
+            mutated->setAMinus(abs(best->getAMinus() + randomInt(-100, 100) * 0.000001));
+            mutated->setTauMinus(abs(best->getTauMinus() + randomInt(-100, 100) * 0.0001));
+            mutated->setTauPlus(abs(best->getTauPlus() + randomInt(-100, 100) * 0.0001));
+            fitness_values[h] = mutated->singleEvaluation(load_module, folder, trial);
+            mutated_genomes[h] = mutated;
+            if (mutated_genomes[h]->getFitness() > best->getFitness() && mutated_genomes[h]->getFitness() >= fitness_values[best_index])
+            {
+                best_index = h;
+                cambiar = 1;
+            }
+            Py_DECREF(load_module);
+
+        }
+        if (cambiar == 1){
+            species[s]->set_RSTDP(mutated_genomes[best_index]->getTauC(), mutated_genomes[best_index]->getAPlus(), mutated_genomes[best_index]->getAMinus(), mutated_genomes[best_index]->getTauMinus(), mutated_genomes[best_index]->getTauPlus());
+        }
+
+
+
+
+        std::ofstream outfile(folder + "/R-STDP-info.txt", std::ios::app);
+        outfile << "\n-------- Evaluation especie " << s << " --------\n";
+        outfile << "Best fitness: " << fitness_values[best_index] << "\n";
+        outfile << "Se cambio la regla R-STDP" << cambiar << "\n";
+        //Print R-STDP parameters
+        outfile << "tau_c: " << species[s]->getTauC() << "\n";
+        outfile << "a_plus: " << species[s]->getAPlus() << "\n";
+        outfile << "a_minus: " << species[s]->getAMinus() << "\n";
+        outfile << "tau_minus: " << species[s]->getTauMinus() << "\n";
+        outfile << "tau_plus: " << species[s]->getTauPlus() << "\n";
+        outfile.close();
+
+        for (auto g : mutated_genomes) delete g;
+        
+        
+    }
+}
+
+
+void Population::print_best()
+{
     float bestFitness = 0;
     int bestIndex = 0;
     for (int i = 0; i < (int)(genomes.size()); i++){

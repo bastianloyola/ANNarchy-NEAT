@@ -25,6 +25,7 @@ class Population{
     void evaluate(std::string folder, int trial);
     void mutations(std::string file);
     void evolution(int n, std::string folder, int trial);
+    void mutate_RSTDP(std::string folder, int trial);
     void print();
     void print_best();
 
