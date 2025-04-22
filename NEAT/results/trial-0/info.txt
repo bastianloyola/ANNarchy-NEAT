@@ -1,0 +1,1272 @@
+
+-------- Generation: 0 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 10
+Genome id: 5 idAnnarchy: 5  eliminated
+Genome id: 2 idAnnarchy: 2  eliminated
+Genome id: 8 idAnnarchy: 8  eliminated
+Genome id: 0 idAnnarchy: 0  eliminated
+Genome id: 7 idAnnarchy: 7  eliminated
+----------------
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 0
+----------------
+Number of genomes: 5 Number of species: 1
+Species 0 size: 5
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+ -> Genome id: 9 idAnnarchy: 9
+ ----> Mutate weight -- index: 13 modification_weight: -10
+ -> Genome id: 4 idAnnarchy: 4
+ ----> Mutate weight -- index: 8 modification_weight: 10
+ -> Genome id: 1 idAnnarchy: 1
+ ----> Not mutate weight 
+ -> Genome id: 6 idAnnarchy: 6
+ ----> Mutate weight -- index: 12 modification_weight: 10
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 1
+ number of genomes: 5
+Species 0 allocatedOffsprings: 5
+Species 0 genomes.size(): 5
+ -> Species: 0
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 5
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate:  1/5  2/5  3/5  4/5  5/5 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 1
+Species 1 size: 1
+Species 2 size: 1
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+Species 6 size: 1
+Species 7 size: 1
+Species 8 size: 1
+Species 9 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 3
+Genome idAnnarchy: 3
+Genome fitness: 26.48
+
+-------- Generation: 1 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 1
+Species 0 added to idSpeciesVoid
+Species 1 size: 1
+Species 1 added to idSpeciesVoid
+Species 2 size: 1
+Species 2 added to idSpeciesVoid
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 1
+Species 5 added to idSpeciesVoid
+Species 6 size: 1
+Species 6 added to idSpeciesVoid
+Species 7 size: 1
+Species 7 added to idSpeciesVoid
+Species 8 size: 1
+Species 8 added to idSpeciesVoid
+Species 9 size: 1
+Species 9 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 10
+----------------
+Species void
+idSpeciesVoid.size(): 10
+idSpeciesVoid.size(): 10
+Genome id: 3 idAnnarchy: 3  eliminated
+idSpeciesVoid.size(): 9
+Genome id: 11 idAnnarchy: 0  eliminated
+idSpeciesVoid.size(): 8
+Genome id: 12 idAnnarchy: 8  eliminated
+Number of genomes: 7 Number of species: 10
+Species 9 size: 1
+Species 8 size: 1
+Species 7 size: 1
+Species 6 size: 1
+Species 5 size: 0
+Species 5 eliminated
+Species 4 size: 1
+Species 3 size: 0
+Species 3 eliminated
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 0
+Species 0 eliminated
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 7
+ number of genomes: 7
+Species 0 allocatedOffsprings: 1
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 2
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 1
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 17 idAnnarchy: 3
+ ----> Not mutate weight 
+ ----> mutations:  1/1 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 5 allocatedOffsprings: 0
+Species 5 genomes.size(): 1
+ -> Species: 5
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 6 allocatedOffsprings: 0
+Species 6 genomes.size(): 1
+ -> Species: 6
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 1
+Species 1 size: 1
+Species 2 size: 2
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+Species 6 size: 1
+Species 7 size: 2
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 13
+Genome idAnnarchy: 2
+Genome fitness: 65.23
+
+-------- Generation: 2 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 1
+Species 0 added to idSpeciesVoid
+Species 1 size: 1
+Species 1 added to idSpeciesVoid
+Species 2 size: 2
+Genome id: 15 idAnnarchy: 8  eliminated
+----------------
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 1
+Species 5 added to idSpeciesVoid
+Species 6 size: 1
+Species 6 added to idSpeciesVoid
+Species 7 size: 2
+Genome id: 17 idAnnarchy: 3  eliminated
+----------------
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 6
+----------------
+Species void
+idSpeciesVoid.size(): 6
+idSpeciesVoid.size(): 6
+Number of genomes: 8 Number of species: 8
+Species 7 size: 1
+Species 6 size: 1
+Species 5 size: 1
+Species 4 size: 1
+Species 3 size: 1
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 8
+ number of genomes: 8
+Species 0 allocatedOffsprings: 1
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 1
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 5 allocatedOffsprings: 0
+Species 5 genomes.size(): 1
+ -> Species: 5
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 6 allocatedOffsprings: 0
+Species 6 genomes.size(): 1
+ -> Species: 6
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 7 allocatedOffsprings: 0
+Species 7 genomes.size(): 1
+ -> Species: 7
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 2
+Species 1 size: 2
+Species 2 size: 1
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+Species 6 size: 1
+Species 7 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 13
+Genome idAnnarchy: 2
+Genome fitness: 59.66
+
+-------- Generation: 3 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 2
+Genome id: 18 idAnnarchy: 3  eliminated
+----------------
+Species 1 size: 2
+Genome id: 10 idAnnarchy: 7  eliminated
+----------------
+Species 2 size: 1
+Species 2 added to idSpeciesVoid
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 1
+Species 5 added to idSpeciesVoid
+Species 6 size: 1
+Species 6 added to idSpeciesVoid
+Species 7 size: 1
+Species 7 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 6
+----------------
+Species void
+idSpeciesVoid.size(): 6
+Genome id: 4 idAnnarchy: 4  eliminated
+idSpeciesVoid.size(): 5
+Genome id: 6 idAnnarchy: 6  eliminated
+Number of genomes: 6 Number of species: 8
+Species 7 size: 1
+Species 6 size: 0
+Species 6 eliminated
+Species 5 size: 1
+Species 4 size: 1
+Species 3 size: 0
+Species 3 eliminated
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 6
+ number of genomes: 6
+Species 0 allocatedOffsprings: 2
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 1
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 21 idAnnarchy: 4
+ ----> Mutate weight -- index: 12 modification_weight: -10
+ ----> mutations:  1/1 
+ --
+Species 1 allocatedOffsprings: 2
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 1
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 23 idAnnarchy: 3
+ ----> Mutate weight -- index: 3 modification_weight: 10
+ ----> mutations:  1/1 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 5 allocatedOffsprings: 0
+Species 5 genomes.size(): 1
+ -> Species: 5
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 3
+Species 1 size: 1
+Species 2 size: 2
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 2
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 13
+Genome idAnnarchy: 2
+Genome fitness: 63.97
+
+-------- Generation: 4 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 3
+Genome id: 23 idAnnarchy: 3  eliminated
+Genome id: 21 idAnnarchy: 4  eliminated
+----------------
+Species 1 size: 1
+Species 1 added to idSpeciesVoid
+Species 2 size: 2
+Genome id: 22 idAnnarchy: 7  eliminated
+----------------
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 2
+Genome id: 20 idAnnarchy: 6  eliminated
+----------------
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 3
+----------------
+Number of genomes: 6 Number of species: 6
+Species 5 size: 1
+Species 4 size: 1
+Species 3 size: 1
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 6
+ number of genomes: 6
+Species 0 allocatedOffsprings: 2
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 1
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 25 idAnnarchy: 7
+ ----> Mutate weight -- index: 8 modification_weight: -10
+ ----> mutations:  1/1 
+ --
+Species 1 allocatedOffsprings: 2
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 1
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 27 idAnnarchy: 3
+ ----> Mutate weight -- index: 11 modification_weight: -10
+ ----> mutations:  1/1 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 5 allocatedOffsprings: 0
+Species 5 genomes.size(): 1
+ -> Species: 5
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 3
+Species 1 size: 1
+Species 2 size: 2
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+Species 6 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 13
+Genome idAnnarchy: 2
+Genome fitness: 49.84
+
+-------- Generation: 5 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 3
+Genome id: 13 idAnnarchy: 2  eliminated
+Genome id: 25 idAnnarchy: 7  eliminated
+----------------
+Species 1 size: 1
+Species 1 added to idSpeciesVoid
+Species 2 size: 2
+Genome id: 26 idAnnarchy: 4  eliminated
+----------------
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 1
+Species 5 added to idSpeciesVoid
+Species 6 size: 1
+Species 6 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 5
+----------------
+Species void
+idSpeciesVoid.size(): 5
+Genome id: 9 idAnnarchy: 9  eliminated
+Number of genomes: 6 Number of species: 7
+Species 6 size: 1
+Species 5 size: 1
+Species 4 size: 1
+Species 3 size: 0
+Species 3 eliminated
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 6
+ number of genomes: 6
+Species 0 allocatedOffsprings: 3
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 2
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 29 idAnnarchy: 4
+ ----> Mutate weight -- index: 15 modification_weight: -10
+ -> Genome id: 30 idAnnarchy: 7
+ ----> Mutate weight -- index: 8 modification_weight: -10
+ ----> mutations:  1/2  2/2 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 1
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 5 allocatedOffsprings: 0
+Species 5 genomes.size(): 1
+ -> Species: 5
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 1
+Species 1 size: 1
+Species 2 size: 4
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+Species 6 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 27
+Genome idAnnarchy: 3
+Genome fitness: 75.51
+
+-------- Generation: 6 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 1
+Species 0 added to idSpeciesVoid
+Species 1 size: 1
+Species 1 added to idSpeciesVoid
+Species 2 size: 4
+Genome id: 31 idAnnarchy: 2  eliminated
+Genome id: 29 idAnnarchy: 4  eliminated
+----------------
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+Species 5 size: 1
+Species 5 added to idSpeciesVoid
+Species 6 size: 1
+Species 6 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 6
+----------------
+Species void
+idSpeciesVoid.size(): 6
+Genome id: 24 idAnnarchy: 6  eliminated
+idSpeciesVoid.size(): 5
+Genome id: 14 idAnnarchy: 5  eliminated
+Number of genomes: 6 Number of species: 7
+Species 6 size: 1
+Species 5 size: 0
+Species 5 eliminated
+Species 4 size: 1
+Species 3 size: 0
+Species 3 eliminated
+Species 2 size: 2
+Species 1 size: 1
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+ -> Genome id: 19 idAnnarchy: 8
+ ----> Not mutate weight 
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 5
+ number of genomes: 6
+Species 0 allocatedOffsprings: 0
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 1 allocatedOffsprings: 4
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 3
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 33 idAnnarchy: 6
+ ----> Mutate weight -- index: 1 modification_weight: 10
+ ----> Add link --
+ in: 1 out: 3
+ -> Genome id: 34 idAnnarchy: 4
+ ----> Mutate weight -- index: 4 modification_weight: -10
+ -> Genome id: 35 idAnnarchy: 2
+ ----> Mutate weight -- index: 0 modification_weight: 10
+ ----> mutations:  1/3  2/3  3/3 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 2
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 2
+Species 1 size: 4
+Species 2 size: 2
+Species 3 size: 1
+Species 4 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 28
+Genome idAnnarchy: 9
+Genome fitness: 170.05
+
+-------- Generation: 7 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 2
+Genome id: 32 idAnnarchy: 5  eliminated
+----------------
+Species 1 size: 4
+Genome id: 33 idAnnarchy: 6  eliminated
+Genome id: 35 idAnnarchy: 2  eliminated
+----------------
+Species 2 size: 2
+Genome id: 30 idAnnarchy: 7  eliminated
+----------------
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 2
+----------------
+Number of genomes: 6 Number of species: 5
+Species 4 size: 1
+Species 3 size: 1
+Species 2 size: 1
+Species 1 size: 2
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+ -> Genome id: 34 idAnnarchy: 4
+ ----> Not mutate weight 
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 5
+ number of genomes: 6
+Species 0 allocatedOffsprings: 4
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 3
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 37 idAnnarchy: 2
+ ----> Mutate weight -- index: 9 modification_weight: -10
+ -> Genome id: 38 idAnnarchy: 6
+ ----> Mutate weight -- index: 13 modification_weight: 10
+ -> Genome id: 39 idAnnarchy: 5
+ ----> Not mutate weight 
+ ----> mutations:  1/3  2/3  3/3 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 2
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 2
+Species 1 size: 5
+Species 2 size: 1
+Species 3 size: 1
+Species 4 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 28
+Genome idAnnarchy: 9
+Genome fitness: 192.91
+
+-------- Generation: 8 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 2
+Genome id: 36 idAnnarchy: 7  eliminated
+----------------
+Species 1 size: 5
+Genome id: 34 idAnnarchy: 4  eliminated
+Genome id: 38 idAnnarchy: 6  eliminated
+Genome id: 39 idAnnarchy: 5  eliminated
+----------------
+Species 2 size: 1
+Species 2 added to idSpeciesVoid
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 3
+----------------
+Number of genomes: 6 Number of species: 5
+Species 4 size: 1
+Species 3 size: 1
+Species 2 size: 1
+Species 1 size: 2
+Species 0 size: 1
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+ -> Genome id: 27 idAnnarchy: 3
+ ----> Mutate weight -- index: 9 modification_weight: -10
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 5
+ number of genomes: 6
+Species 0 allocatedOffsprings: 4
+Species 0 genomes.size(): 1
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 3
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate: 
+ -> Genome id: 41 idAnnarchy: 6
+ ----> Mutate weight -- index: 3 modification_weight: -10
+ -> Genome id: 42 idAnnarchy: 4
+ ----> Not mutate weight 
+ -> Genome id: 43 idAnnarchy: 7
+ ----> Mutate weight -- index: 1 modification_weight: 10
+ ----> mutations:  1/3  2/3  3/3 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 2
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 5
+Species 1 size: 2
+Species 2 size: 1
+Species 3 size: 1
+Species 4 size: 1
+
+-------- Fin Speciation --------
+
+---- Best Genome ----
+Genome id: 28
+Genome idAnnarchy: 9
+Genome fitness: 178.96
+
+-------- Generation: 9 --------
+
+-------- Evaluation  --------
+
+-------- Fin Eval --------
+
+-------- Fin Mutate RSTDP --------
+
+-------- Eliminate --------
+Species 0 size: 5
+Genome id: 41 idAnnarchy: 6  eliminated
+Genome id: 43 idAnnarchy: 7  eliminated
+Genome id: 28 idAnnarchy: 9  eliminated
+----------------
+Species 1 size: 2
+Genome id: 27 idAnnarchy: 3  eliminated
+----------------
+Species 2 size: 1
+Species 2 added to idSpeciesVoid
+Species 3 size: 1
+Species 3 added to idSpeciesVoid
+Species 4 size: 1
+Species 4 added to idSpeciesVoid
+nGenomesPrevious: 10
+idSpeciesVoid.size(): 3
+----------------
+Number of genomes: 6 Number of species: 5
+Species 4 size: 1
+Species 3 size: 1
+Species 2 size: 1
+Species 1 size: 1
+Species 0 size: 2
+----------------
+
+-------- Fin Eliminate --------
+
+-------- Mutations --------
+ -> Genome id: 40 idAnnarchy: 5
+ ----> Mutate weight -- index: 5 modification_weight: 10
+
+-------- Fin Mutations --------
+
+-------- Reproduce --------
+ number of species: 5
+ number of genomes: 6
+Species 0 allocatedOffsprings: 4
+Species 0 genomes.size(): 2
+ -> Species: 0
+ ----> reproduceInterSpecies: 1
+ ----> reproduceNonInterSpecies: 3
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate:  1/1 
+ ----> nonInterSpeciesRate:  1/3  2/3  3/3 
+ ----> mutations: 
+ --
+Species 1 allocatedOffsprings: 0
+Species 1 genomes.size(): 1
+ -> Species: 1
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 2 allocatedOffsprings: 0
+Species 2 genomes.size(): 1
+ -> Species: 2
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 3 allocatedOffsprings: 0
+Species 3 genomes.size(): 1
+ -> Species: 3
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+Species 4 allocatedOffsprings: 0
+Species 4 genomes.size(): 1
+ -> Species: 4
+ ----> reproduceInterSpecies: 0
+ ----> reproduceNonInterSpecies: 0
+ ----> reproduceMutations: 0
+ ----> interSpeciesRate: 
+ ----> nonInterSpeciesRate: 
+ ----> mutations: 
+ --
+----
+
+-------- Fin Reproduce --------
+
+-------- Speciation --------
+Species 0 size: 5
+Species 1 size: 1
+Species 2 size: 1
+Species 3 size: 1
+Species 4 size: 1
+Species 5 size: 1
+
+-------- Fin Speciation --------
+
+-------- Evaluation  --------
