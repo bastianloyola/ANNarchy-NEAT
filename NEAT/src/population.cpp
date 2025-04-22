@@ -290,19 +290,27 @@ void Population::speciation(string filenameInfo){
     vector<Genome*> auxGenomes = genomes;
     bool flag;
 
-    this->genomes.clear();
+    //Get best 
+    Genome *bestGenome = getBest();
+
+    genomes.clear();
 
     
     
     cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
-    //Get best 
-    //Genome *bestGenome = getBest();
-    //species[0]->genome = bestGenome;
-    //species[0]->genomes.clear();
-    //species[0]
+    species[0]->genome = bestGenome;
+    species[0]->genomes.clear();
+    species[0]->genomes.push_back(bestGenome);
+    genomes.push_back(bestGenome);
+    for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
+        if (auxGenomes[i]->getId() == bestGenome->getId()){
+            auxGenomes.erase(auxGenomes.begin() + i);
+            break;
+        }
+    }
 
 
-    for (int i = 0; i < nSpecies; i++){
+    for (int i = 1; i < nSpecies; i++){
         cout << "Species: " << i << endl;
         int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
         cout << "Genome: " << index << endl;
@@ -661,6 +669,7 @@ void Population::mutate_RSTDP(std::string folder, int trial)
         for (int h = 0; h < mutations_per_species; ++h)
         {
             Genome* mutated = new Genome(*best);
+            
             mutated->setTauC(abs(best->getTauC() + randomInt(-100, 100) * 0.0001));
             mutated->setAPlus(abs(best->getAPlus() + randomInt(-100, 100) * 0.000001));
             mutated->setAMinus(abs(best->getAMinus() + randomInt(-100, 100) * 0.000001));
@@ -772,7 +781,6 @@ void Population::mutate_RSTDP(std::string folder, int trial)
         outfile << "tau_plus: " << species[s]->getTauPlus() << "\n";
         outfile.close();
 
-        for (auto g : mutated_genomes) delete g;
 
         Py_DECREF(load_module);
     }

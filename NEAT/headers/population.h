@@ -46,6 +46,7 @@ class Population{
     Genome* crossover(Genome* g1, Genome* g2);
     int get_annarchy_id();
     void offspringsPerSpecies();
+    
 
   private:
     int nGenomes;
