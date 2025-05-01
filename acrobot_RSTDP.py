@@ -1,5 +1,7 @@
 from ANNarchy import *
 
+
+
 class R_STDP(Synapse):
     """
     R-STDP con trazas pre y post, y modulación por recompensa.
@@ -8,8 +10,8 @@ class R_STDP(Synapse):
 
     _instantiated = []
 
-    def __init__(self, tau_c=100.0, a=0.005,
-                 A_plus=1.0, A_minus=1.0,
+    def __init__(self, tau_c=20.0, a=0.1,
+                 A_plus=0.01, A_minus=0.01,
                  tau_plus=20.0, tau_minus=20.0,
                  w_min=0.0, w_max=1.0):
 
@@ -35,13 +37,19 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w = clip(w + a * c * reward, w_min, w_max)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w = clip(w + a * c * reward, w_min, w_max)
+            w += ite(
+                (c < 0.0) and (reward < 0.0),
+                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
+                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
         """
 
         Synapse.__init__(self,
@@ -90,6 +98,7 @@ IZHIKEVICH = Neuron(
 )
 
 
+
 pop = Population(15, IZHIKEVICH)
 
 
@@ -117,7 +126,7 @@ compile()
 
 import gymnasium as gym
 
-env = gym.make('Acrobot-v1', render_mode='human')
+env = gym.make('Acrobot-v1')
 num_steps = 1000
 i = 0
 limites = [
@@ -147,57 +156,90 @@ print(observation)
 recompensas = []
 
 M = Monitor(pop, ['spike','v'])
-while not terminated:
-    # Codificar observación
-    i = 0
-    k = 0
-    for val in observation:
-        if val < 0:
-            #Normalizar val
-            val = normalize(val, limites[k][0], limites[k][1])
-            pop[int(input_index[i])].I = -val*inputWeights[k]
-            pop[int(input_index[i+1])].I = 0
-        else:
-            #Normalizar val
-            val = normalize(val, limites[k][0], limites[k][1])
-            pop[int(input_index[i])].I = 0
-            pop[int(input_index[i+1])].I = val*inputWeights[k]
-        i += 2
-        k += 1
+
+episodes = 500
+retornos = []
+total_return = 0
+for episode in range(episodes):
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    episode_return = 0
+    recompensas = []
+    while not terminated and not truncated:
+        # Codificar observación
+        i = 0
+        k = 0
+        for val in observation:
+            if val < 0:
+                #Normalizar val
+                val = normalize(val, limites[k][0], limites[k][1])
+                pop[int(input_index[i])].I = val*30
+                pop[int(input_index[i+1])].I = 0
+            else:
+                #Normalizar val
+                val = normalize(val, limites[k][0], limites[k][1])
+                pop[int(input_index[i])].I = 0
+                pop[int(input_index[i+1])].I = val*30
+            i += 2
+            k += 1
+
+        theta1 = np.arccos(observation[0])
+        theta2 = np.arccos(observation[2])
+        reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
+
+        returns.append(reward)
+        r = reward - np.mean(recompensas)
+        syn.reward = r
+        simulate(50.0)
+        spikes = M.get('spike')
+        #Output from 3 neurons, one for each action
+        output1 = np.size(spikes[output_index[0]])
+        output2 = np.size(spikes[output_index[1]])
+        output3 = np.size(spikes[output_index[2]])
+        #Choose the action with the most spikes
+        action = env.action_space.sample()
+        if output1 > output2 and output1 > output3:
+            action = 0
+        elif output2 > output1 and output2 > output3:
+            action = 1
+        elif output3 > output1 and output3 > output2:
+            action = 2
+        observation, reward, terminated, truncated, info = env.step(action)
+
+        #La recomensa será la distancia al objetivo
+        #Termination: The free end reaches the target height, which is constructed as: -cos(theta1) - cos(theta2 + theta1) > 1.0
+        #cos(theta1) = observation[0]
+        #cos(theta2) = observation[2]
+        #r = 1 - (-cos(theta1) - cos(theta2 + theta1))
+       
+
+        actions_done.append(action)
+        M.reset()
+        pop.reset()
+        syn.reward = 0
+        recompensas.append(reward)
+    print("Returns episode", episode , sum(recompensas))
+    total_return += sum(recompensas)
+    retornos.append(sum(recompensas))
 
     simulate(50.0)
-    spikes = M.get('spike')
-    #Output from 3 neurons, one for each action
-    output1 = np.size(spikes[output_index[0]])
-    output2 = np.size(spikes[output_index[1]])
-    output3 = np.size(spikes[output_index[2]])
-    #Choose the action with the most spikes
-    action = env.action_space.sample()
-    if output1 > output2 and output1 > output3:
-        action = 0
-    elif output2 > output1 and output2 > output3:
-        action = 1
-    elif output3 > output1 and output3 > output2:
-        action = 2
-    observation, reward, terminated, truncated, info = env.step(action)
-
-    #La recomensa será la distancia al objetivo
-    #Termination: The free end reaches the target height, which is constructed as: -cos(theta1) - cos(theta2 + theta1) > 1.0
-    #cos(theta1) = observation[0]
-    #cos(theta2) = observation[2]
-    #r = 1 - (-cos(theta1) - cos(theta2 + theta1))
-    theta1 = np.arccos(observation[0])
-    theta2 = np.arccos(observation[2])
-    reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
-    
-    returns.append(reward)
-    r = reward - np.mean(recompensas)
-    syn.reward = r
-    simulate(50.0)
-
-    actions_done.append(action)
     M.reset()
+    pop.reset()
 
-print("Returns: ", sum(returns))
+env.close()
+print("Returns: ", total_return/episodes)
+
+#plot returns
+
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(retornos)
+plt.xlabel("Episodio")
+plt.ylabel("Retorno")
+plt.title("Retorno por episodio")
+plt.grid(True)
+plt.show()
+
 
 

@@ -255,7 +255,7 @@ float Genome::singleEvaluation(PyObject *load_module, string folder, int trial){
         std::cerr << "Error: inputWeights está vacío en singleEvaluation." << std::endl;
         return -1;
     }
-
+    
     //Generar un arreglo de largo 5 con los parametros de la regla R-STDP que se sacan de la especie
     std::vector<float> rstdp_parameters;
     rstdp_parameters.push_back(tau_c);

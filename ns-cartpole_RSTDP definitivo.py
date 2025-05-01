@@ -5,6 +5,9 @@ import gymnasium as gym
 from ns_gym.wrappers import NSClassicControlWrapper
 from ns_gym.schedulers import ContinuousScheduler, PeriodicScheduler
 from ns_gym.update_functions import RandomWalk, IncrementUpdate
+from ns_gym import base
+import ns_gym.utils as utils
+from typing import Union, Any, Optional,Type
 
 
 class R_STDP(Synapse):
@@ -65,6 +68,30 @@ class R_STDP(Synapse):
                          name="R-STDP")
 
         self._instantiated.append(True)
+
+
+import random as rd
+
+class BoundedRandomWalk(base.UpdateFn):
+    def __init__(self, scheduler: Type[base.Scheduler], mu: float = 0, sigma: float = 1,
+                 min_val: Optional[float] = None, max_val: Optional[float] = None, seed=None):
+        super().__init__(scheduler)
+        self.mu = mu
+        self.sigma = sigma
+        self.min_val = min_val
+        self.max_val = max_val
+        self.rng = np.random.default_rng(seed=seed)
+
+    def __call__(self, param: float, t: float) -> tuple[float, bool]:
+        return super().__call__(param, t)
+
+    def update(self, param: float, t: float) -> float:
+        #get random value between min val and max val
+        updated_param = rd.uniform(self.min_val,self.max_val)
+        while updated_param == param:
+            updated_param = rd.uniform(self.min_val,self.max_val)
+        return updated_param
+
 
 
 LIF = Neuron(
@@ -142,8 +169,8 @@ print("Pesos de INICIO: ", weights)
 
 # Entorno base
 base_env = gym.make("CartPole-v1")
-scheduler = PeriodicScheduler(period=3)
-update_function = IncrementUpdate(scheduler, k=0.1)
+scheduler = PeriodicScheduler(period=10)
+update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0) 
 tunable_params = {"gravity": update_function}
 env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
 
@@ -188,7 +215,7 @@ M = Monitor(pop, ['spike','v'])
 num_steps = 1000
 i = 0
 acciones = []
-episodes = 500
+episodes = 1
 total_return = 0.0
 for ep in range(episodes):
     observation, _ = env.reset()
@@ -276,7 +303,7 @@ for ep in range(episodes):
     print("Episode %d reward: %f" % (ep + 1, episode_return))
     retornos.append(episode_return)
     #print("Recompensas: ", distancias)
-    #print("Acciones: ", rs)
+    print("recompensa: ", rs)
     total_return += episode_return
     dends = list(syn.dendrites)
     #print(dends[0])

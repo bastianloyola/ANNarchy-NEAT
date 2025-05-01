@@ -5,6 +5,13 @@ import random as rd
 import scipy.sparse
 import gymnasium as gym
 from scipy.special import erf
+from ns_gym.wrappers import NSClassicControlWrapper
+from ns_gym.schedulers import ContinuousScheduler, PeriodicScheduler
+from ns_gym.update_functions import RandomWalk, IncrementUpdate
+from ns_gym import base
+import ns_gym.utils as utils
+from typing import Union, Any, Optional,Type
+
 
 def get_function(trial):
     #open config file and get the parameter "function"
@@ -109,6 +116,32 @@ IZHIKEVICH = Neuron(  #I = 20
     spike="v >= 30.0",
     reset="v = c; u += d"
 )
+
+
+
+class BoundedRandomWalk(base.UpdateFn):
+    def __init__(self, scheduler: Type[base.Scheduler], mu: float = 0, sigma: float = 1,
+                 min_val: Optional[float] = None, max_val: Optional[float] = None, seed=None):
+        super().__init__(scheduler)
+        self.mu = mu
+        self.sigma = sigma
+        self.min_val = min_val
+        self.max_val = max_val
+        self.rng = np.random.default_rng(seed=seed)
+
+    def __call__(self, param: float, t: float) -> tuple[float, bool]:
+        return super().__call__(param, t)
+
+    def update(self, param: float, t: float) -> float:
+        #get random value between min val and max val
+        updated_param = rd.uniform(self.min_val,self.max_val)
+        while updated_param == param:
+            updated_param = rd.uniform(self.min_val,self.max_val)
+        return updated_param
+
+
+
+
 I = 0
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp):
     try:
@@ -116,7 +149,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
+        proj = Projection(pre=pop, post=pop, target='exc')
+        #proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -157,6 +191,8 @@ def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights
         return xor(pop, proj, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole":
         return cartpole(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "cartpole_ns":
+        return cartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "lunar_lander":
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
@@ -215,19 +251,17 @@ def xor(pop,Monitor,input_index,output_index,inputWeights):
     return fitness
 
 
-
 def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
-    env = gym.make("CartPole-v1")
-    observation, info = env.reset()
+    base_env = gym.make("CartPole-v1")
+    scheduler = PeriodicScheduler(period=20)
+    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
+    tunable_params = {"gravity": update_function}
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+    observation = env.reset()[0].state
     terminated = False
     truncated = False
-    maxInput = inputWeights[1]
-    minInput = inputWeights[0]
-    #Generate 4 input weights for each input
-    np.random.seed(int(genome_id))
-    inputWeights = np.random.uniform(minInput,maxInput,4)
     #Number of episodes
-    episodes = 100
+    episodes = 200
     h=0
     #Final fitness 
     final_fitness = 0
@@ -253,18 +287,97 @@ def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id
             #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
             k = 0
-            for val in observation:
+            for val in observation.state:
                 if val < 0:
                     val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = val*inputWeights[k]
+                    pop[int(input_index[i])].I = val*30
                     pop[int(input_index[i+1])].I = 0
                 else:
                     val = normalize(val, limits[k][0], limits[k][1])
                     pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = val*30
                 i += 2
                 k += 1
-            distance = - abs(observation[2])
+            distance = - abs(observation.state[2])
+            distancias.append(distance)
+            r = distance - np.mean(distancias)
+
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 2 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2: #left
+                action = 0
+            elif output1 < output2: #right
+                action = 1
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward.reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            j += 1
+        #The fitness is the sum of the rewards for each episode
+        final_fitness += np.sum(returns)
+        h += 1
+        Monitor.reset()
+        pop.reset()
+    #The final fitness is the mean of the fitness for each episode
+    final_fitness = final_fitness/episodes
+    env.close()
+    return final_fitness
+
+
+def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
+    base_env = gym.make("CartPole-v1")
+    scheduler = PeriodicScheduler(period=20)
+    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
+    tunable_params = {"gravity": update_function}
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+    observation = env.reset()[0].state
+    terminated = False
+    truncated = False
+    #Number of episodes
+    episodes = 200
+    h=0
+    #Final fitness 
+    final_fitness = 0
+
+    # Limits for each observation variable
+    limits = [
+        (-4.8, 4.8),  # Cart position
+        (-10.0, 10.0),  # Cart velocity (estimated)
+        (-0.418, 0.418),  # Pole angle in radians
+        (-10.0, 10.0)  # Pole angular velocity (estimated)
+    ]
+    
+    while h < episodes:
+        j=0
+        returns = []
+        actions_done = []
+        observation, info = env.reset()
+        terminated = False
+        truncated = False
+        distancias = []
+        env.reset()
+        while not terminated and not truncated:
+            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation.state:
+                if val < 0:
+                    val = normalize(val, limits[k][0], limits[k][1])
+                    pop[int(input_index[i])].I = val*30
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    val = normalize(val, limits[k][0], limits[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*30
+                i += 2
+                k += 1
+            distance = - abs(observation.state[2])
             distancias.append(distance)
             r = distance - np.mean(distancias)
             proj.reward = r
@@ -281,7 +394,7 @@ def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id
             elif output1 < output2: #right
                 action = 1
             observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
+            returns.append(reward.reward)
             actions_done.append(action)
             pop.reset()
             Monitor.reset()
@@ -290,7 +403,6 @@ def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id
         #The fitness is the sum of the rewards for each episode
         final_fitness += np.sum(returns)
         h += 1
-        simulate(50.0)
         Monitor.reset()
         pop.reset()
     #The final fitness is the mean of the fitness for each episode
