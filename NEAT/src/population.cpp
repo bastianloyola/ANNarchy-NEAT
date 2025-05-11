@@ -390,6 +390,13 @@ void Population::evaluate(std::string folder,int trial) {
     PyObject* load_module = PyImport_Import(name);
     Py_DECREF(name);
 
+    // Verifica si el módulo se cargó correctamente
+    if (load_module == NULL) {
+        std::cerr << "Error al cargar el módulo 'annarchy'" << std::endl;
+        PyErr_Print();  // Muestra el error detallado de Python
+        return;  // Sal de la función si no se puede cargar el módulo
+    }
+
     // Create a vector to store the fitness values of each genome
     std::vector<float> fitness_values(nGenomes, 0.0f);
 

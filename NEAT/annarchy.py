@@ -149,8 +149,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        proj = Projection(pre=pop, post=pop, target='exc')
-        #proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
+        #proj = Projection(pre=pop, post=pop, target='exc')
+        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -914,4 +914,6 @@ def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): 
     final_fitness = final_fitness / episodes
     env.close()
     return final_fitness
+
+
 

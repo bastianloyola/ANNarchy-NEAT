@@ -15,13 +15,13 @@ env = gym.make("CartPole-v1", render_mode="human")
 # we define the two schedulers and update functions that model the semi-Markov chain over the relevant parameters
 ############
 scheduler_1 = ContinuousScheduler()
-scheduler_2 = PeriodicScheduler(period=3)
+scheduler_2 = PeriodicScheduler(period=2)
 
-update_function1= IncrementUpdate(scheduler_1, k=0.5)
+update_function1= IncrementUpdate(scheduler_1, k=0.01)
 update_function2 = RandomWalk(scheduler_2)
 
 ##### Step 4: map parameters to update functions
-tunable_params = {"masspole":update_function1, "gravity": update_function2}
+tunable_params = {"force_mag":update_function2, "gravity": update_function2, "masscart": update_function2, "masspole": update_function2, "masscart": update_function2}
 
 
 ######## Step 5: set notification level and pass environment and parameters into wrapper
