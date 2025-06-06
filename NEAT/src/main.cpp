@@ -18,7 +18,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     float fitness;
-    if (argc != 14){
+    if (argc != 19){
         std::string folder, parentFolder, subFolder;
         int trial = 0;
         if (argc == 2){
@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
         int numberGenomes, numberInputs, numberOutputs, evolutions, n_max, process_max;
         float learningRate, inputWeights_min, inputWeights_max, weightsRange_min, weightsRange_max;
         string function;
+
 
         std::ifstream file("config/config.cfg"); // Open the file
         std::string line;
@@ -115,6 +116,11 @@ int main(int argc, char *argv[]) {
         float c2=std::atof(argv[11]);
         float c3=std::atof(argv[12]);
         int trialNumber=std::atoi(argv[13]);
+        float tc= std::atof(argv[14]);
+        float aplus= std::atof(argv[15]);
+        float aminus= std::atof(argv[16]);
+        float tplus= std::atof(argv[17]);
+        float tminus= std::atof(argv[18]);
 
         string folder = "results/trial-"+std::to_string(trialNumber);
         std::string parentFolder = "results";
@@ -165,6 +171,11 @@ int main(int argc, char *argv[]) {
         config_file << "process_max=" << process_max << "\n";
         config_file << "function=" << function << "\n";
         config_file << "folder=" << folder << "\n";
+        config_file << "tau_c=" << tc << "\n";
+        config_file << "a_minus=" << aminus << "\n";
+        config_file << "a_plus=" << aplus << "\n";
+        config_file << "tau_plus=" << tplus << "\n";
+        config_file << "tau_minus=" << tminus << "\n";
         config_file.close();
 
         setenv("PYTHONPATH", ".", 1);

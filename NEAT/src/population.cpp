@@ -290,29 +290,24 @@ void Population::speciation(string filenameInfo){
     vector<Genome*> auxGenomes = genomes;
     bool flag;
 
-    //Get best 
-    Genome *bestGenome = getBest();
+
 
     genomes.clear();
 
     
     
     cout << "Size of auxGenomes: " << auxGenomes.size() << endl;
-    species[0]->genome = bestGenome;
-    species[0]->genomes.clear();
-    species[0]->genomes.push_back(bestGenome);
-    genomes.push_back(bestGenome);
-    for (int i = 0; i < static_cast<int>(auxGenomes.size()); i++){
-        if (auxGenomes[i]->getId() == bestGenome->getId()){
-            auxGenomes.erase(auxGenomes.begin() + i);
-            break;
-        }
-    }
 
 
-    for (int i = 1; i < nSpecies; i++){
+    for (int i = 0; i < nSpecies; i++){
         cout << "Species: " << i << endl;
-        int index = randomInt(0,static_cast<int>(species[i]->genomes.size()));
+        int index = 0;
+        for (int j = 0; j < static_cast<int>(species[i]->genomes.size()); j++){
+            if (species[i]->genomes[j]->getFitness() > species[i]->genomes[index]->getFitness()){
+                index = j;
+            }
+        }
+
         cout << "Genome: " << index << endl;
         
         species[i]->genome = species[i]->genomes[index];
@@ -408,7 +403,10 @@ void Population::evaluate(std::string folder,int trial) {
     if (genomes_per_process == 0){
         genomes_per_process = 1;
     }
-    
+
+    for (int i = 0; i < nGenomes; i++){
+        genomes[i]->setIdAnnarchy(i+1);
+    }
 
     // Create a vector of pipes for communication with child processes
     std::vector<std::array<int, 2>> pipes(max_processes);

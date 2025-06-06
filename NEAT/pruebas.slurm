@@ -2,14 +2,46 @@
 #SBATCH --job-name=cartpole
 #SBATCH --partition=batch
 #SBATCH --nodes=1
-#SBATCH --array=1-31:1
-#SBATCH --output=outputs/job-%A_%a.out # job-523_1.out
-#SBATCH --error=outputs/job-%A_%a.err # job-523_1.err
-#SBATCH --cpus-per-task=50  # Cada tarea usará 25 CPU
+#SBATCH --output=output.txt
+#SBATCH --error=error.txt
+#SBATCH --cpus-per-task=1
 
 # Ejecutar el ejecutable ./NEAT
-./NEAT $SLURM_ARRAY_TASK_ID
+cd force
+python3 force.py
+cd ..
+cd base-force-rstdp
+python3 force-rstdp.py
+cd ..
+cd force-rstdp-hidden1
+python3 force-rstdp.py
+cd ..
+cd neatcartpole
+python3 neatsolo.py
+cd ..
+cd rstdphidden2
+python3 rstdp.py
+cd ..
+cd force-rstdp-hidden2
+python3 force-rstdp.py
+cd ..
+cd rstdprand1
+python3 rstdp.py
+cd ..
+cd force-rstdp-rand1
+python3 force-rstdp.py
+cd ..
+cd rstdp
+python3 rstdp.py
+cd ..
+cd force-rstdp
+python3 force-rstdp.py
+cd ..
+cd neatbase-rstdp
+python3 neatrstdp.py
+cd ..
+cd rstdphidden1
+python3 rstdp.py
+cd ..
 
-# Comandos para limpiar el directorio
-rm -rf __pycache__
-rm -rf annarchy
+

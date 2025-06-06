@@ -22,22 +22,27 @@ def objective(trial):
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
-    keep = round(trial.suggest_float('keep', 0.4, 0.6), 3)
-    threshold = round(trial.suggest_float('threshold', 2.0, 4.0), 3)
-    interespeciesRate = round(trial.suggest_float('interSpeciesRate', 0.0005, 0.0015), 3)
-    noCrossoverOff = round(trial.suggest_float('noCrossoverOff', 0.15, 0.35), 3)
-    probabilityWeightMutated = round(trial.suggest_float('probabilityWeightMutated', 0.7, 0.9), 3)
-    probabilityAddNodeSmall = round(trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04), 3)
-    probabilityAddLink_small = round(trial.suggest_float('probabilityAddLink_small', 0.01, 0.05), 3)
-    probabilityAddNodeLarge = round(trial.suggest_float('probabilityAddNodeLarge', 0.02, 0.4), 3)
-    probabilityAddLink_Large = round(trial.suggest_float('probabilityAddLink_Large', 0.05, 0.2), 3)
-    c1 = round(trial.suggest_float('c1', 0.5, 1.5), 3)
-    c2 = round(trial.suggest_float('c2', 0.5, 1.5), 3)
-    c3 = round(trial.suggest_float('c3', 0.3, 0.5), 3)
+    keep = 0.577
+    threshold = 3.241
+    interespeciesRate = 0.000549
+    noCrossoverOff = 0.329
+    probabilityWeightMutated=0.851
+    probabilityAddNodeSmall=0.0305
+    probabilityAddLink_small=0.0436
+    probabilityAddNodeLarge=0.0417
+    probabilityAddLink_Large=0.0789
+    c1=0.53
+    c2=0.959
+    c3=0.306
+    tau_c = trial.suggest_float('tau_c', 10, 30)
+    a_plus = trial.suggest_float('a_plus', 0.001, 0.09)
+    a_minus = trial.suggest_float('a_minus', 0.001, 0.09)
+    tau_plus = trial.suggest_float('tau_plus', 10, 30)
+    tau_minus = trial.suggest_float('tau_minus', 10, 30)
     p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate),
                           str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), 
                           str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), 
-                          str(c1), str(c2), str(c3), str(trial.number)],
+                          str(c1), str(c2), str(c3), str(trial.number), str(tau_c), str(a_plus), str(a_minus), str(tau_plus), str(tau_minus)],
                         stderr=subprocess.PIPE, 
                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 

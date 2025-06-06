@@ -192,7 +192,7 @@ for trial in range(trials):
     pop = Population(10, IZHIKEVICH)
 
     #syn = Projection(pop, pop, target='exc')
-    syn = Projection(pop, pop, target='exc', synapse=R_STDP)
+    syn = Projection(pop, pop, target='exc', synapse=R_STDP(A_plus=0.01, A_minus=0.01, tau_plus=20.0, tau_minus=20.0, tau_c=20.0))
 
 
     syn.connect_from_sparse(matrix)
@@ -320,45 +320,35 @@ env.close()
 
 
 
-
-
 # Convertir la lista de listas en un array de numpy
 retornos2 = np.array(retornos2)
+nombre = "force-rstdp-hidden1"
+np.save(f"retornos2_{nombre}.npy", retornos2)
 
-# Calcular la media y la desviación estándar a través de los trials (por episodio)
+promedios_trials = np.mean(retornos2, axis=1)
+
+plt.figure(figsize=(8, 5))
+plt.boxplot(promedios_trials, vert=True, patch_artist=True)
+plt.title(f'Distribución de la recompensa promedio por trial - {nombre}')
+plt.ylabel('Recompensa promedio')
+plt.xticks([1], [nombre])
+plt.tight_layout()
+plt.savefig(f'boxplot_{nombre}.png')
+plt.close()
+
 mean = np.mean(retornos2, axis=0)
-std = np.std(retornos2, axis=0)
-
-# Calcular el percentil 25 y 75
 q25 = np.percentile(retornos2, 25, axis=0)
 q75 = np.percentile(retornos2, 75, axis=0)
-
-# Calcular la mediana
 median = np.median(retornos2, axis=0)
 
-# Graficar
 plt.figure(figsize=(10, 5))
 plt.plot(mean, label='Media', color='blue')
 plt.fill_between(range(len(mean)), q25, q75, color='blue', alpha=0.2, label='IQR')
 plt.plot(median, label='Mediana', color='red')
-plt.title('Convergencia de la recompensa media por episodio')
+plt.title(f'Convergencia de la recompensa media por episodio - {nombre}')
 plt.xlabel('Episodio')
 plt.ylabel('Recompensa media')
 plt.legend()
-plt.show()
-
-
-print(total_return2)
-
-
-
-promedios_trials = np.mean(retornos2, axis=1)
-
-
-plt.figure(figsize=(8, 5))
-plt.boxplot(promedios_trials, vert=True, patch_artist=True)
-plt.title('Distribución de la recompensa promedio por trial')
-plt.ylabel('Recompensa promedio')
-plt.xticks([1], ['Trials']) 
-plt.show()
-
+plt.tight_layout()
+plt.savefig(f'convergencia_{nombre}.png')
+plt.close()

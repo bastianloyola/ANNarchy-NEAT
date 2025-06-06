@@ -13,14 +13,6 @@ import ns_gym.utils as utils
 from typing import Union, Any, Optional,Type
 
 
-def get_function(trial):
-    #open config file and get the parameter "function"
-    with open('results/trial-' + str(int(trial)) + '/config.txt') as f:
-        lines = f.readlines()
-        for line in lines:
-            if "function" in line:
-                return line.split('=')[1].strip()
-    return None
 
 
 class R_STDP(Synapse):
@@ -203,8 +195,14 @@ def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights
         return lunar_lander2(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "acrobot":
         return acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "acrobot_ns":
+        return acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "acrobot2":
         return acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "mountaincar":
+        return mountaincar(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "mountaincar2":
+        return mountaincar2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -261,7 +259,7 @@ def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id
     terminated = False
     truncated = False
     #Number of episodes
-    episodes = 200
+    episodes = 100
     h=0
     #Final fitness 
     final_fitness = 0
@@ -340,7 +338,7 @@ def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome
     terminated = False
     truncated = False
     #Number of episodes
-    episodes = 200
+    episodes = 100
     h=0
     #Final fitness 
     final_fitness = 0
@@ -831,6 +829,117 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
     env.close()
     return final_fitness
 
+def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id):
+    base_env = gym.make("Acrobot-v1")
+
+    scheduler = PeriodicScheduler(period=5)
+    scheduler2 = PeriodicScheduler(period=5)
+    scheduler3 = PeriodicScheduler(period=5)
+    update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
+    update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
+    update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
+
+
+
+    tunable_params = {
+        "LINK_LENGTH_1": update1,
+        "LINK_LENGTH_2": update1,
+        "LINK_MASS_1": update2,
+        "LINK_MASS_2": update2,
+        "LINK_COM_POS_1": update3,
+        "LINK_COM_POS_2": update3,
+    }
+
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True, render_mode="human")
+
+    obs, info = env.reset()
+    done = False
+    truncated = False
+    total_reward = 0
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-1, 1),  # cos(theta1)
+        (-1, 1),  # sin(theta1)
+        (-1, 1),  # cos(theta2)
+        (-1, 1),  # sin(theta2)
+        (-12.5663706, 12.5663706),  # theta1_dot
+        (-28.2743339, 28.2743339)  # theta2_dot
+    ]
+    np.random.seed(int(genome_id))
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        distancias = []
+        observation, = env.reset()
+        while not terminated and not truncated:
+            # Codificar observación
+            i = 0
+            k = 0
+            for val in observation.state:
+                if val < 0:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = -val*30
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*30
+                i += 2
+                k += 1
+            theta1 = np.arccos(observation.state[0])
+            theta2 = np.arccos(observation.state[2])
+            reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
+
+            distancias.append(reward)
+            r = reward - np.mean(distancias)
+            proj.reward = r
+            rs.append(r)
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 3 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3:
+                action = 0
+            elif output2 > output1 and output2 > output3:
+                action = 1
+            elif output3 > output1 and output3 > output2:
+                action = 2
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            pop.reset()
+            proj.reward = 0.0
+            j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+        Monitor.reset()
+        pop.reset()
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+
 
 def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): #based on lunar_lander2
     env = gym.make("Acrobot-v1")
@@ -880,12 +989,12 @@ def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): 
                 k = 0
                 while k < len(intervalos) - 1:
                     if observation[i] >= intervalos[k] and observation[i] < intervalos[k+1]:
-                        pop[input_index[i * num_neuronas_por_variable + k]].I = 20
+                        pop[input_index[i * num_neuronas_por_variable + k]].I = 75
                         break
                     elif observation[i] > max_val:
-                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 20
+                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 75
                     elif observation[i] < min_val:
-                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 20
+                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 75
                     k += 1
             simulate(50.0)
             spikes = Monitor.get('spike')
@@ -916,4 +1025,155 @@ def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): 
     return final_fitness
 
 
+
+def mountaincar(pop,Monitor,input_index,output_index,inputWeights, genome_id):
+    env = gym.make("MountainCar-v0")
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    #Number of episodes
+    episodes = 10
+    h=0
+    #Final fitness
+    final_fitness = 0
+
+    # Limits for each observation variable
+    limits = [
+        (-1.2, 0.6),  # Car position
+        (-0.07, 0.07),  # Car velocity (estimated)
+    ]
+    while h < episodes:
+        j=0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        observation, info = env.reset()
+        while not terminated and not truncated:
+            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation:
+                
+                if val < 0:
+                    pop[int(input_index[i])].I = normalize(val, limits[k][0], limits[k][1])*30
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = normalize(val, limits[k][0], limits[k][1])*30
+                i += 2
+                k += 1
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 3 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2: 
+                if output1 > output3:
+                    action = 0
+                else:
+                    action = 2
+            else:
+                if output2 > output3:
+                    action = 1
+                else:
+                    action = 2
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            j += 1
+        #The fitness is the sum of the rewards for each episode
+        final_fitness += np.sum(returns)
+        h += 1
+        pop.reset()
+        Monitor.reset()
+    #The final fitness is the mean of the fitness for each episode
+    final_fitness = final_fitness/episodes
+    env.close()
+    return final_fitness
+
+
+def mountaincar2(pop, Monitor, input_index, output_index, inputWeights, genome_id):
+    env = gym.make("MountainCar-v0")
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 10
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+
+    # Definir límites para cada variable de observación
+    limites = [
+        (-1.2, 0.6),  # Posición del carro
+        (-0.07, 0.07)  # Velocidad del carro (estimado)
+    ]
+
+    num_neuronas_por_variable = 20
+    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
+    interval_limits = []
+
+    for low, high in limites:
+        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
+        x = np.linspace(-1, 1, num_neuronas_por_variable)
+        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+        gaussian_weights /= gaussian_weights.sum()
+
+        increments = gaussian_weights * (high - low)
+
+        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
+        interval_limits.append(limites_acumulados)
+
+    while h < episodes:
+        l = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        env.reset()
+        while not terminated and not truncated:
+            # Codificar observación
+            for i, intervalos in enumerate(interval_limits):
+                min_val, max_val = intervalos[0], intervalos[-1]
+                k = 0
+                while k < len(intervalos) - 1:
+                    if observation[i] >= intervalos[k] and observation[i] < intervalos[k+1]:
+                        pop[input_index[i * num_neuronas_por_variable + k]].I = 20
+                        break
+                    elif observation[i] > max_val:
+                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 20
+                    elif observation[i] < min_val:
+                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 20
+                    k += 1
+
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            output1 = sum(np.size(spikes[idx]) for idx in output_index[:20])
+            output2 = sum(np.size(spikes[idx]) for idx in output_index[20:40])
+            output3 = sum(np.size(spikes[idx]) for idx in output_index[40:])
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3:
+                action = 0
+            elif output2 > output1 and output2 > output3:
+                action = 1
+            elif output3 > output1 and output3 > output2:
+                action = 2
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            l += 1
+        final_fitness += np.sum(returns)
+        h += 1
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
 
