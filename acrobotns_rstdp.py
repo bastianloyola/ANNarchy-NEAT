@@ -159,7 +159,7 @@ for i in range(12):
         #random positivo o negativo
         #random entre 0 y 1
         np.random.seed(i+j)
-        matrix[i][j+8] = np.random.uniform(0,110)
+        matrix[i][j+12] = np.random.uniform(0,110)
 
 #print(matrix)
 
@@ -186,10 +186,15 @@ def normalize(value, min_val, max_val):
 i = 0
 
 
-trials = 1
+trials = 31
 from scipy import sparse
 matrix = sparse.csr_matrix(matrix)
 
+a_plus = 0.03172842609828545
+a_minus = 0.041807964981703846
+tau_plus = 11.20345617106177
+tau_minus = 25.46276950485707
+tauc = 13.452698398021719
 
 
 retornos2 = []
@@ -201,13 +206,13 @@ for trial in range(trials):
     pop = Population(15, IZHIKEVICH)
 
     #syn = Projection(pop, pop, target='exc')
-    syn = Projection(pop, pop, target='exc', synapse=R_STDP(A_plus=0.01, A_minus=0.01, tau_plus=20.0, tau_minus=20.0, tau_c=20.0))
+    syn = Projection(pop, pop, target='exc', synapse=R_STDP(A_plus=a_plus, A_minus=a_minus, tau_plus=tau_plus, tau_minus=tau_minus, tau_c=tauc))
 
 
     syn.connect_from_sparse(matrix)
 
 
-    compile(directory="ns-cartpole-rstdp-33")
+    compile(directory="acrobot-rstdp")
     j = 0
     returns = []
     actions_done = []
@@ -328,7 +333,7 @@ env.close()
 
 # Convertir la lista de listas en un array de numpy
 retornos2 = np.array(retornos2)
-nombre = "force-rstdp-hidden1"
+nombre = "acrobot-rstdp"
 np.save(f"retornos2_{nombre}.npy", retornos2)
 
 promedios_trials = np.mean(retornos2, axis=1)

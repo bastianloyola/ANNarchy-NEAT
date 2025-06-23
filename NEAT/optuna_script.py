@@ -22,18 +22,18 @@ def objective(trial):
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
     # Definir los hiperparámetros que Optuna debe optimizar
-    keep = 0.577
-    threshold = 3.241
-    interespeciesRate = 0.000549
-    noCrossoverOff = 0.329
-    probabilityWeightMutated=0.851
-    probabilityAddNodeSmall=0.0305
-    probabilityAddLink_small=0.0436
-    probabilityAddNodeLarge=0.0417
-    probabilityAddLink_Large=0.0789
-    c1=0.53
-    c2=0.959
-    c3=0.306
+    keep=0.456608
+    threshold=3.93036
+    interespeciesRate=0.000886674
+    noCrossoverOff=0.301752
+    probabilityWeightMutated=0.797799
+    probabilityAddNodeSmall=0.0356973
+    probabilityAddLink_small=0.027703
+    probabilityAddNodeLarge=0.384039
+    probabilityAddLink_Large=0.0849447
+    c1=1.44458
+    c2=1.37687
+    c3=0.439188
     tau_c = trial.suggest_float('tau_c', 10, 30)
     a_plus = trial.suggest_float('a_plus', 0.001, 0.09)
     a_minus = trial.suggest_float('a_minus', 0.001, 0.09)

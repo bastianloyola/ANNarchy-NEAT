@@ -1,0 +1,16 @@
+
+-------- Evaluation of gen 0-----------
+Genome id: 0 idAnnarchy: 1  fitness: -495.75
+Genome id: 1 idAnnarchy: 2  fitness: -497.09
+Genome id: 2 idAnnarchy: 3  fitness: -272.32
+Genome id: 3 idAnnarchy: 4  fitness: -500
+Genome id: 4 idAnnarchy: 5  fitness: -423.39
+
+-------- Evaluation of gen 1-----------
+Genome id: 2 idAnnarchy: 1  fitness: -1
+Genome id: 4 idAnnarchy: 2  fitness: -1
+Genome id: 5 idAnnarchy: 3  fitness: -1
+Genome id: 6 idAnnarchy: 4  fitness: -1
+Genome id: 7 idAnnarchy: 5  fitness: -1
+
+-------- Evaluation of gen 2-----------

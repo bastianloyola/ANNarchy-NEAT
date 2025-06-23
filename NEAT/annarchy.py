@@ -141,8 +141,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        #proj = Projection(pre=pop, post=pop, target='exc')
-        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
+        proj = Projection(pre=pop, post=pop, target='exc')
+        #proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -754,12 +754,33 @@ def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
 
 
 def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
-    env = gym.make("Acrobot-v1")
+    base_env = gym.make("Acrobot-v1")
+
+    scheduler = PeriodicScheduler(period=5)
+    scheduler2 = PeriodicScheduler(period=5)
+    scheduler3 = PeriodicScheduler(period=5)
+    update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
+    update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
+    update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
+
+
+
+    tunable_params = {
+        "LINK_LENGTH_1": update1,
+        "LINK_LENGTH_2": update1,
+        "LINK_MASS_1": update2,
+        "LINK_MASS_2": update2,
+        "LINK_COM_POS_1": update3,
+        "LINK_COM_POS_2": update3,
+    }
+
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+
     observation, info = env.reset()
     terminated = False
     truncated = False
     # Number of episodes
-    episodes = 31
+    episodes = 100
     h = 0
     # Final fitness 
     final_fitness = 0
@@ -784,22 +805,22 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
         actions_done = []
         terminated = False
         truncated = False
-        env.reset()
+        observation = env.reset()[0]
         while not terminated and not truncated:
             # Codificar observación
             i = 0
             k = 0
-            for val in observation:
+            for val in observation.state:
                 if val < 0:
                     #Normalizar val
                     val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i])].I = val*30
                     pop[int(input_index[i+1])].I = 0
                 else:
                     #Normalizar val
                     val = normalize(val, limites[k][0], limites[k][1])
                     pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = val*30
                 i += 2
                 k += 1
 
@@ -818,12 +839,15 @@ def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
             elif output3 > output1 and output3 > output2:
                 action = 2
             observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
+            returns.append(reward.reward)
             actions_done.append(action)
             Monitor.reset()
+            pop.reset()
             j += 1
         final_fitness += np.sum(returns)
         h += 1
+        Monitor.reset()
+        pop.reset()
 
     final_fitness = final_fitness / episodes
     env.close()
@@ -850,7 +874,7 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
         "LINK_COM_POS_2": update3,
     }
 
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True, render_mode="human")
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
 
     obs, info = env.reset()
     done = False
@@ -883,7 +907,7 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
         terminated = False
         truncated = False
         distancias = []
-        observation, = env.reset()
+        observation = env.reset()[0]
         while not terminated and not truncated:
             # Codificar observación
             i = 0
@@ -892,7 +916,7 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
                 if val < 0:
                     #Normalizar val
                     val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = -val*30
+                    pop[int(input_index[i])].I = val*30
                     pop[int(input_index[i+1])].I = 0
                 else:
                     #Normalizar val
@@ -904,11 +928,9 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
             theta1 = np.arccos(observation.state[0])
             theta2 = np.arccos(observation.state[2])
             reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
-
             distancias.append(reward)
             r = reward - np.mean(distancias)
             proj.reward = r
-            rs.append(r)
             simulate(50.0)
             spikes = Monitor.get('spike')
             #Output from 3 neurons, one for each action
@@ -924,7 +946,7 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
             elif output3 > output1 and output3 > output2:
                 action = 2
             observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
+            returns.append(reward.reward)
             actions_done.append(action)
             Monitor.reset()
             pop.reset()
