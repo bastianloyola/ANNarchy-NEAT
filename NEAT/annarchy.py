@@ -14,7 +14,6 @@ from typing import Union, Any, Optional,Type
 
 
 
-
 class R_STDP(Synapse):
     """
     R-STDP con trazas pre y post, y modulación por recompensa.
@@ -38,6 +37,8 @@ class R_STDP(Synapse):
             w_min = %(w_min)s : projection
             w_max = %(w_max)s : projection
             reward = 0.0 : projection
+            T = 0.1 : projection
+            ruido = 0.0 : projection
         """ % locals()
 
         equations = """
@@ -50,20 +51,15 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w += ite(
-                (c < 0.0) and (reward < 0.0),
-                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
-                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
+            w = w + (c * reward) + T * ruido
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w += ite(
-                (c < 0.0) and (reward < 0.0),
-                clip(a * abs(c) * reward, -abs(w)*a, abs(w)*a),     
-                abs(clip(a * c * reward, -abs(w)*a, abs(w)*a)))
+            w = w + (c * reward) + T * ruido
         """
+
 
         Synapse.__init__(self,
                          parameters=parameters,
@@ -73,6 +69,9 @@ class R_STDP(Synapse):
                          name="R-STDP")
 
         self._instantiated.append(True)
+
+
+
 
 
 LIF = Neuron(  #I = 75
@@ -134,6 +133,20 @@ class BoundedRandomWalk(base.UpdateFn):
 
 
 
+
+
+def event_function(t):
+    # Si está activo, consumir duración
+    if change_state["active"]:
+        if change_state["remaining"] > 0:
+            change_state["remaining"] -= 1
+            return True
+        else:
+            change_state["active"] = False
+            return False
+    return False
+
+
 I = 0
 def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp):
     try:
@@ -141,8 +154,8 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         I = i
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
-        proj = Projection(pre=pop, post=pop, target='exc')
-        #proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
+        #proj = Projection(pre=pop, post=pop, target='exc')
+        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -185,6 +198,8 @@ def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights
         return cartpole(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "cartpole_ns":
         return cartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "fcartpole_ns":
+        return fcartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "lunar_lander":
         return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
     elif funcion == "cartpole2":
@@ -197,6 +212,8 @@ def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights
         return acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "acrobot_ns":
         return acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
+    elif funcion == "facrobot_ns":
+        return facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "acrobot2":
         return acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
     elif funcion == "mountaincar":
@@ -216,7 +233,11 @@ def get_function(folder):
             if "function" in line:
                 return line.split('=')[1].strip()
     return None
-     
+
+
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
+
 
 def xor(pop,Monitor,input_index,output_index,inputWeights):
     Monitor.reset()
@@ -409,347 +430,169 @@ def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome
     return final_fitness
 
 
-def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
-    env = gym.make("CartPole-v1")
-    observation, info = env.reset(seed=42)
-    max_steps = 1000
+def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
+    base_env = gym.make("CartPole-v1")
+    scheduler = PeriodicScheduler(period=20)
+    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
+    tunable_params = {"gravity": update_function}
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+    observation = env.reset()[0].state
     terminated = False
     truncated = False
-    # Number of episodes
-    episodes = 100
-    h = 0
-    # Final fitness 
-    final_fitness = 0
-    
-    # Definir límites para cada variable de observación
-    limites = [
-        (-4.8, 4.8),  # Posición del carro
-        (-10.0, 10.0),  # Velocidad del carro (estimado)
-        (-0.418, 0.418),  # Ángulo del poste en radianes
-        (-10.0, 10.0)  # Velocidad angular del poste (estimado)
-    ]
-    
-    num_neuronas_por_variable = 20
-    intervals = []
-
-    for low, high in limites:
-        # Generar valores centrados en 0 siguiendo una distribución normal
-        values = np.random.normal(loc=0, scale=1, size=1000)
-        z = np.linspace(low, high, num_neuronas_por_variable + 1)
-        interval_limits = np.percentile(values, (0.5 * (1 + erf(z / np.sqrt(2)))) * 100)
-        # Dividir los valores en intervalos
-        intervals = [values[(values >= interval_limits[i]) & (values < interval_limits[i+1])] for i in range(num_neuronas_por_variable)]
-        intervals[-1] = np.append(intervals[-1], values[-1])  # Asegurar que el último intervalo incluye el valor máximo
-
-    
-    while h < episodes:
-        j = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        while j < max_steps and not terminated and not truncated:
-            # Codificar observación
-            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
-                for j in range(num_neuronas_por_variable):
-                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
-                        break
-            simulate(50.0)
-
-            # Decodificar la acción basada en la cual neurona de salida tuvo la primera spike
-            spikes = Monitor.get('spike')
-            min_left = np.inf
-            for i in output_index[:20]:
-                if len(spikes[i]) > 0:
-                    if min(spikes[i]) < min_left:
-                        min_left = min(spikes[i])
-            min_right = np.inf
-            for i in output_index[20:]:
-                if len(spikes[i]) > 0:
-                    if min(spikes[i]) < min_right:
-                        min_right = min(spikes[i])
-
-
-            action = env.action_space.sample()
-            if min_left < min_right:
-                action = 0
-            elif min_right < min_left:
-                action = 1
-        
-
-            
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            j += 1
-        env.reset()
-        final_fitness += np.sum(returns)
-        h += 1
-
-    final_fitness = final_fitness / episodes
-    env.close()
-    return final_fitness
-
-def normalize(value, min_val, max_val):
-    return (value - min_val) / (max_val - min_val)
-
-
-def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
-    #funcion similar a cartpole, solo que con el entorno de lunar lander 16 entradas y 4 salidas
-    env = gym.make("LunarLander-v2")
-    observation, info = env.reset(seed=42)
-    max_steps = 1000
-    terminated = False
-    truncated = False
-    maxInput = inputWeights[1]
-    minInput = inputWeights[0]
-
-    #Generar 8 input weights para cada input
-    inputWeights = np.random.uniform(minInput,maxInput,8)
     #Number of episodes
-    episodes = 31
+    episodes = 100
     h=0
-    #Final fitness
+    #Final fitness 
     final_fitness = 0
 
-    limites = [
-        (-2.5, 2.5),
-        (-2.5, 2.5),
-        (-10.0, 10.0),
-        (-10.0, 10.0),
-        (-6.2831855, 6.2831855),
-        (-10.0, 10.0),
-        (-0.0, 1.0),
-        (-0.0, 1.0)
+    # Limits for each observation variable
+    limits = [
+        (-4.8, 4.8),  # Cart position
+        (-10.0, 10.0),  # Cart velocity (estimated)
+        (-0.418, 0.418),  # Pole angle in radians
+        (-10.0, 10.0)  # Pole angular velocity (estimated)
     ]
+    
     while h < episodes:
         j=0
         returns = []
         actions_done = []
+        observation, info = env.reset()
         terminated = False
         truncated = False
+        distancias = []
         env.reset()
-        while j < max_steps and not terminated and not truncated:
-            #encode observation, 8 values split in 16 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+        while not terminated and not truncated:
+            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
             k = 0
-            for val in observation:
+            for val in observation.state:
                 if val < 0:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    val = normalize(val, limits[k][0], limits[k][1])
+                    pop[int(input_index[i])].I = val*30
                     pop[int(input_index[i+1])].I = 0
                 else:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
+                    val = normalize(val, limits[k][0], limits[k][1])
                     pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = val*30
                 i += 2
                 k += 1
+            distance = - abs(observation.state[2])
+            distancias.append(distance)
+            r = distance - np.mean(distancias)
+            proj.reward = r
+
             simulate(50.0)
             spikes = Monitor.get('spike')
-            #Output from 4 neurons, one for each action
+            #Output from 2 neurons, one for each action
             output1 = np.size(spikes[output_index[0]])
             output2 = np.size(spikes[output_index[1]])
-            output3 = np.size(spikes[output_index[2]])
-            output4 = np.size(spikes[output_index[3]])
             #Choose the action with the most spikes
             action = env.action_space.sample()
-            if output1 > output2 and output1 > output3 and output1 > output4:
+            if output1 > output2: #left
                 action = 0
-            elif output2 > output1 and output2 > output3 and output2 > output4:
+            elif output1 < output2: #right
                 action = 1
-            elif output3 > output1 and output3 > output2 and output3 > output4:
-                action = 2
-            elif output4 > output1 and output4 > output2 and output4 > output3:
-                action = 3
             observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
+            returns.append(reward.reward)
             actions_done.append(action)
+            pop.reset()
             Monitor.reset()
+            proj.reward = 0.0
             j += 1
+        #The fitness is the sum of the rewards for each episode
         final_fitness += np.sum(returns)
         h += 1
-
+        Monitor.reset()
+        pop.reset()
+    #The final fitness is the mean of the fitness for each episode
     final_fitness = final_fitness/episodes
     env.close()
     return final_fitness
 
-def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
-    env = gym.make("CartPole-v1")
-    observation, info = env.reset(seed=42)
-    max_steps = 1000
+def fcartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
+    base_env = gym.make("CartPole-v1")
+    scheduler = PeriodicScheduler(period=5)
+    scheduler2 = PeriodicScheduler(period=5)
+    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
+    update_function2 = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=5.0, max_val=30.0)
+    tunable_params = {"gravity": update_function, "force_mag": update_function2}
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+    observation = env.reset()[0].state
     terminated = False
     truncated = False
-    # Number of episodes
+    #Number of episodes
     episodes = 100
-    h = 0
-    # Final fitness 
-    final_fitness = 0
-    
-    # Definir límites para cada variable de observación
-    limites = [
-    (-4.8, 4.8),  # Posición del carro
-    (-10.0, 10.0),  # Velocidad del carro (estimado)
-    (-0.418, 0.418),  # Ángulo del poste en radianes
-    (-10.0, 10.0)  # Velocidad angular del poste (estimado)
-]
-
-    num_neuronas_por_variable = 20
-    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
-    interval_limits = []
-
-    for low, high in limites:
-        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
-        x = np.linspace(-1, 1, num_neuronas_por_variable)
-        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
-        gaussian_weights /= gaussian_weights.sum()
-
-        increments = gaussian_weights * (high - low)
-
-        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
-        interval_limits.append(intervalos)
-    flag=True
-    while h < episodes:
-        j = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        while j < max_steps and not terminated and not truncated:
-            # Codificar observación
-            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
-                for j in range(num_neuronas_por_variable):
-                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 75 # Activa la neurona correspondiente
-                        break
-
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            # Decodificar la acción basada en el número de picos en las neuronas de salida
-            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
-            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
-            
-            action = env.action_space.sample()
-            if left_spikes > right_spikes:
-                action = 0  # Mover a la izquierda
-            elif left_spikes < right_spikes:
-                action = 1  # Mover a la derecha
-
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            #resetear I=0, resetear a -65 (Iz valor de descanso)
-            j += 1
-        env.reset()
-        final_fitness += np.sum(returns)
-        h += 1
-
-    final_fitness = final_fitness / episodes
-    env.close()
-    return final_fitness
-
-
-#lunar_lander2 based on cartpole3
-def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
-    env = gym.make("LunarLander-v2")
-    observation, info = env.reset()
-    terminated = False
-    truncated = False
-    max_steps = 1000
-    # Number of episodes
-    episodes = 31
-    h = 0
-    # Final fitness
+    h=0
+    #Final fitness 
     final_fitness = 0
 
-    # Definir límites para cada variable de observación
-    limites = [
-        (-2.5, 2.5),
-        (-2.5, 2.5),
-        (-10.0, 10.0),
-        (-10.0, 10.0),
-        (-6.2831855, 6.2831855),
-        (-10.0, 10.0),
-        (-0.0, 1.0),
-        (-0.0, 1.0)
+    # Limits for each observation variable
+    limits = [
+        (-4.8, 4.8),  # Cart position
+        (-10.0, 10.0),  # Cart velocity (estimated)
+        (-0.418, 0.418),  # Pole angle in radians
+        (-10.0, 10.0)  # Pole angular velocity (estimated)
     ]
 
-    num_neuronas_por_variable = 20
-    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
-    intervalos_por_variable = []
-
-    for low, high in limites:
-        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
-        x = np.linspace(-1, 1, num_neuronas_por_variable)
-        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
-
-        # Normalizar los pesos para que sumen 1
-        gaussian_weights /= gaussian_weights.sum()
-
-        # Escalar los pesos al rango total
-        increments = gaussian_weights * (high - low)
-
-        # Calcular los límites acumulados
-        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-
-        # Guardar los intervalos como listas anidadas
-        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
-        intervalos_por_variable.append(intervalos)
+    recompensas = []
+    
     while h < episodes:
-        l = 0
+        j=0
         returns = []
         actions_done = []
+        observation, info = env.reset()
         terminated = False
         truncated = False
-        while not terminated and not truncated and l < max_steps:
-            # Codificar observación
-            for i, intervalos in enumerate(intervalos_por_variable):
-                min_val, max_val = intervalos[0]
-                for j, (low, high) in enumerate(intervalos):
-                    if observation[i] >= low and observation[i] < high:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
-                    elif observation[i] > max_val:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
-                    elif observation[i] < min_val:
-                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+        env.reset()
+        while not terminated and not truncated:
+            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation.state:
+                if val < 0:
+                    val = normalize(val, limits[k][0], limits[k][1])
+                    pop[int(input_index[i])].I = val*30
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    val = normalize(val, limits[k][0], limits[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*30
+                i += 2
+                k += 1
+
             simulate(50.0)
             spikes = Monitor.get('spike')
-            # Decodificar la acción basada en el número de picos en las neuronas de salida
-            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  
-            middle_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:40])
-            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[40:])
-            no_action_spikes = sum(np.size(spikes[idx]) for idx in output_index[60:]) 
-
+            #Output from 2 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            #Choose the action with the most spikes
             action = env.action_space.sample()
-            if left_spikes > middle_spikes and left_spikes > right_spikes and left_spikes > no_action_spikes:
-                action = 1
-            elif middle_spikes > left_spikes and middle_spikes > right_spikes and middle_spikes > no_action_spikes:
-                action = 2
-            elif right_spikes > left_spikes and right_spikes > middle_spikes and right_spikes > no_action_spikes:
-                action = 3
-            elif no_action_spikes > left_spikes and no_action_spikes > middle_spikes and no_action_spikes > right_spikes:
+            if output1 > output2: #left
                 action = 0
-
+            elif output1 < output2: #right
+                action = 1
             observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
+            returns.append(reward.reward)
             actions_done.append(action)
             pop.reset()
             Monitor.reset()
-            l += 1
-        env.reset()
+            proj.reward = 0.0
+            j += 1
+        #The fitness is the sum of the rewards for each episode
         final_fitness += np.sum(returns)
+        recompensas.append(np.sum(returns))
+        r = 1 - (np.sum(returns)/500)
+        proj.reward = r
+        simulate(50.0)
         h += 1
-
-    final_fitness = final_fitness / episodes
+        Monitor.reset()
+        pop.reset()
+    #The final fitness is the mean of the fitness for each episode
+    final_fitness = final_fitness/episodes
     env.close()
     return final_fitness
+
 
 
 
@@ -960,6 +803,118 @@ def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, geno
     final_fitness = final_fitness / episodes
     env.close()
     return final_fitness
+
+
+def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id):
+    base_env = gym.make("Acrobot-v1")
+
+    scheduler = PeriodicScheduler(period=5)
+    scheduler2 = PeriodicScheduler(period=5)
+    scheduler3 = PeriodicScheduler(period=5)
+    update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
+    update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
+    update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
+
+
+
+    tunable_params = {
+        "LINK_LENGTH_1": update1,
+        "LINK_LENGTH_2": update1,
+        "LINK_MASS_1": update2,
+        "LINK_MASS_2": update2,
+        "LINK_COM_POS_1": update3,
+        "LINK_COM_POS_2": update3,
+    }
+
+    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
+
+    obs, info = env.reset()
+    done = False
+    truncated = False
+    total_reward = 0
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-1, 1),  # cos(theta1)
+        (-1, 1),  # sin(theta1)
+        (-1, 1),  # cos(theta2)
+        (-1, 1),  # sin(theta2)
+        (-12.5663706, 12.5663706),  # theta1_dot
+        (-28.2743339, 28.2743339)  # theta2_dot
+    ]
+    np.random.seed(int(genome_id))
+
+    recompensas = []
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        distancias = []
+        observation = env.reset()[0]
+        while not terminated and not truncated:
+            # Codificar observación
+            i = 0
+            k = 0
+            for val in observation.state:
+                if val < 0:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = val*30
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*30
+                i += 2
+                k += 1
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 3 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3:
+                action = 0
+            elif output2 > output1 and output2 > output3:
+                action = 1
+            elif output3 > output1 and output3 > output2:
+                action = 2
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward.reward)
+            actions_done.append(action)
+            Monitor.reset()
+            pop.reset()
+            proj.reward = 0.0
+            j += 1
+        final_fitness += np.sum(returns)
+        recompensas.append(np.sum(returns))
+        r = (np.sum(returns) - 50)/500
+        proj.reward = r
+        simulate(50.0)
+        h += 1
+        Monitor.reset()
+        pop.reset()
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+
+
 
 
 
@@ -1198,4 +1153,356 @@ def mountaincar2(pop, Monitor, input_index, output_index, inputWeights, genome_i
     final_fitness = final_fitness / episodes
     env.close()
     return final_fitness
+
+
+
+
+
+
+
+
+
+
+
+
+def cartpole2(pop, Monitor, input_index, output_index, inputWeights):
+    env = gym.make("CartPole-v1")
+    observation, info = env.reset(seed=42)
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+    
+    # Definir límites para cada variable de observación
+    limites = [
+        (-4.8, 4.8),  # Posición del carro
+        (-10.0, 10.0),  # Velocidad del carro (estimado)
+        (-0.418, 0.418),  # Ángulo del poste en radianes
+        (-10.0, 10.0)  # Velocidad angular del poste (estimado)
+    ]
+    
+    num_neuronas_por_variable = 20
+    intervals = []
+
+    for low, high in limites:
+        # Generar valores centrados en 0 siguiendo una distribución normal
+        values = np.random.normal(loc=0, scale=1, size=1000)
+        z = np.linspace(low, high, num_neuronas_por_variable + 1)
+        interval_limits = np.percentile(values, (0.5 * (1 + erf(z / np.sqrt(2)))) * 100)
+        # Dividir los valores en intervalos
+        intervals = [values[(values >= interval_limits[i]) & (values < interval_limits[i+1])] for i in range(num_neuronas_por_variable)]
+        intervals[-1] = np.append(intervals[-1], values[-1])  # Asegurar que el último intervalo incluye el valor máximo
+
+    
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        while j < max_steps and not terminated and not truncated:
+            # Codificar observación
+            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
+                for j in range(num_neuronas_por_variable):
+                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20 # Activa la neurona correspondiente
+                        break
+            simulate(50.0)
+
+            # Decodificar la acción basada en la cual neurona de salida tuvo la primera spike
+            spikes = Monitor.get('spike')
+            min_left = np.inf
+            for i in output_index[:20]:
+                if len(spikes[i]) > 0:
+                    if min(spikes[i]) < min_left:
+                        min_left = min(spikes[i])
+            min_right = np.inf
+            for i in output_index[20:]:
+                if len(spikes[i]) > 0:
+                    if min(spikes[i]) < min_right:
+                        min_right = min(spikes[i])
+
+
+            action = env.action_space.sample()
+            if min_left < min_right:
+                action = 0
+            elif min_right < min_left:
+                action = 1
+        
+
+            
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            j += 1
+        env.reset()
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+
+
+
+def lunar_lander(pop, Monitor, input_index, output_index, inputWeights):
+    #funcion similar a cartpole, solo que con el entorno de lunar lander 16 entradas y 4 salidas
+    env = gym.make("LunarLander-v2")
+    observation, info = env.reset(seed=42)
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    maxInput = inputWeights[1]
+    minInput = inputWeights[0]
+
+    #Generar 8 input weights para cada input
+    inputWeights = np.random.uniform(minInput,maxInput,8)
+    #Number of episodes
+    episodes = 31
+    h=0
+    #Final fitness
+    final_fitness = 0
+
+    limites = [
+        (-2.5, 2.5),
+        (-2.5, 2.5),
+        (-10.0, 10.0),
+        (-10.0, 10.0),
+        (-6.2831855, 6.2831855),
+        (-10.0, 10.0),
+        (-0.0, 1.0),
+        (-0.0, 1.0)
+    ]
+    while h < episodes:
+        j=0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        env.reset()
+        while j < max_steps and not terminated and not truncated:
+            #encode observation, 8 values split in 16 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
+            i = 0
+            k = 0
+            for val in observation:
+                if val < 0:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = -val*inputWeights[k]
+                    pop[int(input_index[i+1])].I = 0
+                else:
+                    #Normalizar val
+                    val = normalize(val, limites[k][0], limites[k][1])
+                    pop[int(input_index[i])].I = 0
+                    pop[int(input_index[i+1])].I = val*inputWeights[k]
+                i += 2
+                k += 1
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            #Output from 4 neurons, one for each action
+            output1 = np.size(spikes[output_index[0]])
+            output2 = np.size(spikes[output_index[1]])
+            output3 = np.size(spikes[output_index[2]])
+            output4 = np.size(spikes[output_index[3]])
+            #Choose the action with the most spikes
+            action = env.action_space.sample()
+            if output1 > output2 and output1 > output3 and output1 > output4:
+                action = 0
+            elif output2 > output1 and output2 > output3 and output2 > output4:
+                action = 1
+            elif output3 > output1 and output3 > output2 and output3 > output4:
+                action = 2
+            elif output4 > output1 and output4 > output2 and output4 > output3:
+                action = 3
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            Monitor.reset()
+            j += 1
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness/episodes
+    env.close()
+    return final_fitness
+
+def cartpole3(pop, Monitor, input_index, output_index, inputWeights):
+    env = gym.make("CartPole-v1")
+    observation, info = env.reset(seed=42)
+    max_steps = 1000
+    terminated = False
+    truncated = False
+    # Number of episodes
+    episodes = 100
+    h = 0
+    # Final fitness 
+    final_fitness = 0
+    
+    # Definir límites para cada variable de observación
+    limites = [
+    (-4.8, 4.8),  # Posición del carro
+    (-10.0, 10.0),  # Velocidad del carro (estimado)
+    (-0.418, 0.418),  # Ángulo del poste en radianes
+    (-10.0, 10.0)  # Velocidad angular del poste (estimado)
+]
+
+    num_neuronas_por_variable = 20
+    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
+    interval_limits = []
+
+    for low, high in limites:
+        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
+        x = np.linspace(-1, 1, num_neuronas_por_variable)
+        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+        gaussian_weights /= gaussian_weights.sum()
+
+        increments = gaussian_weights * (high - low)
+
+        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
+        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
+        interval_limits.append(intervalos)
+    flag=True
+    while h < episodes:
+        j = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        while j < max_steps and not terminated and not truncated:
+            # Codificar observación
+            for i, obs in enumerate(observation):  # Primer ciclo: Itera sobre cada observación
+                for j in range(num_neuronas_por_variable):
+                    if obs >= interval_limits[j] and obs < interval_limits[j + 1]:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 75 # Activa la neurona correspondiente
+                        break
+
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
+            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:])  # Neuronas que controlan el movimiento a la derecha
+            
+            action = env.action_space.sample()
+            if left_spikes > right_spikes:
+                action = 0  # Mover a la izquierda
+            elif left_spikes < right_spikes:
+                action = 1  # Mover a la derecha
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            #resetear I=0, resetear a -65 (Iz valor de descanso)
+            j += 1
+        env.reset()
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+def lunar_lander2(pop, Monitor, input_index, output_index, inputWeights):
+    env = gym.make("LunarLander-v2")
+    observation, info = env.reset()
+    terminated = False
+    truncated = False
+    max_steps = 1000
+    # Number of episodes
+    episodes = 31
+    h = 0
+    # Final fitness
+    final_fitness = 0
+
+    # Definir límites para cada variable de observación
+    limites = [
+        (-2.5, 2.5),
+        (-2.5, 2.5),
+        (-10.0, 10.0),
+        (-10.0, 10.0),
+        (-6.2831855, 6.2831855),
+        (-10.0, 10.0),
+        (-0.0, 1.0),
+        (-0.0, 1.0)
+    ]
+
+    num_neuronas_por_variable = 20
+    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
+    intervalos_por_variable = []
+
+    for low, high in limites:
+        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
+        x = np.linspace(-1, 1, num_neuronas_por_variable)
+        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
+
+        # Normalizar los pesos para que sumen 1
+        gaussian_weights /= gaussian_weights.sum()
+
+        # Escalar los pesos al rango total
+        increments = gaussian_weights * (high - low)
+
+        # Calcular los límites acumulados
+        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
+
+        # Guardar los intervalos como listas anidadas
+        intervalos = [[limites_acumulados[i], limites_acumulados[i+1]] for i in range(len(limites_acumulados) - 1)]
+        intervalos_por_variable.append(intervalos)
+    while h < episodes:
+        l = 0
+        returns = []
+        actions_done = []
+        terminated = False
+        truncated = False
+        while not terminated and not truncated and l < max_steps:
+            # Codificar observación
+            for i, intervalos in enumerate(intervalos_por_variable):
+                min_val, max_val = intervalos[0]
+                for j, (low, high) in enumerate(intervalos):
+                    if observation[i] >= low and observation[i] < high:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+                    elif observation[i] > max_val:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+                    elif observation[i] < min_val:
+                        pop[input_index[i * num_neuronas_por_variable + j]].I = 20
+            simulate(50.0)
+            spikes = Monitor.get('spike')
+            # Decodificar la acción basada en el número de picos en las neuronas de salida
+            left_spikes = sum(np.size(spikes[idx]) for idx in output_index[:20])  
+            middle_spikes = sum(np.size(spikes[idx]) for idx in output_index[20:40])
+            right_spikes = sum(np.size(spikes[idx]) for idx in output_index[40:])
+            no_action_spikes = sum(np.size(spikes[idx]) for idx in output_index[60:]) 
+
+            action = env.action_space.sample()
+            if left_spikes > middle_spikes and left_spikes > right_spikes and left_spikes > no_action_spikes:
+                action = 1
+            elif middle_spikes > left_spikes and middle_spikes > right_spikes and middle_spikes > no_action_spikes:
+                action = 2
+            elif right_spikes > left_spikes and right_spikes > middle_spikes and right_spikes > no_action_spikes:
+                action = 3
+            elif no_action_spikes > left_spikes and no_action_spikes > middle_spikes and no_action_spikes > right_spikes:
+                action = 0
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            returns.append(reward)
+            actions_done.append(action)
+            pop.reset()
+            Monitor.reset()
+            l += 1
+        env.reset()
+        final_fitness += np.sum(returns)
+        h += 1
+
+    final_fitness = final_fitness / episodes
+    env.close()
+    return final_fitness
+
+
 

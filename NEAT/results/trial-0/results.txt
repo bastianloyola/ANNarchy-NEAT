@@ -13,20 +13,67 @@
   c1=1.44458
   c2=1.37687
   c3=0.439188
-  numberGenomes=5
+  numberGenomes=2
   numberInputs=12
   numberOutputs=3
-  evolutions=5
+  evolutions=2
   n_max=100
   learningRate=10
   inputWeights=0,150
   weightsRange=-20,80
-  process_max=5
-  function=acrobot
+  process_max=50
+  function=facrobot_ns
   folder=results/trial-0
-  tau_c=20
-  a_minus=0.1
-  a_plus=0.1
-  tau_minus=20
-  tau_plus=20
+  tau_c=0
+  a_minus=0
+  a_plus=0
+  tau_minus=0
+  tau_plus=0
 
+--Results of run:0 --
+Best Genome 
+Genome id: 2
+Genome fitness: -458.47
+   IN  OUT    Weight  Innov
+    1   13   29.3583      1
+    1   14   77.2775      2
+    1   15   9.25168      3
+    2   13   57.1358      4
+    2   14   32.6745      5
+    2   15   66.9914      6
+    3   13   20.0229      7
+    3   14   69.1529      8
+    3   15   8.33147      9
+    4   13   15.2458     10
+    4   14   60.7725     11
+    4   15   71.9026     12
+    5   13  -13.0245     13
+    5   14   74.9327     14
+    5   15   32.5995     15
+    6   13  -11.3944     16
+    6   14 -0.778614     17
+    6   15   46.3227     18
+    7   13   69.0233     19
+    7   14   14.8893     20
+    7   15  -13.5829     21
+    8   13  -17.9977     22
+    8   14   25.7702     23
+    8   15  -13.6904     24
+    9   13     3.828     25
+    9   14   77.0634     26
+    9   15   70.2208     27
+   10   13    65.092     28
+   10   14   6.66658     29
+   10   15    33.976     30
+   11   13   17.5207     31
+   11   14   56.0249     32
+   11   15   31.2535     33
+   12   13   46.7724     34
+   12   14   33.1606     35
+   12   15   -16.072     36
+
+Summerized results: 
+run: 0 bestFitness: -458
+Max fitness: -458
+Percentage: 100% (1 of 1)
+--------------------------------------------------------------

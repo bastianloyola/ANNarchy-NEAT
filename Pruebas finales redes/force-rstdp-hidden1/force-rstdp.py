@@ -200,6 +200,11 @@ tau_minus=21.69928289427541
 retornos2 = []
 gravedades2 = []
 total_return2 = []
+
+gravedad_og = base_env.gravity
+fuerza_og = base_env.force_mag
+largo_og = base_env.length
+masa_og = base_env.masspole
 for trial in range(trials):
     #convertir en sparse matrix
 
