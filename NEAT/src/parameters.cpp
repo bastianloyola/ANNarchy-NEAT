@@ -66,6 +66,7 @@ void Parameters::loadFromCfg(const std::string& filename) {
                     else if (key == "a_plus") a_plus = std::stof(value);
                     else if (key == "tau_minus") tau_minus = std::stof(value);
                     else if (key == "tau_plus") tau_plus = std::stof(value);
+                    else if (key == "tunable_params") tunable_params = value;
                     
                 }catch (const std::exception& e) {
                     std::cerr << "Error parsing key: " << key << ", value: " << value << ". Exception: " << e.what() << std::endl;

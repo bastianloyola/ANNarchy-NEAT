@@ -245,6 +245,7 @@ float run3(int trial) {
     config_file << "a_plus=" << parameters.a_plus << "\n";
     config_file << "tau_minus=" << parameters.tau_minus << "\n";
     config_file << "tau_plus=" << parameters.tau_plus << "\n";
+    config_file << "tunable_params=" << parameters.tunable_params << "\n";
     config_file.close();
 
     outfile << "\n---- Results of config: ----\n";

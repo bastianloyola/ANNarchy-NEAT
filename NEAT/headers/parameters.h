@@ -45,6 +45,7 @@ public:
     float tau_minus;
     float tau_plus;
     std::string function;
+    std::string tunable_params;
     std::vector<int> mutacionPeso;
     std::vector<int> mutacionPesoInput;
     std::vector<int> agregarNodos;

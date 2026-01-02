@@ -6,7 +6,7 @@ import scipy.sparse
 import gymnasium as gym
 from scipy.special import erf
 from ns_gym.wrappers import NSClassicControlWrapper
-from ns_gym.schedulers import ContinuousScheduler, PeriodicScheduler
+from ns_gym.schedulers import ContinuousScheduler, PeriodicScheduler, CustomScheduler
 from ns_gym.update_functions import RandomWalk, IncrementUpdate
 from ns_gym import base
 import ns_gym.utils as utils
@@ -37,8 +37,6 @@ class R_STDP(Synapse):
             w_min = %(w_min)s : projection
             w_max = %(w_max)s : projection
             reward = 0.0 : projection
-            T = 0.1 : projection
-            ruido = 0.0 : projection
         """ % locals()
 
         equations = """
@@ -51,13 +49,13 @@ class R_STDP(Synapse):
             g_target += w
             x += A_plus
             c += y
-            w = w + (c * reward) + T * ruido
+            w = w + (c * reward)
         """
 
         post_spike = """
             y -= A_minus
             c += x
-            w = w + (c * reward) + T * ruido
+            w = w + (c * reward)
         """
 
 
@@ -133,7 +131,10 @@ class BoundedRandomWalk(base.UpdateFn):
 
 
 
-
+change_state = {
+    "active": False,
+    "remaining": 0
+}
 
 def event_function(t):
     # Si está activo, consumir duración
@@ -155,7 +156,7 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         clear()
         pop = Population(geometry=n, neuron=IZHIKEVICH)
         #proj = Projection(pre=pop, post=pop, target='exc')
-        proj = Projection(pre=pop, post=pop, target='exc', synapse=R_STDP(tau_c=rstdp[0], A_plus=rstdp[1], A_minus=rstdp[2], tau_minus=rstdp[3], tau_plus=rstdp[4]))
+        proj = Projection(pre=pop, post=pop, target='exc')
         #Matrix to numpy array
          # Verificar el tamaño de la matrix
         if matrix.size == 0:
@@ -183,7 +184,9 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
             raise ValueError("inputWeights is empty")
 
         funcion = get_function('results/trial-'+ str(int(trial)))
-        fit = fitness(pop,proj,M,input_index,output_index, funcion, inputWeights, genome_id*int(trial))
+        params_ns = get_params_ns('results/trial-'+ str(int(trial)))
+
+        fit = fitness(pop,proj,M,input_index,output_index, funcion, inputWeights, genome_id*int(trial), params_ns)
         #return fit
 
         return fit
@@ -191,35 +194,13 @@ def snn(n_entrada, n_salida, n, i, matrix, inputWeights, trial, genome_id, rstdp
         # Capturar y manejar excepciones
         print("Error en annarchy:", e)
 
-def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights, genome_id):
-    if funcion == "xor":
-        return xor(pop, proj, Monitor, input_index, output_index, inputWeights)
-    elif funcion == "cartpole":
-        return cartpole(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "cartpole_ns":
-        return cartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "fcartpole_ns":
-        return fcartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "lunar_lander":
-        return lunar_lander(pop, Monitor, input_index, output_index, inputWeights)
-    elif funcion == "cartpole2":
-        return cartpole2(pop, Monitor, input_index, output_index, inputWeights)
-    elif funcion == "cartpole3":
-        return cartpole3(pop, Monitor, input_index, output_index, inputWeights)
-    elif funcion == "lunar_lander2":
-        return lunar_lander2(pop, Monitor, input_index, output_index, inputWeights)
-    elif funcion == "acrobot":
-        return acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+def fitness(pop, proj ,Monitor, input_index, output_index, funcion, inputWeights, genome_id, params_ns):
+    if funcion == "cartpole_ns":
+        return cartpole_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id, params_ns)
     elif funcion == "acrobot_ns":
-        return acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "facrobot_ns":
-        return facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "acrobot2":
-        return acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "mountaincar":
-        return mountaincar(pop, Monitor, input_index, output_index, inputWeights, genome_id)
-    elif funcion == "mountaincar2":
-        return mountaincar2(pop, Monitor, input_index, output_index, inputWeights, genome_id)
+        return acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id, params_ns)
+    elif funcion == "mountaincar_ns":
+        return mountaincar_ns(pop, Monitor, input_index, output_index, inputWeights, genome_id, params_ns)
     else:
         raise ValueError(f"Unknown function: {funcion}")
 
@@ -234,294 +215,53 @@ def get_function(folder):
                 return line.split('=')[1].strip()
     return None
 
+def get_params_ns(folder):
+    config_path = folder + '/config.cfg'
+
+    with open(config_path) as f:
+        for line in f:
+            if "tunable_params" in line:
+                params_line = line.split('=')[1].strip()
+                params_list = [p.strip() for p in params_line.split(',')]
+                return params_list
+
+    return []
+
 
 def normalize(value, min_val, max_val):
     return (value - min_val) / (max_val - min_val)
 
 
-def xor(pop,Monitor,input_index,output_index,inputWeights):
-    Monitor.reset()
-    entradas = [(0, 0), (0, 1), (1, 0), (1, 1)]
-    fitness = 0
-    for entrada in entradas:
-        for i, val in zip(input_index, entrada):
-            if val == 1:
-                pop[int(i)].I = 15.1*inputWeights[i]
-            else:
-                pop[int(i)].I = 0
-        simulate(10.0)
-        spikes = Monitor.get('spike')
-        #print("spikes: ",spikes) 
-        #Get the output
-        output = 0
-        for i in output_index:
-            output += np.size(spikes[i])
-        #print("spike output: ",output)
 
-        decode_output = 0
-        if output > 1:
-            decode_output = 1
-
-        pop.reset()
-        Monitor.reset()
-        #comparar las entradas y la salida esperada con el output
-        if entrada[0] ^ entrada[1] == decode_output:
-            fitness += 1
-    return fitness
-
-
-def cartpole(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
+def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id, params_ns):
     base_env = gym.make("CartPole-v1")
-    scheduler = PeriodicScheduler(period=20)
-    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
-    tunable_params = {"gravity": update_function}
+    scheduler = CustomScheduler(event_function)
+    #scheduler2 = PeriodicScheduler(period=500)
+    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=2.0, max_val=30.0)
+    update_function2 = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
+    update_function3 = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=0.5, max_val=0.75)
+    update_function4 = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=0.05, max_val=0.5)
+
+    tunable_params = {}
+    if "force_mag" in params_ns:
+        tunable_params["force_mag"] = update_function
+    if "gravity" in params_ns:
+        tunable_params["gravity"] = update_function2
+    if "length" in params_ns:
+        tunable_params["length"] = update_function3
+    if "masspole" in params_ns:
+        tunable_params["masspole"] = update_function4
+
+    #tunable_params = {"force": update_function}
+    #tunable_params = {"gravity": update_function2}
+    #tunable_params = {"length": update_function3}
+    #tunable_params = {"masspole": update_function4}
     env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
     observation = env.reset()[0].state
     terminated = False
     truncated = False
     #Number of episodes
-    episodes = 100
-    h=0
-    #Final fitness 
-    final_fitness = 0
-
-    # Limits for each observation variable
-    limits = [
-        (-4.8, 4.8),  # Cart position
-        (-10.0, 10.0),  # Cart velocity (estimated)
-        (-0.418, 0.418),  # Pole angle in radians
-        (-10.0, 10.0)  # Pole angular velocity (estimated)
-    ]
-    
-    while h < episodes:
-        j=0
-        returns = []
-        actions_done = []
-        observation, info = env.reset()
-        terminated = False
-        truncated = False
-        distancias = []
-        env.reset()
-        while not terminated and not truncated:
-            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
-            i = 0
-            k = 0
-            for val in observation.state:
-                if val < 0:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = val*30
-                    pop[int(input_index[i+1])].I = 0
-                else:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*30
-                i += 2
-                k += 1
-            distance = - abs(observation.state[2])
-            distancias.append(distance)
-            r = distance - np.mean(distancias)
-
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            #Output from 2 neurons, one for each action
-            output1 = np.size(spikes[output_index[0]])
-            output2 = np.size(spikes[output_index[1]])
-            #Choose the action with the most spikes
-            action = env.action_space.sample()
-            if output1 > output2: #left
-                action = 0
-            elif output1 < output2: #right
-                action = 1
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward.reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            j += 1
-        #The fitness is the sum of the rewards for each episode
-        final_fitness += np.sum(returns)
-        h += 1
-        Monitor.reset()
-        pop.reset()
-    #The final fitness is the mean of the fitness for each episode
-    final_fitness = final_fitness/episodes
-    env.close()
-    return final_fitness
-
-
-def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
-    base_env = gym.make("CartPole-v1")
-    scheduler = PeriodicScheduler(period=20)
-    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
-    tunable_params = {"gravity": update_function}
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
-    observation = env.reset()[0].state
-    terminated = False
-    truncated = False
-    #Number of episodes
-    episodes = 100
-    h=0
-    #Final fitness 
-    final_fitness = 0
-
-    # Limits for each observation variable
-    limits = [
-        (-4.8, 4.8),  # Cart position
-        (-10.0, 10.0),  # Cart velocity (estimated)
-        (-0.418, 0.418),  # Pole angle in radians
-        (-10.0, 10.0)  # Pole angular velocity (estimated)
-    ]
-    
-    while h < episodes:
-        j=0
-        returns = []
-        actions_done = []
-        observation, info = env.reset()
-        terminated = False
-        truncated = False
-        distancias = []
-        env.reset()
-        while not terminated and not truncated:
-            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
-            i = 0
-            k = 0
-            for val in observation.state:
-                if val < 0:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = val*30
-                    pop[int(input_index[i+1])].I = 0
-                else:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*30
-                i += 2
-                k += 1
-            distance = - abs(observation.state[2])
-            distancias.append(distance)
-            r = distance - np.mean(distancias)
-            proj.reward = r
-
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            #Output from 2 neurons, one for each action
-            output1 = np.size(spikes[output_index[0]])
-            output2 = np.size(spikes[output_index[1]])
-            #Choose the action with the most spikes
-            action = env.action_space.sample()
-            if output1 > output2: #left
-                action = 0
-            elif output1 < output2: #right
-                action = 1
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward.reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            proj.reward = 0.0
-            j += 1
-        #The fitness is the sum of the rewards for each episode
-        final_fitness += np.sum(returns)
-        h += 1
-        Monitor.reset()
-        pop.reset()
-    #The final fitness is the mean of the fitness for each episode
-    final_fitness = final_fitness/episodes
-    env.close()
-    return final_fitness
-
-
-def cartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
-    base_env = gym.make("CartPole-v1")
-    scheduler = PeriodicScheduler(period=20)
-    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
-    tunable_params = {"gravity": update_function}
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
-    observation = env.reset()[0].state
-    terminated = False
-    truncated = False
-    #Number of episodes
-    episodes = 100
-    h=0
-    #Final fitness 
-    final_fitness = 0
-
-    # Limits for each observation variable
-    limits = [
-        (-4.8, 4.8),  # Cart position
-        (-10.0, 10.0),  # Cart velocity (estimated)
-        (-0.418, 0.418),  # Pole angle in radians
-        (-10.0, 10.0)  # Pole angular velocity (estimated)
-    ]
-    
-    while h < episodes:
-        j=0
-        returns = []
-        actions_done = []
-        observation, info = env.reset()
-        terminated = False
-        truncated = False
-        distancias = []
-        env.reset()
-        while not terminated and not truncated:
-            #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
-            i = 0
-            k = 0
-            for val in observation.state:
-                if val < 0:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = val*30
-                    pop[int(input_index[i+1])].I = 0
-                else:
-                    val = normalize(val, limits[k][0], limits[k][1])
-                    pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*30
-                i += 2
-                k += 1
-            distance = - abs(observation.state[2])
-            distancias.append(distance)
-            r = distance - np.mean(distancias)
-            proj.reward = r
-
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            #Output from 2 neurons, one for each action
-            output1 = np.size(spikes[output_index[0]])
-            output2 = np.size(spikes[output_index[1]])
-            #Choose the action with the most spikes
-            action = env.action_space.sample()
-            if output1 > output2: #left
-                action = 0
-            elif output1 < output2: #right
-                action = 1
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward.reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            proj.reward = 0.0
-            j += 1
-        #The fitness is the sum of the rewards for each episode
-        final_fitness += np.sum(returns)
-        h += 1
-        Monitor.reset()
-        pop.reset()
-    #The final fitness is the mean of the fitness for each episode
-    final_fitness = final_fitness/episodes
-    env.close()
-    return final_fitness
-
-def fcartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id):
-    base_env = gym.make("CartPole-v1")
-    scheduler = PeriodicScheduler(period=5)
-    scheduler2 = PeriodicScheduler(period=5)
-    update_function = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=9.0, max_val=20.0)
-    update_function2 = BoundedRandomWalk(scheduler, mu=0, sigma=10, min_val=5.0, max_val=30.0)
-    tunable_params = {"gravity": update_function, "force_mag": update_function2}
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
-    observation = env.reset()[0].state
-    terminated = False
-    truncated = False
-    #Number of episodes
+    change_episode = 10
     episodes = 100
     h=0
     #Final fitness 
@@ -536,15 +276,34 @@ def fcartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genom
     ]
 
     recompensas = []
+    gravedades = []
+    fuerzas = []
+    largos = []
+    masas = []
     
-    while h < episodes:
+    while h < episodes*change_episode:
         j=0
         returns = []
         actions_done = []
         observation, info = env.reset()
+        if gravedades != []:
+            base_env.gravity = gravedades[-1]
+            env.unwrapped.gravity = gravedades[-1]
+        if fuerzas != []:
+            base_env.force_mag = fuerzas[-1]
+            env.unwrapped.force_mag = fuerzas[-1]
+        if largos != []:
+            env.unwrapped.length = largos[-1]
+            env.length = largos[-1]
+        if masas != []:
+            env.unwrapped.masspole = masas[-1]
+            env.masspole = masas[-1]
+        if h % change_episode == 0:
+            change_state["active"] = True
+            change_state["remaining"] = change_episode
+
         terminated = False
         truncated = False
-        env.reset()
         while not terminated and not truncated:
             #encode observation, 4 values split in 8 neurons (2 for each value), if value is negative the left neuron is activated, if positive the right neuron is activated
             i = 0
@@ -577,254 +336,69 @@ def fcartpole_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genom
             actions_done.append(action)
             pop.reset()
             Monitor.reset()
-            proj.reward = 0.0
             j += 1
         #The fitness is the sum of the rewards for each episode
+        gravedades.append(env.unwrapped.gravity)
+        fuerzas.append(env.unwrapped.force_mag)
+        largos.append(env.unwrapped.length)
+        masas.append(env.unwrapped.masspole)
         final_fitness += np.sum(returns)
         recompensas.append(np.sum(returns))
-        r = 1 - (np.sum(returns)/500)
+        if len(recompensas) > 100:
+            recompensas.pop(0)
+        r = np.sum(returns) - np.mean(recompensas) 
         proj.reward = r
         simulate(50.0)
         h += 1
         Monitor.reset()
         pop.reset()
+
+
     #The final fitness is the mean of the fitness for each episode
-    final_fitness = final_fitness/episodes
+    final_fitness = final_fitness/(episodes*change_episode)
     env.close()
     return final_fitness
 
 
 
 
-def acrobot(pop, Monitor, input_index, output_index, inputWeights, genome_id):
-    base_env = gym.make("Acrobot-v1")
 
-    scheduler = PeriodicScheduler(period=5)
-    scheduler2 = PeriodicScheduler(period=5)
-    scheduler3 = PeriodicScheduler(period=5)
+def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id, params_ns):
+    base_env = gym.make("Acrobot-v1")
+    scheduler = CustomScheduler(event_function=event_function)
+    scheduler2 = CustomScheduler(event_function=event_function)
+    scheduler3 = CustomScheduler(event_function=event_function)
+    scheduler4 = CustomScheduler(event_function=event_function)
+    scheduler5 = CustomScheduler(event_function=event_function)
+    scheduler6 = CustomScheduler(event_function=event_function)
     update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
     update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
     update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
+    update4 = BoundedRandomWalk(scheduler4, min_val=0.8, max_val=2.0)
+    update5 = BoundedRandomWalk(scheduler5, min_val=0.8, max_val=3.0)
+    update6 = BoundedRandomWalk(scheduler6, min_val=0.2, max_val=0.8)
 
 
-
-    tunable_params = {
-        "LINK_LENGTH_1": update1,
-        "LINK_LENGTH_2": update1,
-        "LINK_MASS_1": update2,
-        "LINK_MASS_2": update2,
-        "LINK_COM_POS_1": update3,
-        "LINK_COM_POS_2": update3,
-    }
-
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
-
-    observation, info = env.reset()
-    terminated = False
-    truncated = False
-    # Number of episodes
-    episodes = 100
-    h = 0
-    # Final fitness 
-    final_fitness = 0
-
-    maxInput = inputWeights[1]
-    minInput = inputWeights[0]
+    #tunable_params = {
+    #"LINK_LENGTH_1": update1,
+    #"LINK_LENGTH_2": update4,
+    #"LINK_MASS_1": update2,
+    #"LINK_MASS_2": update5,
+    #"LINK_COM_POS_1": update3,
+    #"LINK_COM_POS_2": update6
+    #}
+    tunable_params = {}
+    if "length" in params_ns:
+        tunable_params["LINK_LENGTH_1"] = update1
+        tunable_params["LINK_LENGTH_2"] = update4
+    if "mass" in params_ns:
+        tunable_params["LINK_MASS_1"] = update2
+        tunable_params["LINK_MASS_1"] = update5
+    if "moi" in params_ns:
+        tunable_params["LINK_COM_POS_1"] = update3
+        tunable_params["LINK_COM_POS_2"] = update6
     
-    # Definir límites para cada variable de observación
-    limites = [
-        (-1, 1),  # cos(theta1)
-        (-1, 1),  # sin(theta1)
-        (-1, 1),  # cos(theta2)
-        (-1, 1),  # sin(theta2)
-        (-12.5663706, 12.5663706),  # theta1_dot
-        (-28.2743339, 28.2743339)  # theta2_dot
-    ]
-    np.random.seed(int(genome_id))
-    inputWeights = np.random.uniform(minInput,maxInput,6)
-    while h < episodes:
-        j = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        observation = env.reset()[0]
-        while not terminated and not truncated:
-            # Codificar observación
-            i = 0
-            k = 0
-            for val in observation.state:
-                if val < 0:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = val*30
-                    pop[int(input_index[i+1])].I = 0
-                else:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*30
-                i += 2
-                k += 1
 
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            #Output from 3 neurons, one for each action
-            output1 = np.size(spikes[output_index[0]])
-            output2 = np.size(spikes[output_index[1]])
-            output3 = np.size(spikes[output_index[2]])
-            #Choose the action with the most spikes
-            action = env.action_space.sample()
-            if output1 > output2 and output1 > output3:
-                action = 0
-            elif output2 > output1 and output2 > output3:
-                action = 1
-            elif output3 > output1 and output3 > output2:
-                action = 2
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward.reward)
-            actions_done.append(action)
-            Monitor.reset()
-            pop.reset()
-            j += 1
-        final_fitness += np.sum(returns)
-        h += 1
-        Monitor.reset()
-        pop.reset()
-
-    final_fitness = final_fitness / episodes
-    env.close()
-    return final_fitness
-
-def acrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id):
-    base_env = gym.make("Acrobot-v1")
-
-    scheduler = PeriodicScheduler(period=5)
-    scheduler2 = PeriodicScheduler(period=5)
-    scheduler3 = PeriodicScheduler(period=5)
-    update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
-    update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
-    update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
-
-
-
-    tunable_params = {
-        "LINK_LENGTH_1": update1,
-        "LINK_LENGTH_2": update1,
-        "LINK_MASS_1": update2,
-        "LINK_MASS_2": update2,
-        "LINK_COM_POS_1": update3,
-        "LINK_COM_POS_2": update3,
-    }
-
-    env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
-
-    obs, info = env.reset()
-    done = False
-    truncated = False
-    total_reward = 0
-    observation, info = env.reset()
-    terminated = False
-    truncated = False
-    # Number of episodes
-    episodes = 100
-    h = 0
-    # Final fitness 
-    final_fitness = 0
-
-    
-    # Definir límites para cada variable de observación
-    limites = [
-        (-1, 1),  # cos(theta1)
-        (-1, 1),  # sin(theta1)
-        (-1, 1),  # cos(theta2)
-        (-1, 1),  # sin(theta2)
-        (-12.5663706, 12.5663706),  # theta1_dot
-        (-28.2743339, 28.2743339)  # theta2_dot
-    ]
-    np.random.seed(int(genome_id))
-    while h < episodes:
-        j = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        distancias = []
-        observation = env.reset()[0]
-        while not terminated and not truncated:
-            # Codificar observación
-            i = 0
-            k = 0
-            for val in observation.state:
-                if val < 0:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = val*30
-                    pop[int(input_index[i+1])].I = 0
-                else:
-                    #Normalizar val
-                    val = normalize(val, limites[k][0], limites[k][1])
-                    pop[int(input_index[i])].I = 0
-                    pop[int(input_index[i+1])].I = val*30
-                i += 2
-                k += 1
-            theta1 = np.arccos(observation.state[0])
-            theta2 = np.arccos(observation.state[2])
-            reward = 1 - (-np.cos(theta1) - np.cos(theta2 + theta1))
-            distancias.append(reward)
-            r = reward - np.mean(distancias)
-            proj.reward = r
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            #Output from 3 neurons, one for each action
-            output1 = np.size(spikes[output_index[0]])
-            output2 = np.size(spikes[output_index[1]])
-            output3 = np.size(spikes[output_index[2]])
-            #Choose the action with the most spikes
-            action = env.action_space.sample()
-            if output1 > output2 and output1 > output3:
-                action = 0
-            elif output2 > output1 and output2 > output3:
-                action = 1
-            elif output3 > output1 and output3 > output2:
-                action = 2
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward.reward)
-            actions_done.append(action)
-            Monitor.reset()
-            pop.reset()
-            proj.reward = 0.0
-            j += 1
-        final_fitness += np.sum(returns)
-        h += 1
-        Monitor.reset()
-        pop.reset()
-
-    final_fitness = final_fitness / episodes
-    env.close()
-    return final_fitness
-
-
-def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, genome_id):
-    base_env = gym.make("Acrobot-v1")
-
-    scheduler = PeriodicScheduler(period=5)
-    scheduler2 = PeriodicScheduler(period=5)
-    scheduler3 = PeriodicScheduler(period=5)
-    update1 = BoundedRandomWalk(scheduler, min_val=0.8, max_val=2.0)
-    update2 = BoundedRandomWalk(scheduler2, min_val=0.8, max_val=3.0)
-    update3 = BoundedRandomWalk(scheduler3, min_val=0.2, max_val=0.8)
-
-
-
-    tunable_params = {
-        "LINK_LENGTH_1": update1,
-        "LINK_LENGTH_2": update1,
-        "LINK_MASS_1": update2,
-        "LINK_MASS_2": update2,
-        "LINK_COM_POS_1": update3,
-        "LINK_COM_POS_2": update3,
-    }
 
     env = NSClassicControlWrapper(base_env, tunable_params, change_notification=True)
 
@@ -854,6 +428,14 @@ def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, gen
     np.random.seed(int(genome_id))
 
     recompensas = []
+    largos1 = []
+    largos2 = []
+    masas1 = []
+    masas2 = []
+    moi1 = []
+    moi2 = []
+    retornos_parciales = []
+    change_episode = 10
     while h < episodes:
         j = 0
         returns = []
@@ -862,6 +444,26 @@ def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, gen
         truncated = False
         distancias = []
         observation = env.reset()[0]
+        if largos1 != [] and largos2 != []:
+            base_env.LINK_LENGTH_1 = largos1[-1]
+            base_env.LINK_LENGTH_2 = largos2[-1]
+            env.unwrapped.LINK_LENGTH_1 = largos1[-1]
+            env.unwrapped.LINK_LENGTH_2 = largos2[-1]
+        if masas1 != [] and masas2 != []:
+            base_env.LINK_MASS_1 = masas1[-1]
+            base_env.LINK_MASS_2 = masas2[-1]
+            env.unwrapped.LINK_MASS_1 = masas1[-1]
+            env.unwrapped.LINK_MASS_2 = masas2[-1]
+        if moi1 != [] and moi2 != []:
+            base_env.LINK_COM_POS_1 = moi1[-1]
+            base_env.LINK_COM_POS_2 = moi2[-1]
+            env.unwrapped.LINK_COM_POS_1 = moi1[-1]
+            env.unwrapped.LINK_COM_POS_2 = moi2[-1]
+        if h % change_episode == 0:
+            change_state["active"] = True
+            change_state["remaining"] = change_episode
+
+        
         while not terminated and not truncated:
             # Codificar observación
             i = 0
@@ -898,11 +500,21 @@ def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, gen
             actions_done.append(action)
             Monitor.reset()
             pop.reset()
-            proj.reward = 0.0
             j += 1
+        largos1.append(env.unwrapped.LINK_LENGTH_1)
+        largos2.append(env.unwrapped.LINK_LENGTH_2)
+        masas1.append(env.unwrapped.LINK_MASS_1)
+        masas2.append(env.unwrapped.LINK_MASS_2)
+        moi1.append(env.unwrapped.LINK_COM_POS_1)
+        moi2.append(env.unwrapped.LINK_COM_POS_2)
         final_fitness += np.sum(returns)
         recompensas.append(np.sum(returns))
-        r = (np.sum(returns) - 50)/500
+        retornos_parciales.append(np.sum(returns))
+        if len(retornos_parciales) > 50:
+            retornos_parciales.pop(0)
+
+        r = np.sum(returns) - np.mean(retornos_parciales)
+
         proj.reward = r
         simulate(50.0)
         h += 1
@@ -918,92 +530,8 @@ def facrobot_ns(pop, proj, Monitor, input_index, output_index, inputWeights, gen
 
 
 
-def acrobot2(pop, Monitor, input_index, output_index, inputWeights, genome_id): #based on lunar_lander2
-    env = gym.make("Acrobot-v1")
-    observation, info = env.reset()
-    terminated = False
-    truncated = False
-    # Number of episodes
-    episodes = 31
-    h = 0
-    # Final fitness
-    final_fitness = 0
-    
-    # Definir límites para cada variable de observación
-    limites = [
-        (-1, 1),  # cos(theta1)
-        (-1, 1),  # sin(theta1)
-        (-1, 1),  # cos(theta2)
-        (-1, 1),  # sin(theta2)
-        (-12.5663706, 12.5663706),  # theta1_dot
-        (-28.2743339, 28.2743339)  # theta2_dot
-    ]
 
-    num_neuronas_por_variable = 20
-    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
-    interval_limits = []
-    for low, high in limites:
-        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
-        x = np.linspace(-1, 1, num_neuronas_por_variable)
-        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
-        gaussian_weights /= gaussian_weights.sum()
-
-        increments = gaussian_weights * (high - low)
-
-        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-        interval_limits.append(limites_acumulados)
-    while h < episodes:
-        l = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        env.reset()
-        while not terminated and not truncated:
-            # Codificar observación
-            for i, intervalos in enumerate(interval_limits):
-                min_val, max_val = intervalos[0], intervalos[-1]
-                k = 0
-                while k < len(intervalos) - 1:
-                    if observation[i] >= intervalos[k] and observation[i] < intervalos[k+1]:
-                        pop[input_index[i * num_neuronas_por_variable + k]].I = 75
-                        break
-                    elif observation[i] > max_val:
-                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 75
-                    elif observation[i] < min_val:
-                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 75
-                    k += 1
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            # Decodificar la acción basada en el número de picos en las neuronas de salida
-            output1 = sum(np.size(spikes[idx]) for idx in output_index[:20])  # Neuronas que controlan el movimiento a la izquierda
-            output2 = sum(np.size(spikes[idx]) for idx in output_index[20:40])  # Neuronas que controlan el movimiento a la derecha
-            output3 = sum(np.size(spikes[idx]) for idx in output_index[40:])  # Neuronas que controlan el movimiento a la derecha
-
-            action = env.action_space.sample()
-            if output1 > output2 and output1 > output3:
-                action = 0
-            elif output2 > output1 and output2 > output3:
-                action = 1
-            elif output3 > output1 and output3 > output2:
-                action = 2
-
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            l += 1
-        final_fitness += np.sum(returns)
-        h += 1
-
-    final_fitness = final_fitness / episodes
-    env.close()
-    return final_fitness
-
-
-
-def mountaincar(pop,Monitor,input_index,output_index,inputWeights, genome_id):
+def mountaincar_ns(pop, proj, Monitor,input_index,output_index,inputWeights, genome_id, params_ns):
     env = gym.make("MountainCar-v0")
     observation, info = env.reset()
     terminated = False
@@ -1071,86 +599,6 @@ def mountaincar(pop,Monitor,input_index,output_index,inputWeights, genome_id):
         Monitor.reset()
     #The final fitness is the mean of the fitness for each episode
     final_fitness = final_fitness/episodes
-    env.close()
-    return final_fitness
-
-
-def mountaincar2(pop, Monitor, input_index, output_index, inputWeights, genome_id):
-    env = gym.make("MountainCar-v0")
-    observation, info = env.reset()
-    terminated = False
-    truncated = False
-    # Number of episodes
-    episodes = 10
-    h = 0
-    # Final fitness 
-    final_fitness = 0
-
-    # Definir límites para cada variable de observación
-    limites = [
-        (-1.2, 0.6),  # Posición del carro
-        (-0.07, 0.07)  # Velocidad del carro (estimado)
-    ]
-
-    num_neuronas_por_variable = 20
-    std_dev = 1  # Controla cuán concentrados están los incrementos en el centro
-    interval_limits = []
-
-    for low, high in limites:
-        # Crear una distribución gaussiana normalizada en el rango [-1, 1]
-        x = np.linspace(-1, 1, num_neuronas_por_variable)
-        gaussian_weights = np.exp(-0.5 * (x / std_dev) ** 2)
-        gaussian_weights /= gaussian_weights.sum()
-
-        increments = gaussian_weights * (high - low)
-
-        limites_acumulados = np.concatenate([[low], low + np.cumsum(increments)])
-        interval_limits.append(limites_acumulados)
-
-    while h < episodes:
-        l = 0
-        returns = []
-        actions_done = []
-        terminated = False
-        truncated = False
-        env.reset()
-        while not terminated and not truncated:
-            # Codificar observación
-            for i, intervalos in enumerate(interval_limits):
-                min_val, max_val = intervalos[0], intervalos[-1]
-                k = 0
-                while k < len(intervalos) - 1:
-                    if observation[i] >= intervalos[k] and observation[i] < intervalos[k+1]:
-                        pop[input_index[i * num_neuronas_por_variable + k]].I = 20
-                        break
-                    elif observation[i] > max_val:
-                        pop[input_index[i * num_neuronas_por_variable + 19]].I = 20
-                    elif observation[i] < min_val:
-                        pop[input_index[i * num_neuronas_por_variable + 0]].I = 20
-                    k += 1
-
-            simulate(50.0)
-            spikes = Monitor.get('spike')
-            # Decodificar la acción basada en el número de picos en las neuronas de salida
-            output1 = sum(np.size(spikes[idx]) for idx in output_index[:20])
-            output2 = sum(np.size(spikes[idx]) for idx in output_index[20:40])
-            output3 = sum(np.size(spikes[idx]) for idx in output_index[40:])
-            action = env.action_space.sample()
-            if output1 > output2 and output1 > output3:
-                action = 0
-            elif output2 > output1 and output2 > output3:
-                action = 1
-            elif output3 > output1 and output3 > output2:
-                action = 2
-            observation, reward, terminated, truncated, info = env.step(action)
-            returns.append(reward)
-            actions_done.append(action)
-            pop.reset()
-            Monitor.reset()
-            l += 1
-        final_fitness += np.sum(returns)
-        h += 1
-    final_fitness = final_fitness / episodes
     env.close()
     return final_fitness
 

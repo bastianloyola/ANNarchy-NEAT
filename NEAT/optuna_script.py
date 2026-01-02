@@ -21,24 +21,24 @@ def objective(trial):
 
     # Trial: single execution of the objective function
     # Suggest call parameters uniformly within the range 
-    # Definir los hiperparámetros que Optuna debe optimizar
-    keep=0.456608
-    threshold=3.93036
-    interespeciesRate=0.000886674
-    noCrossoverOff=0.301752
-    probabilityWeightMutated=0.797799
-    probabilityAddNodeSmall=0.0356973
-    probabilityAddLink_small=0.027703
-    probabilityAddNodeLarge=0.384039
-    probabilityAddLink_Large=0.0849447
-    c1=1.44458
-    c2=1.37687
-    c3=0.439188
-    tau_c = trial.suggest_float('tau_c', 10, 30)
+    # Definir los hiperparámetros que Optuna debe optimizartrial.suggest_float()
+    keep = trial.suggest_float('keep', 0.4, 0.6)
+    threshold = trial.suggest_float('threshold', 2.0, 4.0)
+    interespeciesRate = trial.suggest_float('interSpeciesRate', 0.0005, 0.0015)
+    noCrossoverOff = trial.suggest_float('noCrossoverOff', 0.15, 0.35)
+    probabilityWeightMutated = trial.suggest_float('probabilityWeightMutated', 0.7, 0.9)
+    probabilityAddNodeSmall = trial.suggest_float('probabilityAddNodeSmall', 0.02, 0.04)
+    probabilityAddLink_small = trial.suggest_float('probabilityAddLink_small', 0.01, 0.05)
+    probabilityAddNodeLarge = trial.suggest_float('probabilityAddNodeLarge', 0.02, 0.4)
+    probabilityAddLink_Large = trial.suggest_float('probabilityAddLink_Large', 0.05, 0.2)
+    c1 = trial.suggest_float('c1', 0.5, 1.6)
+    c2 = trial.suggest_float('c2', 0.5, 1.6)
+    c3 = trial.suggest_float('c3', 0.3, 0.6)
+    tau_c = trial.suggest_float('tau_c', 5, 40)
     a_plus = trial.suggest_float('a_plus', 0.001, 0.09)
     a_minus = trial.suggest_float('a_minus', 0.001, 0.09)
-    tau_plus = trial.suggest_float('tau_plus', 10, 30)
-    tau_minus = trial.suggest_float('tau_minus', 10, 30)
+    tau_plus = trial.suggest_float('tau_plus', 5, 40)
+    tau_minus = trial.suggest_float('tau_minus', 5, 40)
     p = subprocess.Popen(["./NEAT", str(keep), str(threshold), str(interespeciesRate),
                           str(noCrossoverOff), str(probabilityWeightMutated), str(probabilityAddNodeSmall), 
                           str(probabilityAddLink_small), str(probabilityAddNodeLarge), str(probabilityAddLink_Large), 
@@ -80,15 +80,41 @@ optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout)
 study_name = "example-study"  # Unique identifier of the study.
 storage_name = "sqlite:///{}.db".format(study_name)
 
+sampler = optuna.samplers.TPESampler(
+    multivariate=True,
+    n_startup_trials=20
+)
+
 # Create the study object (an optimization session = set of trials)
 study = optuna.create_study(study_name=study_name,
                             storage=storage_name,
                             direction='maximize', 
-                            sampler=optuna.samplers.TPESampler(),
+                            sampler=sampler,
                             pruner=optuna.pruners.HyperbandPruner(),
                             load_if_exists=True)
+
+study.enqueue_trial({
+    "keep": 0.456608,
+    "threshold":3.93036,
+    "interSpeciesRate":0.000886674,
+    "noCrossoverOff":0.301752,
+    "probabilityWeightMutated":0.797799,
+    "probabilityAddNodeSmall":0.0356973,
+    "probabilityAddLink_small":0.027703,
+    "probabilityAddNodeLarge":0.384039,
+    "probabilityAddLink_Large":0.0849447,
+    "c3":1.44458,
+    "c2":1.37687,
+    "c4":0.439188,
+    "tau_c": 18.25698889660699,
+    "a_plus": 0.08682567113985205,
+    "a_minus": 0.01874269950898628,
+    "tau_plus": 12.897211639356417,
+    "tau_minus": 23.311488355109855
+
+})
 # Pass the objective function method
-study.optimize(objective, n_trials=100) #timeout in seconds
+study.optimize(objective, n_trials=30) #timeout in seconds
 
 print(f'Mejor valor: {study.best_value}')
 print(f'Mejores parámetros: {study.best_params}')

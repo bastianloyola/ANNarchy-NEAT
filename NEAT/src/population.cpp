@@ -610,12 +610,12 @@ void Population::evolution(int n, std::string folder, int trial){
         outfile << "\n-------- Fin Eval --------\n";
         outfile.close();
         //mutar RSTDP cada 5 generaciones
-        //if (((i-4) % 5) == 0){
-        //    mutate_RSTDP(folder, trial);
-        //    outfile.open(filenameInfo, ios::app);
-        //    outfile << "\n-------- Fin Mutate RSTDP --------\n";
-        //    outfile.close();
-        //}
+        if (((i-4) % 5) == 0){
+            mutate_RSTDP(folder, trial);
+            outfile.open(filenameInfo, ios::app);
+            outfile << "\n-------- Fin Mutate RSTDP --------\n";
+            outfile.close();
+        }
 
 
         eliminate(filenameInfo);

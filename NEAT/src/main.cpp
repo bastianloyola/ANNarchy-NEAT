@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
         int numberGenomes, numberInputs, numberOutputs, evolutions, n_max, process_max;
         float learningRate, inputWeights_min, inputWeights_max, weightsRange_min, weightsRange_max;
         string function;
+        string tunable_params;
 
 
         std::ifstream file("config/config.cfg"); // Open the file
@@ -94,7 +95,12 @@ int main(int argc, char *argv[]) {
                             weightsRange_min = std::stof(rangePart);
                             std::getline(rangeStream, rangePart, ',');
                             weightsRange_max = std::stof(rangePart);
-                        }else if (key == "function") function = value;
+                        }else if (key == "function"){
+                            function = value;
+                        }else if (key == "tunable_params"){
+                            tunable_params = value;                            
+                        }
+                        
                     }catch (const std::exception& e) {
                         std::cerr << "Error parsing key: " << key << ", value: " << value << ". Exception: " << e.what() << std::endl;
                     }
@@ -176,6 +182,7 @@ int main(int argc, char *argv[]) {
         config_file << "a_plus=" << aplus << "\n";
         config_file << "tau_plus=" << tplus << "\n";
         config_file << "tau_minus=" << tminus << "\n";
+        config_file << "tunable_params=" << tunable_params << "\n";
         config_file.close();
 
         setenv("PYTHONPATH", ".", 1);
